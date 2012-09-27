@@ -1,8 +1,17 @@
 <resources>
+    
+    <!-- String resource for Home Screen -->
 
     <string name="app_name">The Importance of Being Android</string>
-    <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="home">Home</string>
+    <string name="title1">The</string>
+    <string name="title2">Importance</string>
+    <string name="title3">of Being</string>
+    <string name="title4">Android</string>
+    <string name="start">Start</string>
+    <string name="options">Options</string>
+    <string name="stats">Statistics</string>
+    <string name="help">Help</string>
 
 </resources>
