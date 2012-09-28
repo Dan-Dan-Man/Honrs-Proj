@@ -1,0 +1,72 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:id="@+id/imageBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:contentDescription="Background"
+        android:gravity="center_vertical"
+        android:scaleType="fitXY"
+        android:src="@drawable/stage_curtains" />
+
+    <TextView
+        android:id="@+id/textTitleChar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="45dp"
+        android:text="@string/char_select"
+        android:textColor="#FFFFFF" />
+
+    <Spinner
+        android:id="@+id/spinnerCharacter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textTitleChar"
+        android:layout_centerHorizontal="true"
+        android:entries="@array/char_array" />
+
+    <TextView
+        android:id="@+id/textTitleAct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/spinnerCharacter"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="50dp"
+        android:layout_toLeftOf="@+id/textTitleChar"
+        android:text="@string/act_select"
+        android:textColor="#FFFFFF" />
+
+    <Spinner
+        android:id="@+id/spinnerAct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textTitleAct"
+        android:layout_below="@+id/textTitleAct"
+        android:entries="@array/act_array" />
+
+    <TextView
+        android:id="@+id/textTitlePage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textTitleAct"
+        android:layout_alignBottom="@+id/textTitleAct"
+        android:layout_toRightOf="@+id/textTitleChar"
+        android:text="@string/page_select"
+        android:textColor="#FFFFFF" />
+
+    <Spinner
+        android:id="@+id/spinnerPage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/spinnerAct"
+        android:layout_alignBottom="@+id/spinnerAct"
+        android:layout_alignLeft="@+id/textTitlePage"
+        android:entries="@array/act1_array" />
+
+</RelativeLayout>

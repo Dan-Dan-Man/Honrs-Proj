@@ -22,6 +22,7 @@
 package com.importance;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
@@ -48,7 +49,7 @@ public class HomeActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+        setContentView(R.layout.home_layout);
         
         mTop = (TextView) findViewById(R.id.textTop);
         mMiddle = (TextView) findViewById(R.id.textMiddle);
@@ -62,7 +63,7 @@ public class HomeActivity extends Activity {
          */
         mUpArrow.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				switchTextUp();
+				switchTextDown();
 			}
 		});
         
@@ -71,9 +72,27 @@ public class HomeActivity extends Activity {
          */
         mDownArrow.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				switchTextDown();
+				switchTextUp();
 			}
 		});
+    }
+    
+    /**
+     * Switch screen based on user selection.
+     * 
+     * @param v
+     */
+    public void menuClick(View v) {
+    	if (mMiddle.getText().toString().equals("Start")) {
+    		Intent i = new Intent(this, OptionsActivity.class);
+    		startActivityForResult(i, 0);
+    	} else if (mMiddle.getText().toString().equals("Statistics")) {
+    		Intent i = new Intent(this, StatsActivity.class);
+    		startActivityForResult(i, 0);
+    	} else if (mMiddle.getText().toString().equals("Help")) {
+    		Intent i = new Intent(this, HelpActivity.class);
+    		startActivityForResult(i, 0);
+    	}
     }
 
     @Override
@@ -88,10 +107,6 @@ public class HomeActivity extends Activity {
     private void switchTextUp() {
     	if (mMiddle.getText().toString().equals("Start")) {
     		mTop.setText("Start"); 
-    		mMiddle.setText("Options");
-    		mBottom.setText("Statistics");
-    	} else if (mMiddle.getText().toString().equals("Options")) {
-    		mTop.setText("Options"); 
     		mMiddle.setText("Statistics");
     		mBottom.setText("Help");
     	} else if (mMiddle.getText().toString().equals("Statistics")) {
@@ -106,17 +121,13 @@ public class HomeActivity extends Activity {
      */
     private void switchTextDown() {
     	if (mMiddle.getText().toString().equals("Help")) {
-    		mTop.setText("Options"); 
+    		mTop.setText("Start");
     		mMiddle.setText("Statistics");
     		mBottom.setText("Help");
     	} else if (mMiddle.getText().toString().equals("Statistics")) {
-    		mTop.setText("Start"); 
-    		mMiddle.setText("Options");
-    		mBottom.setText("Statistics");
-    	} else if (mMiddle.getText().toString().equals("Options")) {
-    		mTop.setText(""); 
+    		mTop.setText("");
     		mMiddle.setText("Start");
-    		mBottom.setText("Options");
+    		mBottom.setText("Statistics");
     	}
     }
 }

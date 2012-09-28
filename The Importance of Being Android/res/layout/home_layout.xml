@@ -1,0 +1,115 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+
+    <ImageView
+        android:id="@+id/imageBackground"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:contentDescription="Background"
+        android:gravity="center_vertical"
+        android:scaleType="fitXY"
+        android:src="@drawable/stage_curtains" />
+
+    <TextView
+        android:id="@+id/textTitle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="14dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/title1"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/TextTitle2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textTitle1"
+        android:layout_alignBottom="@+id/textTitle1"
+        android:layout_marginLeft="5sp"
+        android:layout_toRightOf="@+id/textTitle1"
+        android:text="@string/title2"
+        android:textColor="#FFFFFF"
+        android:textSize="44sp" />
+
+    <TextView
+        android:id="@+id/TextTitle4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/TextTitle2"
+        android:layout_below="@+id/TextTitle2"
+        android:text="@string/title4"
+        android:textColor="#FFFFFF"
+        android:textSize="44sp" />
+
+    <TextView
+        android:id="@+id/TextTitle3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/TextTitle4"
+        android:layout_alignBottom="@+id/TextTitle4"
+        android:layout_marginRight="5dp"
+        android:layout_toLeftOf="@+id/TextTitle4"
+        android:text="@string/title3"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp" />
+    
+    <ImageButton
+        android:id="@+id/imageButtonArrowUp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textTop"
+        android:layout_centerHorizontal="true"
+        android:background="@null"
+        android:src="@drawable/arrow_reverse" />
+
+    <ImageButton
+        android:id="@+id/imageButtonArrowDown"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="60dp"
+        android:background="@null"
+        android:src="@drawable/arrow" />
+
+    <TextView
+        android:id="@+id/textBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/imageButtonArrowDown"
+        android:layout_centerHorizontal="true"
+        android:text="@string/stats"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textMiddle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textBottom"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:text="@string/start"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#FFFFFF"
+        android:clickable="true"
+        android:onClick="menuClick" />
+
+    <TextView
+        android:id="@+id/textTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textMiddle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="30dp"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="#FFFFFF" />
+
+</RelativeLayout>
