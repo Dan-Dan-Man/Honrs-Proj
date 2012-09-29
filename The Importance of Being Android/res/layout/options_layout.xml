@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="45dp"
+        android:layout_marginTop="30dp"
         android:text="@string/char_select"
         android:textColor="#FFFFFF" />
 
@@ -29,7 +29,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textTitleChar"
         android:layout_centerHorizontal="true"
-        android:entries="@array/char_array" />
+        android:entries="@array/char_array"
+        android:prompt="@string/char_select" />
 
     <TextView
         android:id="@+id/textTitleAct"
@@ -37,7 +38,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/spinnerCharacter"
         android:layout_marginRight="25dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="30dp"
         android:layout_toLeftOf="@+id/textTitleChar"
         android:text="@string/act_select"
         android:textColor="#FFFFFF" />
@@ -48,7 +49,8 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textTitleAct"
         android:layout_below="@+id/textTitleAct"
-        android:entries="@array/act_array" />
+        android:entries="@array/act_array"
+        android:prompt="@string/act_select" />
 
     <TextView
         android:id="@+id/textTitlePage"
@@ -67,6 +69,7 @@
         android:layout_alignBaseline="@+id/spinnerAct"
         android:layout_alignBottom="@+id/spinnerAct"
         android:layout_alignLeft="@+id/textTitlePage"
-        android:entries="@array/act1_array" />
+        android:entries="@array/act1_array"
+        android:prompt="@string/page_select" />
 
 </RelativeLayout>
