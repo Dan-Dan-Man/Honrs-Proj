@@ -72,4 +72,118 @@
         android:entries="@array/act1_array"
         android:prompt="@string/page_select" />
 
+    <TextView
+        android:id="@+id/textConfig"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/spinnerAct"
+        android:layout_centerVertical="true"
+        android:text="@string/config"
+        android:textColor="#FFFFFF" />
+
+    <CheckBox
+        android:id="@+id/checkCue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/textConfig"
+        android:layout_below="@+id/textConfig"
+        android:layout_marginTop="22dp"
+        android:checked="true"
+        android:text="@string/cue"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <CheckBox
+        android:id="@+id/checkAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/checkCue"
+        android:layout_below="@+id/checkCue"
+        android:text="@string/audio"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <CheckBox
+        android:id="@+id/checkOwnLines"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/spinnerPage"
+        android:layout_alignTop="@+id/checkCue"
+        android:text="@string/own_lines"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <CheckBox
+        android:id="@+id/checkStage"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/checkAudio"
+        android:layout_alignLeft="@+id/checkOwnLines"
+        android:checked="true"
+        android:text="@string/stage"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <ImageButton
+        android:id="@+id/imageButtonCue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@+id/checkCue"
+        android:layout_alignTop="@+id/checkCue"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help"
+        android:layout_marginTop="7dp"
+        android:layout_marginLeft="10dp" />
+
+    <ImageButton
+        android:id="@+id/imageButtonAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/imageButtonCue"
+        android:layout_alignTop="@+id/checkStage"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help"
+        android:layout_marginTop="7dp" />
+
+    <ImageButton
+        android:id="@+id/imageButtonOwnLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/imageButtonCue"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help" />
+
+    <ImageButton
+        android:id="@+id/imageButtonStage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/imageButtonAudio"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help" />
+
+    <TextView
+        android:id="@+id/textBack"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/checkAudio"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="15dp"
+        android:text="@string/back"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textContinue"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textBack"
+        android:layout_alignBottom="@+id/textBack"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="14dp"
+        android:text="@string/cont"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#FFFFFF" />
+
 </RelativeLayout>

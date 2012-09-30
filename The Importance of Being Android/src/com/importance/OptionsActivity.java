@@ -23,12 +23,17 @@ package com.importance;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.support.v4.view.ViewPager.LayoutParams;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.android.R;
 
@@ -46,6 +51,10 @@ public class OptionsActivity extends Activity {
 	private Spinner mChar;
 	private Spinner mAct;
 	private Spinner mPage;
+	private ImageButton mCueHelp;
+	private ImageButton mAudioHelp;
+	private ImageButton mOwnLineHelp;
+	private ImageButton mStageHelp;
 	private ArrayAdapter<CharSequence> adapter;
 	private int resource;
 
@@ -58,8 +67,76 @@ public class OptionsActivity extends Activity {
 		mAct = (Spinner) findViewById(R.id.spinnerAct);
 		mPage = (Spinner) findViewById(R.id.spinnerPage);
 
+		mCueHelp = (ImageButton) findViewById(R.id.imageButtonCue);
+		mAudioHelp = (ImageButton) findViewById(R.id.imageButtonAudio);
+		mOwnLineHelp = (ImageButton) findViewById(R.id.imageButtonOwnLine);
+		mStageHelp = (ImageButton) findViewById(R.id.imageButtonStage);
+
 		mAct.setOnItemSelectedListener(new MyOnItemSelectedListener());
 
+		mCueHelp.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View v) {
+				showPopup("cue");
+			}
+		});
+
+		mAudioHelp.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View v) {
+				showPopup("audio");
+			}
+		});
+
+		mOwnLineHelp.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View v) {
+				showPopup("own line");
+			}
+		});
+
+		mStageHelp.setOnClickListener(new View.OnClickListener() {
+
+			public void onClick(View v) {
+				showPopup("stage");
+			}
+		});
+	}
+
+	/**
+	 * This method creates and shows a popup to the user, displaying a relevent
+	 * help message.
+	 * 
+	 */
+	public void showPopup(String msg) {
+		LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
+				.getSystemService(LAYOUT_INFLATER_SERVICE);
+		View popupView = layoutInflater.inflate(R.layout.popup_layout, null);
+		final PopupWindow popupWindow = new PopupWindow(popupView,
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+		Button btnDismiss = (Button) popupView.findViewById(R.id.dismiss);
+		TextView text = (TextView) popupView.findViewById(R.id.text);
+
+		// Here we decide what help message to display to the user.
+		if (msg.equals("cue")) {
+			text.setText(R.string.cue_help);
+		} else if (msg.equals("audio")) {
+			text.setText(R.string.audio_help);
+		} else if (msg.equals("own line")) {
+			text.setText(R.string.own_line_help);
+		} else if (msg.equals("stage")) {
+			text.setText(R.string.stage_help);
+		}
+
+		btnDismiss.setOnClickListener(new Button.OnClickListener() {
+
+			public void onClick(View v) {
+				popupWindow.dismiss();
+			}
+		});
+
+		popupWindow.showAsDropDown(mCueHelp, 50, -30);
 	}
 
 	/**

@@ -1,74 +1,92 @@
 <resources>
-    
+
     <!-- String resource for Options Screen -->
-    
+
     <string name="char_select">Select Character</string>
+
     <string-array name="char_array">
-		<item>John Worthing, J.P.</item>
-		<item>Algernon Moncrieff</item>
-		<item>Rev. Canon Chasuble, D.D.</item>
-		<item>Merriman, Butler</item>
-		<item>Lane, Manservant</item>
-		<item>Lady Bracknell</item>
-		<item>Hon. Gwendolen Fairfax</item>
-		<item>Cecily Cardew</item>
-		<item>Miss Prism, Governess</item>
-	</string-array>
-	<string name="act_select">Select Act</string>
-	<string-array name="act_array">
-	    <item>Act I</item>
-	    <item>Act II</item>
-	    <item>Act III</item>
-	</string-array>
-	<string name="page_select">Select Page</string>
-	<string-array name="act1_array">
-	    <item>1</item>
-	    <item>2</item>
-	    <item>3</item>
-	    <item>4</item>
-	    <item>5</item>
-	    <item>6</item>
-	    <item>7</item>
-	    <item>8</item>
-	    <item>9</item>
-	    <item>10</item>
-	    <item>11</item>
-	    <item>12</item>
-	    <item>13</item>
-	    <item>14</item>
-	</string-array>
-	<string-array name="act2_array">
-	    <item>15</item>
-	    <item>16</item>
-	    <item>17</item>
-	    <item>18</item>
-	    <item>19</item>
-	    <item>20</item>
-	    <item>21</item>
-	    <item>22</item>
-	    <item>23</item>
-	    <item>24</item>
-	    <item>25</item>
-	    <item>25</item>
-	    <item>26</item>
-	    <item>27</item>
-	    <item>28</item>
-	    <item>29</item>
-	    <item>30</item>
-	    <item>31</item>
-	    <item>32</item>
-	    <item>33</item>
-	</string-array>
-	<string-array name="act3_array">
-	    <item>34</item>
-	    <item>35</item>
-	    <item>36</item>
-	    <item>37</item>
-	    <item>38</item>
-	    <item>39</item>
-	    <item>40</item>
-	    <item>41</item>
-	    <item>42</item>
-	</string-array>
-    
+        <item>John Worthing, J.P.</item>
+        <item>Algernon Moncrieff</item>
+        <item>Rev. Canon Chasuble, D.D.</item>
+        <item>Merriman, Butler</item>
+        <item>Lane, Manservant</item>
+        <item>Lady Bracknell</item>
+        <item>Hon. Gwendolen Fairfax</item>
+        <item>Cecily Cardew</item>
+        <item>Miss Prism, Governess</item>
+    </string-array>
+
+    <string name="act_select">Select Act</string>
+
+    <string-array name="act_array">
+        <item>Act I</item>
+        <item>Act II</item>
+        <item>Act III</item>
+    </string-array>
+
+    <string name="page_select">Select Page</string>
+
+    <string-array name="act1_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
+    </string-array>
+    <string-array name="act2_array">
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
+        <item>31</item>
+        <item>32</item>
+        <item>33</item>
+    </string-array>
+    <string-array name="act3_array">
+        <item>34</item>
+        <item>35</item>
+        <item>36</item>
+        <item>37</item>
+        <item>38</item>
+        <item>39</item>
+        <item>40</item>
+        <item>41</item>
+        <item>42</item>
+    </string-array>
+
+    <string name="config">Configurations</string>
+    <string name="cue">Cue Words</string>
+    <string name="audio">Audio</string>
+    <string name="own_lines">Display only own lines</string>
+    <string name="stage">Stage Directions</string>
+    <string name="back">Back</string>
+    <string name="cont">Continue</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="cue_help">Help 1</string>
+    <string name="audio_help">Help 2</string>
+    <string name="own_line_help">Help 3</string>
+    <string name="stage_help">Help 4</string>
+
 </resources>
