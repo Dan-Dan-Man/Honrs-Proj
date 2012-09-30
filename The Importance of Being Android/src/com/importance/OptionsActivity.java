@@ -55,7 +55,9 @@ public class OptionsActivity extends Activity {
 	private ImageButton mAudioHelp;
 	private ImageButton mOwnLineHelp;
 	private ImageButton mStageHelp;
-	private ArrayAdapter<CharSequence> adapter;
+	private ArrayAdapter<CharSequence> mAdapterChar;
+	private ArrayAdapter<CharSequence> mAdapterAct;
+	private ArrayAdapter<CharSequence> mAdapterPage;
 	private int resource;
 
 	@Override
@@ -72,31 +74,44 @@ public class OptionsActivity extends Activity {
 		mOwnLineHelp = (ImageButton) findViewById(R.id.imageButtonOwnLine);
 		mStageHelp = (ImageButton) findViewById(R.id.imageButtonStage);
 
+		// Set contents of Character Spinner
+		mChar = (Spinner) findViewById(R.id.spinnerCharacter);
+		mAdapterChar = ArrayAdapter.createFromResource(OptionsActivity.this,
+				R.array.char_array, R.layout.spinner_text_layout);
+		mAdapterChar
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mChar.setAdapter(mAdapterChar);
+
+		// Set contents of Act Spinner
+		mAct = (Spinner) findViewById(R.id.spinnerAct);
+		mAdapterAct = ArrayAdapter.createFromResource(OptionsActivity.this,
+				R.array.act_array, R.layout.spinner_text_layout);
+		mAdapterAct
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mAct.setAdapter(mAdapterAct);
+
 		mAct.setOnItemSelectedListener(new MyOnItemSelectedListener());
 
+		// Listeners to display relevent help messages to the user.
 		mCueHelp.setOnClickListener(new View.OnClickListener() {
-
 			public void onClick(View v) {
 				showPopup("cue");
 			}
 		});
 
 		mAudioHelp.setOnClickListener(new View.OnClickListener() {
-
 			public void onClick(View v) {
 				showPopup("audio");
 			}
 		});
 
 		mOwnLineHelp.setOnClickListener(new View.OnClickListener() {
-
 			public void onClick(View v) {
 				showPopup("own line");
 			}
 		});
 
 		mStageHelp.setOnClickListener(new View.OnClickListener() {
-
 			public void onClick(View v) {
 				showPopup("stage");
 			}
@@ -106,6 +121,8 @@ public class OptionsActivity extends Activity {
 	/**
 	 * This method creates and shows a popup to the user, displaying a relevent
 	 * help message.
+	 * 
+	 * @param msg
 	 * 
 	 */
 	public void showPopup(String msg) {
@@ -156,10 +173,12 @@ public class OptionsActivity extends Activity {
 			} else if (mAct.getSelectedItem().equals("Act III")) {
 				resource = R.array.act3_array;
 			}
-			adapter = ArrayAdapter.createFromResource(OptionsActivity.this,
-					resource, android.R.layout.simple_spinner_item);
-			adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			mPage.setAdapter(adapter);
+			mAdapterPage = ArrayAdapter.createFromResource(
+					OptionsActivity.this, resource,
+					R.layout.spinner_text_layout);
+			mAdapterPage
+					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+			mPage.setAdapter(mAdapterPage);
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {

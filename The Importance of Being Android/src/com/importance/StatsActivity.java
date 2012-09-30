@@ -21,10 +21,14 @@
 
 package com.importance;
 
-import com.example.android.R;
+import java.util.ArrayList;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
+
+import com.example.android.R;
 
 /**
  * The Stats screen where the user can view some statistics of their
@@ -37,10 +41,31 @@ import android.os.Bundle;
 
 public class StatsActivity extends Activity {
 
+	private Spinner mChar;
+	private Spinner mAct;
+	private ArrayAdapter<CharSequence> mAdapterChar;
+	private ArrayAdapter<CharSequence> mAdapterAct;
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.options_layout);
+		setContentView(R.layout.stats_layout);
+
+		// Set contents of Character Spinner
+		mChar = (Spinner) findViewById(R.id.spinnerCharacter);
+		mAdapterChar = ArrayAdapter.createFromResource(StatsActivity.this,
+				R.array.stats_char_array, R.layout.spinner_text_layout);
+		mAdapterChar
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mChar.setAdapter(mAdapterChar);
+
+		// Set contents of Act Spinner
+		mAct = (Spinner) findViewById(R.id.spinnerAct);
+		mAdapterAct = ArrayAdapter.createFromResource(StatsActivity.this,
+				R.array.stats_act_array, R.layout.spinner_text_layout);
+		mAdapterAct
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mAct.setAdapter(mAdapterAct);
 	}
 
 }

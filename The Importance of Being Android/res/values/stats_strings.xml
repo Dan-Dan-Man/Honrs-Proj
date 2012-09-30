@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="stats_char_array">
+        <item>All</item>
+        <item>John Worthing, J.P.</item>
+        <item>Algernon Moncrieff</item>
+        <item>Rev. Canon Chasuble, D.D.</item>
+        <item>Merriman, Butler</item>
+        <item>Lane, Manservant</item>
+        <item>Lady Bracknell</item>
+        <item>Hon. Gwendolen Fairfax</item>
+        <item>Cecily Cardew</item>
+        <item>Miss Prism, Governess</item>
+    </string-array>
+    <string-array name="stats_act_array">
+        <item>All</item>
+        <item>Act I</item>
+        <item>Act II</item>
+        <item>Act III</item>
+    </string-array>
+
+    <string name="num">Number</string>
+    <string name="percent">%</string>
+    <string name="views">Times Viewed</string>
+    <string name="prompt">Prompts Used</string>
+    <string name="complete">Completions without prompts used</string>
+    <string name="clear_stats">Clear Stats</string>
+    <string name="notes">View Performance Notes</string>
+    <string name="recordings">View Recordings</string>
+
+</resources>
