@@ -12,14 +12,13 @@
         android:gravity="center_vertical"
         android:scaleType="fitXY"
         android:src="@drawable/stage_curtains" />
-
+    
     <TextView
         android:id="@+id/textTitleChar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="5dp"
+        android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
         android:text="@string/char_select"
         android:textColor="#FFFFFF" />
@@ -28,126 +27,60 @@
         android:id="@+id/spinnerCharacter"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textTitleChar"
         android:layout_below="@+id/textTitleChar"
-        android:entries="@array/char_array"
-        android:prompt="@string/char_select"/>
-
-    <Spinner
-        android:id="@+id/spinnerAct"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textTitleAct"
-        android:layout_alignLeft="@+id/textTitleAct"
-        android:entries="@array/act_array"
-        android:prompt="@string/act_select" />
+        android:layout_centerHorizontal="true"
+        android:entries="@array/stats_char_array"
+        android:prompt="@string/char_select" />
 
     <TextView
         android:id="@+id/textTitleAct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textTitleChar"
-        android:layout_alignBottom="@+id/textTitleChar"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="35dp"
+        android:layout_below="@+id/spinnerCharacter"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="30dp"
+        android:layout_toLeftOf="@+id/textTitleChar"
         android:text="@string/act_select"
         android:textColor="#FFFFFF" />
 
-    <TextView
-        android:id="@+id/textStats"
+    <Spinner
+        android:id="@+id/spinnerAct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/spinnerCharacter"
-        android:layout_below="@+id/spinnerCharacter"
-        android:layout_marginTop="60dp"
-        android:text="@string/stats"
+        android:layout_alignLeft="@+id/textTitleAct"
+        android:layout_below="@+id/textTitleAct"
+        android:entries="@array/stats_act_array"
+        android:prompt="@string/act_select" />
+
+    <TextView
+        android:id="@+id/textTitlePage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textTitleAct"
+        android:layout_alignBottom="@+id/textTitleAct"
+        android:layout_toRightOf="@+id/textTitleChar"
+        android:text="@string/page_select"
         android:textColor="#FFFFFF" />
 
-    <TextView
-        android:id="@+id/textNum"
+    <Spinner
+        android:id="@+id/spinnerPage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textStats"
-        android:layout_alignBottom="@+id/textStats"
-        android:layout_centerHorizontal="true"
-        android:text="@string/num"
-        android:textColor="#FFFFFF" />
+        android:layout_alignBaseline="@+id/spinnerAct"
+        android:layout_alignBottom="@+id/spinnerAct"
+        android:layout_alignLeft="@+id/textTitlePage"
+        android:entries="@array/stats_act1_array"
+        android:prompt="@string/page_select" />
 
-    <TextView
-        android:id="@+id/textPercent"
+    <Button
+        android:id="@+id/buttonStats"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textNum"
-        android:layout_alignBottom="@+id/textNum"
-        android:layout_alignRight="@+id/textTitleAct"
-        android:text="@string/percent"
-        android:textColor="#FFFFFF" />
-
-    <TextView
-        android:id="@+id/textViews"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textStats"
-        android:layout_below="@+id/textStats"
-        android:layout_marginTop="30dp"
-        android:text="@string/views"
-        android:textSize="12sp"
-        android:textColor="#FFFFFF" />
-
-    <TextView
-        android:id="@+id/textViewsNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textViews"
-        android:layout_alignBottom="@+id/textViews"
-        android:layout_centerHorizontal="true"
-        android:text="12"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/textViewsPercent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textViewsNum"
-        android:layout_alignBottom="@+id/textViewsNum"
-        android:layout_alignLeft="@+id/textPercent"
-        android:text="63%"
-        android:layout_marginRight="90dp"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/textPrompts"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textViews"
-        android:layout_below="@+id/textViews"
-        android:text="@string/prompt"
-        android:layout_marginTop="20dp"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/textPromptsNum"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textPrompts"
-        android:layout_alignBottom="@+id/textPrompts"
-        android:layout_centerHorizontal="true"
-        android:text="9"
-        android:textColor="#FFFFFF"
-        android:textSize="12sp" />
-
-    <TextView
-        android:id="@+id/textPromptsPercent"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textPromptsNum"
-        android:layout_alignBottom="@+id/textPromptsNum"
-        android:layout_alignLeft="@+id/textViewsPercent"
-        android:text="26%"
-        android:textColor="#FFFFFF"
+        android:layout_height="40dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="35dp"
+        android:layout_marginRight="20dp"
+        android:text="@string/clear_stats"
         android:textSize="12sp" />
 
     <TextView
@@ -162,13 +95,106 @@
         android:textSize="12sp" />
 
     <TextView
+        android:id="@+id/textStats"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="10dp"
+        android:text="@string/stats"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textViews"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textStats"
+        android:layout_below="@+id/textStats"
+        android:layout_marginTop="25dp"
+        android:text="@string/views"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/textPrompts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textViews"
+        android:layout_below="@+id/textViews"
+        android:layout_marginTop="20dp"
+        android:text="@string/prompt"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/textNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViews"
+        android:layout_centerHorizontal="true"
+        android:text="@string/num"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textViewsNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textPrompts"
+        android:layout_centerHorizontal="true"
+        android:text="12"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/textPromptsNum"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textComplete"
+        android:layout_centerHorizontal="true"
+        android:text="9"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
         android:id="@+id/textCompleteNum"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textComplete"
         android:layout_alignBottom="@+id/textComplete"
         android:layout_centerHorizontal="true"
+        android:layout_marginBottom="8dp"
         android:text="3"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/textPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/textViews"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="40dp"
+        android:text="@string/percent"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textPromptsPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textViewsNum"
+        android:layout_alignBottom="@+id/textViewsNum"
+        android:layout_alignRight="@+id/textPercent"
+        android:text="26%"
+        android:textColor="#FFFFFF"
+        android:textSize="12sp" />
+
+    <TextView
+        android:id="@+id/textViewsPercent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textPromptsNum"
+        android:layout_alignBottom="@+id/textPromptsNum"
+        android:layout_alignLeft="@+id/textPromptsPercent"
+        android:text="63%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -178,41 +204,9 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textCompleteNum"
         android:layout_alignBottom="@+id/textCompleteNum"
-        android:layout_alignLeft="@+id/textPromptsPercent"
+        android:layout_alignLeft="@+id/textViewsPercent"
         android:text="25%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
-
-    <Button
-        android:id="@+id/buttonStats"
-        android:layout_width="wrap_content"
-        android:layout_height="40dp"
-        android:layout_alignLeft="@+id/spinnerAct"
-        android:layout_below="@+id/textComplete"
-        android:textSize="12sp"
-        android:layout_marginTop="10dp"
-        android:text="@string/clear_stats" />
-
-    <TextView
-        android:id="@+id/textNotes"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textComplete"
-        android:layout_below="@+id/buttonStats"
-        android:layout_marginTop="22dp"
-        android:text="@string/notes"
-        android:textColor="#FFFFFF"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
-
-    <TextView
-        android:id="@+id/textRecordings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textNotes"
-        android:layout_below="@+id/textNotes"
-        android:layout_marginTop="20dp"
-        android:text="@string/recordings"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#FFFFFF" />
 
 </RelativeLayout>

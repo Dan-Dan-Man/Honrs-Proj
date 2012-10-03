@@ -22,6 +22,7 @@
 package com.importance;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.LayoutParams;
 import android.view.LayoutInflater;
@@ -75,7 +76,6 @@ public class OptionsActivity extends Activity {
 		mStageHelp = (ImageButton) findViewById(R.id.imageButtonStage);
 
 		// Set contents of Character Spinner
-		mChar = (Spinner) findViewById(R.id.spinnerCharacter);
 		mAdapterChar = ArrayAdapter.createFromResource(OptionsActivity.this,
 				R.array.char_array, R.layout.spinner_text_layout);
 		mAdapterChar
@@ -83,7 +83,6 @@ public class OptionsActivity extends Activity {
 		mChar.setAdapter(mAdapterChar);
 
 		// Set contents of Act Spinner
-		mAct = (Spinner) findViewById(R.id.spinnerAct);
 		mAdapterAct = ArrayAdapter.createFromResource(OptionsActivity.this,
 				R.array.act_array, R.layout.spinner_text_layout);
 		mAdapterAct
@@ -119,16 +118,29 @@ public class OptionsActivity extends Activity {
 	}
 
 	/**
+	 * 
+	 * When the user has finished their configurations, they move on to the Main
+	 * Screen.
+	 * 
+	 * @param v
+	 */
+	public void cont(View v) {
+		Intent i = new Intent(this, MainActivity.class);
+		startActivityForResult(i, 0);
+	}
+
+	/**
 	 * This method creates and shows a popup to the user, displaying a relevent
 	 * help message.
 	 * 
 	 * @param msg
 	 * 
 	 */
-	public void showPopup(String msg) {
+	private void showPopup(String msg) {
 		LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
 				.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View popupView = layoutInflater.inflate(R.layout.popup_layout, null);
+		View popupView = layoutInflater.inflate(R.layout.help_popup_layout,
+				null);
 		final PopupWindow popupWindow = new PopupWindow(popupView,
 				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 

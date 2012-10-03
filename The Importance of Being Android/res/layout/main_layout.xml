@@ -1,0 +1,181 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#500000" >
+
+    <ImageButton
+        android:id="@+id/imageAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@null"
+        android:src="@drawable/ic_btn_speak_now" />
+
+    <TextView
+        android:id="@+id/textAct"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageAudio"
+        android:layout_marginLeft="65dp"
+        android:layout_marginTop="5dp"
+        android:layout_toRightOf="@+id/imageAudio"
+        android:text="Act I |"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textPage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textAct"
+        android:layout_alignBottom="@+id/textAct"
+        android:layout_toRightOf="@+id/textAct"
+        android:text=" Page 12"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
+
+    <ImageButton
+        android:id="@+id/imageNote"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:background="@null"
+        android:src="@drawable/sym_action_chat" />
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/imageNote"
+        android:layout_marginTop="5dp"
+        android:background="#000000" >
+
+        <TextView
+            android:id="@+id/textChar1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="20dp"
+            android:text="Jack:"
+            android:textColor="#FFFFFF"
+            android:textSize="12dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textLine1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/textChar1"
+            android:layout_alignBottom="@+id/textChar1"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/textChar1"
+            android:text="Is that clever?"
+            android:textColor="#FFFFFF"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/textChar2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textChar1"
+            android:layout_below="@+id/textChar1"
+            android:layout_marginTop="15dp"
+            android:text="Algernon:"
+            android:textColor="#FFFFFF"
+            android:textSize="12dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textLine2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/textChar2"
+            android:layout_alignBottom="@+id/textChar2"
+            android:layout_marginLeft="5dp"
+            android:layout_toRightOf="@+id/textChar2"
+            android:text="It is perfectly phrased! And quite as true as any observation in civilised life should be."
+            android:textColor="#FFFFFF"
+            android:textSize="12dp" />
+
+        <TextView
+            android:id="@+id/textChar3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@+id/textChar2"
+            android:layout_below="@+id/textLine2"
+            android:layout_marginTop="40dp"
+            android:text="Jack:"
+            android:textColor="#FFFFFF"
+            android:textSize="12dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/textLine3"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/textChar3"
+            android:layout_alignBottom="@+id/textChar3"
+            android:layout_alignLeft="@+id/textLine1"
+            android:text="I am sick to death of cleverness. Everybody is clever nowadays. You can’t go anywhere without meeting clever people. The thing has become an absolute public nuisance. I wish to goodness we had a few fools left."
+            android:textColor="#FFFFFF"
+            android:textSize="12dp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="45dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginTop="5dp"
+        android:background="#500000" >
+
+        <TextView
+            android:id="@+id/textPrompt"
+            android:layout_width="120dp"
+            android:layout_height="fill_parent"
+            android:layout_centerHorizontal="true"
+            android:background="#365812"
+            android:gravity="center"
+            android:text="@string/prompt"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/textPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/textPrompt"
+            android:layout_alignBottom="@+id/textPrompt"
+            android:layout_marginRight="28dp"
+            android:layout_toLeftOf="@+id/textPrompt"
+            android:text="@string/prev"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:id="@+id/textNext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/textPrompt"
+            android:layout_alignBottom="@+id/textPrompt"
+            android:layout_alignParentRight="true"
+            android:layout_marginLeft="28dp"
+            android:layout_toRightOf="@+id/textPrompt"
+            android:clickable="true"
+            android:onClick="clickNext"
+            android:text="@string/next"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#FFFFFF" />
+    </RelativeLayout>
+
+</RelativeLayout>

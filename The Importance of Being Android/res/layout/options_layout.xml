@@ -164,24 +164,14 @@
         android:src="@drawable/ic_menu_help" />
 
     <TextView
-        android:id="@+id/textBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/checkAudio"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="15dp"
-        android:text="@string/back"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="#FFFFFF" />
-
-    <TextView
         android:id="@+id/textContinue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textBack"
-        android:layout_alignBottom="@+id/textBack"
-        android:layout_alignParentRight="true"
-        android:layout_marginRight="14dp"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="35dp"
+        android:clickable="true"
+        android:onClick="cont"
         android:text="@string/cont"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FFFFFF" />
