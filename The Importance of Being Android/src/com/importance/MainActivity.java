@@ -38,6 +38,7 @@ import com.example.android.R;
 
 public class MainActivity extends Activity {
 
+	private static final String TAG = "MainActivity";
 	private TextView line1;
 	private TextView line2;
 	private TextView char3;

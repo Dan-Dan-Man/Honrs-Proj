@@ -21,9 +21,17 @@
 
 package com.importance;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageButton;
@@ -38,6 +46,8 @@ import com.example.android.R;
  * 
  */
 
+// TODO: Create Database
+
 public class HomeActivity extends Activity {
 
 	private ImageButton mUpArrow;
@@ -45,11 +55,39 @@ public class HomeActivity extends Activity {
 	private TextView mTop;
 	private TextView mMiddle;
 	private TextView mBottom;
+	private static final String TAG = "HomeActivity";
+	private ArrayList<String> mCharacters;
+	private ArrayList<String> mText;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.home_layout);
+
+		try {
+			readFile();
+		} catch (IOException e) {
+			Log.e(TAG, "Error");
+		}
+
+		// Log.d(TAG, Integer.toString(characters.size()));
+		//
+		// for (int i = 0; i < 11; i++) {
+		// Log.d(TAG, characters.get(i));
+		// }
+
+		// for (int i = 0; i < mText.size(); i++) {
+		// Log.i(TAG, mText.get(i));
+		// }
+
+		// HashSet<String> hs = new HashSet<String>();
+		// hs.addAll(mCharacters);
+		// mCharacters.clear();
+		// mCharacters.addAll(hs);
+		//
+		// for (int i = 0; i < mCharacters.size(); i++) {
+		// Log.d(TAG, mCharacters.get(i));
+		// }
 
 		mTop = (TextView) findViewById(R.id.textTop);
 		mMiddle = (TextView) findViewById(R.id.textMiddle);
@@ -149,5 +187,138 @@ public class HomeActivity extends Activity {
 			mMiddle.setText("Start");
 			mBottom.setText("Statistics");
 		}
+	}
+
+	/**
+	 * Here we read the file, extracting the character name speaking the line.
+	 * 
+	 * @param file
+	 * @throws IOException
+	 */
+	private void readFile() throws IOException {
+
+		mCharacters = new ArrayList<String>();
+		// mText = new ArrayList<String>();
+		String test = "";
+		AssetManager am = getAssets();
+
+		InputStream is;
+		BufferedInputStream bis;
+		DataInputStream dis;
+		String line = null;
+
+		// Try to open the file, and alert the user if file doesn't exist
+		try {
+			is = am.open("earnest.txt");
+			bis = new BufferedInputStream(is);
+			dis = new DataInputStream(bis);
+		} catch (IOException e) {
+			// TODO: Add proper error handling
+			Log.e(TAG, "Error");
+			return;
+		}
+
+		// Read line-by-line and pick out the relevent information
+		while (dis.available() != 0) {
+
+			line = dis.readLine();
+
+			// Store the first word of each line into ArrayList.
+			// TODO: Store act and page number into Database
+			String words[] = line.split("\\s+");
+			String firstWord = words[0];
+
+			// Check our firstWord is a character
+			if (isCharacter(firstWord)) {
+				// TODO: Bug found. If a character has two words for a name e.g.
+				// "Lady Bracknell" they are stored as a Stage Direction.
+				// If the first word doesn't contain a period (.) then we need
+				// to take the second word as well as part of the character
+				// name.
+				if (!firstWord.contains(".")) {
+					firstWord += " " + words[1];
+
+					test = "";
+					for (int j = 2; j < words.length; j++) {
+						test += words[j] + " ";
+					}
+					// If the second word is "and" then it is two characters
+					// delievering a line and we need to get the other
+					// characters name.
+					if (words[1].equals("and")) {
+						firstWord += " " + words[2] + ".";
+
+						test = "";
+						for (int j = 3; j < words.length; j++) {
+							test += words[j] + " ";
+						}
+						// Handle the rest of the data that hasn't yet been
+						// filtered
+					} else {
+						firstWord = "STAGE.";
+
+						test = "";
+						for (int j = 0; j < words.length; j++) {
+							test += words[j] + " ";
+						}
+					}
+
+				}
+			} else {
+				firstWord = "STAGE.";
+
+				test = "";
+				for (int j = 0; j < words.length; j++) {
+					test += words[j] + " ";
+				}
+			}
+			// String character = firstWord;
+			mCharacters.add(firstWord);
+
+			if (test.equals("")) {
+				for (int j = 1; j < words.length; j++) {
+					test += words[j] + " ";
+				}
+			}
+
+			Log.i(TAG, firstWord + " :::: " + test);
+			test = "";
+		}
+		is.close();
+		bis.close();
+		dis.close();
+	}
+
+	/**
+	 * Method for checking if the first word of the current line is a character
+	 * name.
+	 * 
+	 * @param word
+	 * @return
+	 */
+	private boolean isCharacter(String word) {
+		// Check if the line is a stage direction
+		if (word.contains("[") || isAllUpperCase(word)) {
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	/**
+	 * Method for checking if the current word is entirely capitals.
+	 * 
+	 * @param word
+	 * @return
+	 */
+	private boolean isAllUpperCase(String word) {
+		boolean allCaps = true;
+		for (char c : word.toCharArray()) {
+			if (Character.isLowerCase(c)) {
+				allCaps = false;
+				break;
+			}
+		}
+		return allCaps;
 	}
 }
