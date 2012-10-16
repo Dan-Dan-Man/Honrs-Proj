@@ -57,7 +57,6 @@ public class HomeActivity extends Activity {
 	private TextView mBottom;
 	private static final String TAG = "HomeActivity";
 	private ArrayList<String> mCharacters;
-	private ArrayList<String> mText;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -198,14 +197,16 @@ public class HomeActivity extends Activity {
 	private void readFile() throws IOException {
 
 		mCharacters = new ArrayList<String>();
-		// mText = new ArrayList<String>();
-		String test = "";
+		String text = "";
 		AssetManager am = getAssets();
 
 		InputStream is;
 		BufferedInputStream bis;
 		DataInputStream dis;
 		String line = null;
+		int lineNo = 0;
+		int actNo = 0;
+		int pageNo = 1;
 
 		// Try to open the file, and alert the user if file doesn't exist
 		try {
@@ -221,26 +222,37 @@ public class HomeActivity extends Activity {
 		// Read line-by-line and pick out the relevent information
 		while (dis.available() != 0) {
 
+			lineNo++;
+
 			line = dis.readLine();
 
-			// Store the first word of each line into ArrayList.
-			// TODO: Store act and page number into Database
+			// Split line into array of words
 			String words[] = line.split("\\s+");
 			String firstWord = words[0];
 
-			// Check our firstWord is a character
+			// Keep a count of which Act we're on
+			if (firstWord.equals("FIRST") || firstWord.equals("SECOND")
+					|| firstWord.equals("THIRD")) {
+				actNo++;
+				Log.d(TAG, Integer.toString(actNo));
+			}
+			
+			// Keep count of what page we're on (23 lines/page)
+			if ((lineNo % 23) == 0) {
+				pageNo++;
+			}
+
+			// Check our firstWord is a character name
 			if (isCharacter(firstWord)) {
-				// TODO: Bug found. If a character has two words for a name e.g.
-				// "Lady Bracknell" they are stored as a Stage Direction.
 				// If the first word doesn't contain a period (.) then we need
 				// to take the second word as well as part of the character
 				// name.
 				if (!firstWord.contains(".")) {
 					firstWord += " " + words[1];
 
-					test = "";
+					text = "";
 					for (int j = 2; j < words.length; j++) {
-						test += words[j] + " ";
+						text += words[j] + " ";
 					}
 					// If the second word is "and" then it is two characters
 					// delievering a line and we need to get the other
@@ -248,41 +260,50 @@ public class HomeActivity extends Activity {
 					if (words[1].equals("and")) {
 						firstWord += " " + words[2] + ".";
 
-						test = "";
+						text = "";
 						for (int j = 3; j < words.length; j++) {
-							test += words[j] + " ";
+							text += words[j] + " ";
 						}
 						// Handle the rest of the data that hasn't yet been
 						// filtered
-					} else {
+					} else if (!words[1].contains(".")) {
 						firstWord = "STAGE.";
 
-						test = "";
+						text = "";
 						for (int j = 0; j < words.length; j++) {
-							test += words[j] + " ";
+							text += words[j] + " ";
 						}
-					}
 
+						//Log.d(TAG, firstWord + " :::: " + text);
+					}
 				}
 			} else {
 				firstWord = "STAGE.";
 
-				test = "";
+				text = "";
 				for (int j = 0; j < words.length; j++) {
-					test += words[j] + " ";
+					text += words[j] + " ";
 				}
 			}
-			// String character = firstWord;
+			// Once we have obtained the correct data, we add to the database.
+
+			// Add lineNo to database
+
 			mCharacters.add(firstWord);
 
-			if (test.equals("")) {
+			if (text.equals("")) {
 				for (int j = 1; j < words.length; j++) {
-					test += words[j] + " ";
+					text += words[j] + " ";
 				}
 			}
 
-			Log.i(TAG, firstWord + " :::: " + test);
-			test = "";
+			Log.d(TAG, Integer.toString(pageNo));
+			Log.i(TAG, firstWord + " :::: " + text);
+			text = "";
+
+			// Add actNo to database
+			
+			// Add pageNo to database
 		}
 		is.close();
 		bis.close();
