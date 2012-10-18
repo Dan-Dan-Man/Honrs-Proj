@@ -46,7 +46,7 @@ import com.example.android.R;
  * 
  */
 
-// TODO: Create Database
+// TODO: Intialise database. View code from FoodActivity.
 
 public class HomeActivity extends Activity {
 
@@ -236,7 +236,7 @@ public class HomeActivity extends Activity {
 				actNo++;
 				Log.d(TAG, Integer.toString(actNo));
 			}
-			
+
 			// Keep count of what page we're on (23 lines/page)
 			if ((lineNo % 23) == 0) {
 				pageNo++;
@@ -274,7 +274,7 @@ public class HomeActivity extends Activity {
 							text += words[j] + " ";
 						}
 
-						//Log.d(TAG, firstWord + " :::: " + text);
+						// Log.d(TAG, firstWord + " :::: " + text);
 					}
 				}
 			} else {
@@ -302,7 +302,7 @@ public class HomeActivity extends Activity {
 			text = "";
 
 			// Add actNo to database
-			
+
 			// Add pageNo to database
 		}
 		is.close();
