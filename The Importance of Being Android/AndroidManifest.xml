@@ -33,7 +33,7 @@
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         <activity
-            android:name="com.importance.MainActivity"
+            android:name="com.lines.MainActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
     </application>
