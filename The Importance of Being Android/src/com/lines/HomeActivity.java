@@ -50,14 +50,12 @@ import com.lines.database.PlayDbAdapter;
  * 
  */
 
-// TODO: Intialise database. View code from FoodActivity.
+// TODO: Some minor formating bugs in database. Need to examine these and edit
+// textfile.
 
 public class HomeActivity extends Activity {
 
 	private PlayDbAdapter mDbAdapter;
-	private Cursor mCursor;
-	private String[] mFrom;
-	private int[] mTo;
 	private ImageButton mUpArrow;
 	private ImageButton mDownArrow;
 	private TextView mTop;
@@ -70,11 +68,11 @@ public class HomeActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.home_layout);
 
-		mDbAdapter = new PlayDbAdapter(this);
-		mDbAdapter.open();
-
+		// TODO: This check does not work right and database is populated
+		// everytime. Check ForumApp example and see if same thing happens
+		// there.
 		// Create and populate Database if one doesn't exist
-//		if (!checkDataBase()) {
+		if (!checkDataBase()) {
 			try {
 				Log.d(TAG, "Creating new Database");
 				readFile();
@@ -82,13 +80,9 @@ public class HomeActivity extends Activity {
 				// TODO: Add proper error handling
 				Log.e(TAG, "Error");
 			}
-//		}
+		}
 
 		Log.d(TAG, "Opening Database");
-
-		// For populating widgets
-		// mCursor = mDbAdapter.fetchAllFood();
-		// startManagingCursor(mCursor);
 
 		mTop = (TextView) findViewById(R.id.textTop);
 		mMiddle = (TextView) findViewById(R.id.textMiddle);
@@ -209,6 +203,9 @@ public class HomeActivity extends Activity {
 		int actNo = 0;
 		int pageNo = 1;
 
+		mDbAdapter = new PlayDbAdapter(this);
+		mDbAdapter.open();
+
 		// Try to open the file, and alert the user if file doesn't exist
 		try {
 			is = am.open("earnest.txt");
@@ -312,9 +309,13 @@ public class HomeActivity extends Activity {
 			// Clear "text" before we read next line
 			text = "";
 		}
+
+		// Cleanup
 		is.close();
 		bis.close();
 		dis.close();
+		onDestroy();
+
 	}
 
 	/**

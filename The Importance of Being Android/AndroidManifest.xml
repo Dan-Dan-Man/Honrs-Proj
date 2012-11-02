@@ -12,7 +12,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.importance.HomeActivity"
+            android:name="com.lines.HomeActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -21,15 +21,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.importance.OptionsActivity"
+            android:name="com.lines.OptionsActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         <activity
-            android:name="com.importance.StatsActivity"
+            android:name="com.lines.StatsActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         <activity
-            android:name="com.importance.HelpActivity"
+            android:name="com.lines.HelpActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         <activity

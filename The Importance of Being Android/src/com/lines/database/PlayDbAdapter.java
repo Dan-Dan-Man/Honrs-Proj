@@ -100,17 +100,17 @@ public class PlayDbAdapter {
 	// TODO: ALL OF THESE WILL BE USED TO FILTER LINES FOR USER. COME BACK TO
 	// THIS LATER
 
-	// /**
-	// * * Return a Cursor over the list of all Food in the database * * @return
-	// * Cursor over all Food
-	// */
-	//
-	// public Cursor fetchAllFood() {
-	// return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_TITLE,
-	// KEY_ADDRESS, KEY_POSTCODE, KEY_PHONE, KEY_WEB, KEY_BOOK,
-	// KEY_CUISINE, KEY_DISTANCE, KEY_RATING }, null, null, null,
-	// null, null);
-	// }
+	/**
+	 * * Return a Cursor over the list of all Food in the database * * @return
+	 * Cursor over all Food
+	 */
+
+	public Cursor fetchAllLines() {
+		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
+				KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE, KEY_NOTE,
+				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS, KEY_COMPLETIONS }, null, null, null,
+				null, null);
+	}
 	//
 	// public Cursor fetchAllCafe() {
 	// return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_TITLE,

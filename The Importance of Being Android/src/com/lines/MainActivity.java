@@ -21,13 +21,17 @@
 
 package com.lines;
 
-import android.app.Activity;
+import android.app.ListActivity;
+import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
 import com.example.android.R;
+import com.lines.database.PlayDbAdapter;
 
 /**
  * The Main Screen where the user will rehearse their lines.
@@ -36,55 +40,44 @@ import com.example.android.R;
  * 
  */
 
-public class MainActivity extends Activity {
+public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
-	private TextView line1;
-	private TextView line2;
-	private TextView char3;
-	private TextView line3;
-	private TextView char4;
 	private TextView mPage;
 	private Button mNext;
 	private Button mPrev;
+	private Cursor mCursor;
+	private String[] mFrom;
+	private int[] mTo;
+	private PlayDbAdapter mDbAdapter;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
 
-		line1 = (TextView) findViewById(R.id.textLine1);
-		line2 = (TextView) findViewById(R.id.textLine2);
-		char3 = (TextView) findViewById(R.id.textChar3);
-		line3 = (TextView) findViewById(R.id.textLine3);
-		char4 = (TextView) findViewById(R.id.textChar4);
-
 		mNext = (Button) findViewById(R.id.buttonNext);
 		mPrev = (Button) findViewById(R.id.buttonPrev);
 		mPage = (TextView) findViewById(R.id.textPage);
 
+		mDbAdapter = new PlayDbAdapter(this);
+		mDbAdapter.open();
+
+		mCursor = mDbAdapter.fetchAllLines();
+		startManagingCursor(mCursor);
+		fillData();
+		registerForContextMenu(getListView());
+
 		// When Next button is pressed, play jumps until user's next line.
 		mNext.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				if (mPage.getText().toString().contains("12")) {
-					line2.setVisibility(View.VISIBLE);
-					line3.setVisibility(View.VISIBLE);
-					char3.setVisibility(View.VISIBLE);
-					char4.setVisibility(View.VISIBLE);
-				}
+
 			}
 		});
 
 		// When Next button is long pressed, play jumps to next page.
 		mNext.setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
-				mPage.setText(" Page 13");
-				line2.setVisibility(View.INVISIBLE);
-				line3.setVisibility(View.INVISIBLE);
-				char3.setVisibility(View.INVISIBLE);
-				char4.setVisibility(View.INVISIBLE);
-
-				line1.setText("I never knew you when you weren’t...");
 				return true;
 			}
 		});
@@ -92,23 +85,45 @@ public class MainActivity extends Activity {
 		// When Prev button is pressed, play jumps until user's prev line.
 		mPrev.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				line2.setVisibility(View.INVISIBLE);
-				line3.setVisibility(View.INVISIBLE);
-				char3.setVisibility(View.INVISIBLE);
-				char4.setVisibility(View.INVISIBLE);
 			}
 		});
 
 		// When Prev button is long pressed, play jumps to prev page.
 		mPrev.setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
-				mPage.setText(" Page 12");
-
-				line1.setText("Is that clever?");
 
 				return true;
 			}
 		});
+	}
+
+	// Called with the result of the other activity
+	// requestCode was the origin request code send to the activity
+	// resultCode is the return code, 0 is everything is ok
+	// intend can be used to get data
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode,
+			Intent intent) {
+		super.onActivityResult(requestCode, resultCode, intent);
+		fillData();
+
+	}
+
+	/**
+	 * Here we fill the list with lines from the play.
+	 * 
+	 */
+	private void fillData() {
+		mFrom = new String[] { PlayDbAdapter.KEY_CHARACTER,
+				PlayDbAdapter.KEY_LINE };
+		mTo = new int[] { R.id.textCharacter, R.id.textLine };
+
+		// Now create an array adapter and set it to display using our row
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+				R.layout.play_list_layout, mCursor, mFrom, mTo);
+
+		setListAdapter(adapter);
+
 	}
 
 }
