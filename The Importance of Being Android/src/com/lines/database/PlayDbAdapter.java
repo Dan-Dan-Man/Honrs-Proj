@@ -111,13 +111,13 @@ public class PlayDbAdapter {
 				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS, KEY_COMPLETIONS }, null, null, null,
 				null, null);
 	}
-	//
-	// public Cursor fetchAllCafe() {
-	// return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_TITLE,
-	// KEY_ADDRESS, KEY_POSTCODE, KEY_PHONE, KEY_WEB, KEY_BOOK,
-	// KEY_CUISINE, KEY_DISTANCE, KEY_RATING }, KEY_CUISINE + "= ?",
-	// new String[] { "Cafe" }, null, null, null);
-	// }
+	
+	 public Cursor fetchPage(String page) {
+	 return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
+				KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE, KEY_NOTE,
+				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS, KEY_COMPLETIONS }, KEY_PAGE + "= ?",
+	 new String[] { page }, null, null, null);
+	 }
 	//
 	// public Cursor fetchAllSandwich() {
 	// return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_TITLE,

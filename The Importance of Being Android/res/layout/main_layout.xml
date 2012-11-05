@@ -23,18 +23,7 @@
         android:layout_marginLeft="65dp"
         android:layout_marginTop="5dp"
         android:layout_toRightOf="@+id/imageAudio"
-        android:text="Act I |"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#FFFFFF" />
-
-    <TextView
-        android:id="@+id/textPage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textAct"
-        android:layout_alignBottom="@+id/textAct"
-        android:layout_toRightOf="@+id/textAct"
-        android:text=" Page 12"
+        android:text="Act I"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -49,6 +38,28 @@
         android:background="@null"
         android:src="@drawable/sym_action_chat" />
 
+    <TextView
+        android:id="@+id/textPageTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textAct"
+        android:layout_alignBottom="@+id/textAct"
+        android:layout_toRightOf="@+id/textAct"
+        android:text=" | Page "
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textPage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/textPageTitle"
+        android:layout_alignBottom="@+id/textPageTitle"
+        android:layout_toRightOf="@+id/textPageTitle"
+        android:text="12"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
+
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -61,56 +72,56 @@
         <ListView
             android:id="@id/android:list"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true" >
         </ListView>
-    </RelativeLayout>
 
-    <RelativeLayout
-        android:layout_width="fill_parent"
-        android:layout_height="45dp"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginTop="5dp"
-        android:background="#500000" >
-
-        <TextView
-            android:id="@+id/textPrompt"
-            android:layout_width="120dp"
-            android:layout_height="fill_parent"
-            android:layout_centerHorizontal="true"
-            android:background="#365812"
-            android:gravity="center"
-            android:text="@string/prompt"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:textColor="#FFFFFF" />
-
-        <Button
-            android:id="@+id/buttonNext"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/textPrompt"
-            android:background="@null"
-            android:text="@string/next"
-            android:textColor="#FFFFFF"
-            android:textSize="22dp" />
-
-        <Button
-            android:id="@+id/buttonPrev"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="45dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_toLeftOf="@+id/textPrompt"
-            android:background="@null"
-            android:text="@string/prev"
-            android:textColor="#FFFFFF"
-            android:textSize="22dp" />
+            android:layout_marginTop="5dp"
+            android:background="#500000" >
+
+            <TextView
+                android:id="@+id/textPrompt"
+                android:layout_width="120dp"
+                android:layout_height="fill_parent"
+                android:layout_centerHorizontal="true"
+                android:background="#365812"
+                android:gravity="center"
+                android:text="@string/prompt"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#FFFFFF" />
+
+            <Button
+                android:id="@+id/buttonNext"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentTop="true"
+                android:layout_toRightOf="@+id/textPrompt"
+                android:background="@null"
+                android:text="@string/next"
+                android:textColor="#FFFFFF"
+                android:textSize="22dp" />
+
+            <Button
+                android:id="@+id/buttonPrev"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                android:layout_toLeftOf="@+id/textPrompt"
+                android:background="@null"
+                android:text="@string/prev"
+                android:textColor="#FFFFFF"
+                android:textSize="22dp" />
+        </RelativeLayout>
     </RelativeLayout>
 
 </RelativeLayout>

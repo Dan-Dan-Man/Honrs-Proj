@@ -220,6 +220,7 @@ public class HomeActivity extends Activity {
 		}
 
 		// Read line-by-line and pick out the relevent information
+		// TODO: Filter out stuff we don't want in the database
 		while (dis.available() != 0) {
 
 			lineNo++;
@@ -299,9 +300,16 @@ public class HomeActivity extends Activity {
 			}
 
 			// Once we have all the data picked out from current line in text
-			// file, create a new row in the database.
-			mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo, "N",
-					"N", "N", 0, 0, 0);
+			// file, create a new row in the database. Filter out text we don't
+			// want in our database.
+			if (!isAllUpperCase(words[0])) {
+				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
+						"N", "N", "N", 0, 0, 0);
+				// If we're not adding to the database, then we need to reduce
+				// the line count.
+			} else {
+				lineNo--;
+			}
 
 			Log.d(TAG, Integer.toString(pageNo));
 			Log.i(TAG, firstWord + " :::: " + text);

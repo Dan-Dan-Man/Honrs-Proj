@@ -25,6 +25,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.LayoutParams;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -49,6 +50,9 @@ import com.example.android.R;
 
 public class OptionsActivity extends Activity {
 
+	private String pageNo;
+	private String actNo;
+	private Button mContinue;
 	private Spinner mChar;
 	private Spinner mAct;
 	private Spinner mPage;
@@ -60,6 +64,7 @@ public class OptionsActivity extends Activity {
 	private ArrayAdapter<CharSequence> mAdapterAct;
 	private ArrayAdapter<CharSequence> mAdapterPage;
 	private int resource;
+	private static final String TAG = "OptionsActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -69,6 +74,7 @@ public class OptionsActivity extends Activity {
 		mChar = (Spinner) findViewById(R.id.spinnerCharacter);
 		mAct = (Spinner) findViewById(R.id.spinnerAct);
 		mPage = (Spinner) findViewById(R.id.spinnerPage);
+		mContinue = (Button) findViewById(R.id.buttonContinue);
 
 		mCueHelp = (ImageButton) findViewById(R.id.imageButtonCue);
 		mAudioHelp = (ImageButton) findViewById(R.id.imageButtonAudio);
@@ -90,6 +96,26 @@ public class OptionsActivity extends Activity {
 		mAct.setAdapter(mAdapterAct);
 
 		mAct.setOnItemSelectedListener(new MyOnItemSelectedListener());
+
+		// Store user's configurations and move to main screen
+		mContinue.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				pageNo = mPage.getSelectedItem().toString();
+				actNo = mAct.getSelectedItem().toString();
+
+				// Once we obtain the user's selection, we need to isolate the
+				// page number
+				String words[] = pageNo.split("\\s+");
+				pageNo = words[0];
+				Log.d(TAG, "Page selected: " + pageNo);
+				
+				Intent i = new Intent(OptionsActivity.this, MainActivity.class);
+				// Pass through User selection
+				i.putExtra("EXTRA_ACT", actNo);
+				i.putExtra("EXTRA_PAGE", pageNo);
+				OptionsActivity.this.startActivity(i);
+			}
+		});
 
 		// Listeners to display relevent help messages to the user.
 		mCueHelp.setOnClickListener(new View.OnClickListener() {
@@ -115,18 +141,6 @@ public class OptionsActivity extends Activity {
 				showPopup("stage");
 			}
 		});
-	}
-
-	/**
-	 * 
-	 * When the user has finished their configurations, they move on to the Main
-	 * Screen.
-	 * 
-	 * @param v
-	 */
-	public void cont(View v) {
-		Intent i = new Intent(this, MainActivity.class);
-		startActivityForResult(i, 0);
 	}
 
 	/**
