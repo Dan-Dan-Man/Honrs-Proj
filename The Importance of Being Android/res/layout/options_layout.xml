@@ -29,7 +29,6 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/textTitleChar"
         android:layout_centerHorizontal="true"
-        android:entries="@array/char_array"
         android:prompt="@string/char_select" />
 
     <TextView
@@ -49,7 +48,6 @@
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/textTitleAct"
         android:layout_below="@+id/textTitleAct"
-        android:entries="@array/act_array"
         android:prompt="@string/act_select" />
 
     <TextView
@@ -69,7 +67,6 @@
         android:layout_alignBaseline="@+id/spinnerAct"
         android:layout_alignBottom="@+id/spinnerAct"
         android:layout_alignLeft="@+id/textTitlePage"
-        android:entries="@array/act1_array"
         android:prompt="@string/page_select" />
 
     <TextView
@@ -94,13 +91,14 @@
         android:textSize="12sp" />
 
     <CheckBox
-        android:id="@+id/checkAudio"
-        android:layout_width="wrap_content"
+        android:id="@+id/checkBreak"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/checkCue"
         android:layout_below="@+id/checkCue"
-        android:text="@string/audio"
+        android:text="@string/breakup"
         android:textColor="#FFFFFF"
+        android:enabled="false"
         android:textSize="12sp" />
 
     <CheckBox
@@ -117,7 +115,7 @@
         android:id="@+id/checkStage"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/checkAudio"
+        android:layout_alignBottom="@+id/checkBreak"
         android:layout_alignLeft="@+id/checkOwnLines"
         android:checked="true"
         android:text="@string/stage"
@@ -136,7 +134,7 @@
         android:layout_marginLeft="10dp" />
 
     <ImageButton
-        android:id="@+id/imageButtonAudio"
+        android:id="@+id/imageButtonBreak"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/imageButtonCue"
@@ -159,7 +157,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/imageButtonAudio"
+        android:layout_alignTop="@+id/imageButtonBreak"
         android:background="@null"
         android:src="@drawable/ic_menu_help" />
 
@@ -174,5 +172,23 @@
         android:text="@string/cont"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FFFFFF" />
+
+    <Spinner
+        android:id="@+id/spinnerMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/imageButtonCue"
+        android:entries="@array/mode_array"
+        android:prompt="@string/mode_select" />
+
+    <ImageButton
+        android:id="@+id/imageButtonMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help" />
 
 </RelativeLayout>

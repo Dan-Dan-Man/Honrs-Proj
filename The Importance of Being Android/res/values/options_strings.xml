@@ -5,15 +5,15 @@
     <string name="char_select">Select Character</string>
 
     <string-array name="char_array">
-        <item>John Worthing, J.P.</item>
-        <item>Algernon Moncrieff</item>
-        <item>Rev. Canon Chasuble, D.D.</item>
-        <item>Merriman, Butler</item>
-        <item>Lane, Manservant</item>
-        <item>Lady Bracknell</item>
-        <item>Hon. Gwendolen Fairfax</item>
-        <item>Cecily Cardew</item>
-        <item>Miss Prism, Governess</item>
+        <item>Jack.</item>
+        <item>Algernon.</item>
+        <item>Chasuble.</item>
+        <item>Merriman.</item>
+        <item>Lane.</item>
+        <item>Lady Bracknell.</item>
+        <item>Gwendolen.</item>
+        <item>Cecily.</item>
+        <item>Miss Prism.</item>
     </string-array>
 
     <string name="act_select">Select Act</string>
@@ -27,64 +27,72 @@
     <string name="page_select">Select Page</string>
 
     <string-array name="act1_array">
-        <item>1 - Algernon: Did you hear what I was playing, Lane?</item>
-        <item>2 - Algernon: I believe it is customary in good society...</item>
-        <item>3 - Jack: Why on earth do you say that?</item>
-        <item>4 - Algernon: Yes. But why does your aunt call...</item>
-        <item>5 - Jack: That wouldn’t be at all a bad thing.</item>
-        <item>6 - Jack: I suppose so, if you want to.</item>
-        <item>7 - Algernon: It is a great bore, and, I need...</item>
-        <item>8 - Jack: You really love me, Gwendolen?</item>
-        <item>9 - Gwendolen: Yes, but men often propose for practice.</item>
-        <item>10 - Lady Bracknell: That is satisfactory.</item>
-        <item>11 - Jack: In the cloak-room at Victoria Station.</item>
-        <item>12 - Jack: Is that clever?</item>
-        <item>13 - Algernon: Well, I’m hungry.</item>
-        <item>14 - Gwendolen: Good! Algy, you may turn round now.</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+        <item>7</item>
+        <item>8</item>
+        <item>9</item>
+        <item>10</item>
+        <item>11</item>
+        <item>12</item>
+        <item>13</item>
+        <item>14</item>
     </string-array>
     <string-array name="act2_array">
-        <item>15 - Miss Prism: Cecily, Cecily! Surely such a utilitarian...</item>
-        <item>16 - Miss Prism: The good ended happily, and the bad unhappily.</item>
-        <item>17 - Cecily: Ask Mr. Ernest Worthing to come here.</item>
-        <item>18 - Cecily: I’m afraid I’ve no time, this afternoon.</item>
-        <item>19 - Miss Prism: Mr. Worthing!</item>
-        <item>20 - Miss Prism: People who live entirely for pleasure usually are.</item>
-        <item>21 - Jack: Good heavens!</item>
-        <item>22 - Algernon: I am afraid I can’t stay more than a week this time.</item>
-        <item>23 - Algernon: Thank you.</item>
-        <item>24 - Algernon: Darling! And when was the engagement actually settled?</item>
-        <item>25 - Cecily: But I don’t like the name of Algernon.</item>
-        <item>26 - Cecily: How nice of you to like me so much after...</item>
-        <item>27 - Cecily: I beg your pardon, Gwendolen, did you say Ernest?</item>
-        <item>28 - Cecily: Yes, as usual.</item>
-        <item>29 - Jack: To dear little Cecily! Of course not!</item>
-        <item>30 - Jack: Gwendolen—Cecily—it is very painful for me...</item>
-        <item>31 - Jack: How can you sit there, calmly eating muffins...</item>
-        <item>32 - Jack: Algernon! I have already told you to go.</item>
+        <item>15</item>
+        <item>16</item>
+        <item>17</item>
+        <item>18</item>
+        <item>19</item>
+        <item>20</item>
+        <item>21</item>
+        <item>22</item>
+        <item>23</item>
+        <item>24</item>
+        <item>25</item>
+        <item>26</item>
+        <item>27</item>
+        <item>28</item>
+        <item>29</item>
+        <item>30</item>
+        <item>31</item>
+        <item>32</item>
     </string-array>
     <string-array name="act3_array">
-        <item>33 - Gwendolen: The fact that they did not follow us...</item>
-        <item>34 - Cecily: Could we not both speak at the same time?</item>
-        <item>35 - Lady Bracknell: What did he die of?</item>
-        <item>36 - Jack: And after six months nobody knew her.</item>
-        <item>37 - Lady Bracknell: Ahem! Mr. Worthing, after careful consideration...</item>
-        <item>38 - Lady Bracknell: That is not the destiny I propose for Gwendolen.</item>
-        <item>39 - Miss Prism: Lady Bracknell, I admit with shame that I do not know.</item>
-        <item>40 - Miss Prism: You?</item>
-        <item>41 - Lady Bracknell: The General was essentially a man of peace...</item>
+        <item>33</item>
+        <item>34</item>
+        <item>35</item>
+        <item>36</item>
+        <item>37</item>
+        <item>38</item>
+        <item>39</item>
+        <item>40</item>
+        <item>41</item>
+    </string-array>
+
+    <string name="mode_select">Select Mode</string>
+
+    <string-array name="mode_array">
+        <item>Normal</item>
+        <item>Rehearsal</item>
     </string-array>
 
     <string name="config">Configurations</string>
     <string name="cue">Cue Words</string>
-    <string name="audio">Audio</string>
+    <string name="breakup">Break up text</string>
     <string name="own_lines">Display only own lines</string>
     <string name="stage">Stage Directions</string>
     <string name="back">Back</string>
     <string name="cont">Continue</string>
     <string name="dismiss">Dismiss</string>
-    <string name="cue_help">Help 1</string>
-    <string name="audio_help">Help 2</string>
-    <string name="own_line_help">Help 3</string>
-    <string name="stage_help">Help 4</string>
+    <string name="mode_help">In NORMAL mode, the script is available to read with no hidden text, and stats are not recorded. \n\nIn REHEARSAL mode, the selected character\'s lines will be hidden, and stats will be recorded.</string>
+    <string name="cue_help">Cue Words will underline relevent words from the previous line delieved by another character, to help you remember the context of yor current line.</string>
+    <string name="break_help">Breaking up the text will split each line by sentence. When pressing \"Next\", instead of revealing the whole line, you will only reveal the next sentence. \n\n Not available in NORMAL mode.</string>
+    <string name="own_line_help">Here you will only display the lines delivred by your selected character. \n\n Not available in REHEARSAL mode.</string>
+    <string name="stage_help">Toggling this will either hide or show the stage directions.</string>
 
 </resources>

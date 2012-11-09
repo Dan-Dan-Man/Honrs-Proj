@@ -54,6 +54,11 @@ public class MainActivity extends ListActivity {
 	private PlayDbAdapter mDbAdapter;
 	private String pageNo;
 	private String actNo;
+	private String character;
+	private boolean cue;
+	private boolean breakUp;
+	private boolean ownLines;
+	private boolean stage;
 	private int pgNum;
 
 	@Override
@@ -72,17 +77,27 @@ public class MainActivity extends ListActivity {
 		if (extras != null) {
 			pageNo = extras.getString("EXTRA_PAGE");
 			actNo = extras.getString("EXTRA_ACT");
+			character = extras.getString("EXTRA_CHAR");
+			cue = extras.getBoolean("EXTRA_CUE");
+			breakUp = extras.getBoolean("EXTRA_BREAKUP");
+			ownLines = extras.getBoolean("EXTRA_OWN");
+			stage = extras.getBoolean("EXTRA_STAGE");
 		} else {
 			Log.e(TAG, "Unable to pass user choice through");
 		}
-		
+
 		mPage.setText(pageNo);
 		mAct.setText(actNo);
 
 		mDbAdapter = new PlayDbAdapter(this);
 		mDbAdapter.open();
 
-		mCursor = mDbAdapter.fetchPage(pageNo);
+		if (ownLines) {
+			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
+		} else {
+			mCursor = mDbAdapter.fetchPage(pageNo);
+		}
+
 		startManagingCursor(mCursor);
 		fillData();
 		registerForContextMenu(getListView());
@@ -145,7 +160,7 @@ public class MainActivity extends ListActivity {
 
 		setListAdapter(adapter);
 	}
-	
+
 	/**
 	 * Switch Page either up or down
 	 * 
@@ -153,17 +168,35 @@ public class MainActivity extends ListActivity {
 	 */
 	private void switchPage(boolean pgUp) {
 		pgNum = Integer.parseInt(pageNo);
-		
+
 		// Decide if we want to increment or decrement pages
-		if (pgUp) {
+		if (pgUp && pgNum < 41) {
 			pgNum++;
-		} else if(pgNum > 1) {
+		} else if (pgNum > 1) {
 			pgNum--;
 		}
 		pageNo = Integer.toString(pgNum);
 		mPage.setText(pageNo);
-		
-		mCursor = mDbAdapter.fetchPage(pageNo);
+
+		// Here we handle if the user has selected to display own lines
+		if (ownLines) {
+			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
+			// Here we make sure to filter out any empty pages (where the
+			// character doesn't appear)
+			while (mCursor.getCount() == 0 && pgNum < 41) {
+				// TODO: This is hardcoded for testing
+				if (pgUp && pgNum < 41) {
+					pgNum++;
+				} else if (pgNum > 1) {
+					pgNum--;
+				}
+				pageNo = Integer.toString(pgNum);
+				mCursor = mDbAdapter.fetchCharacter(character, pageNo);
+			}
+
+		} else {
+			mCursor = mDbAdapter.fetchPage(pageNo);
+		}
 		startManagingCursor(mCursor);
 		fillData();
 	}
