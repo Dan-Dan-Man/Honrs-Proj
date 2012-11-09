@@ -29,6 +29,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.R;
 import com.lines.database.PlayDbAdapter;
@@ -60,6 +61,7 @@ public class MainActivity extends ListActivity {
 	private boolean ownLines;
 	private boolean stage;
 	private int pgNum;
+	private int lastPage;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -91,6 +93,7 @@ public class MainActivity extends ListActivity {
 
 		mDbAdapter = new PlayDbAdapter(this);
 		mDbAdapter.open();
+		getLastPage();
 
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
@@ -102,6 +105,8 @@ public class MainActivity extends ListActivity {
 		fillData();
 		registerForContextMenu(getListView());
 
+		mDbAdapter.close();
+
 		// When Next button is pressed, play jumps until user's next line.
 		mNext.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -112,7 +117,13 @@ public class MainActivity extends ListActivity {
 		// When Next button is long pressed, play jumps to next page.
 		mNext.setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
-				switchPage(true);
+				if (Integer.parseInt(mPage.getText().toString()) < lastPage) {
+					switchPage(true);
+				} else {
+					Toast.makeText(MainActivity.this,
+							"No more pages available in script!",
+							Toast.LENGTH_SHORT).show();
+				}
 				return true;
 			}
 		});
@@ -126,10 +137,28 @@ public class MainActivity extends ListActivity {
 		// When Prev button is long pressed, play jumps to prev page.
 		mPrev.setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
-				switchPage(false);
+				if (Integer.parseInt(mPage.getText().toString()) > 1) {
+					switchPage(false);
+				}
 				return true;
 			}
 		});
+	}
+
+	/**
+	 * Use this method to obtain the last page in the script. Need this for a
+	 * limit to number of pages user can view.
+	 * 
+	 */
+	private void getLastPage() {
+		mCursor = mDbAdapter.fetchAllLines();
+		String page = "";
+
+		if (mCursor.moveToLast()) {
+			page = (mCursor.getString(mCursor.getColumnIndex("page")));
+		}
+
+		lastPage = Integer.parseInt(page);
 	}
 
 	// TODO: Find out exactly what this does. Don't think I need it
@@ -167,38 +196,54 @@ public class MainActivity extends ListActivity {
 	 * @param pgUp
 	 */
 	private void switchPage(boolean pgUp) {
+		boolean valid = true;
+		mDbAdapter.open();
 		pgNum = Integer.parseInt(pageNo);
 
 		// Decide if we want to increment or decrement pages
-		if (pgUp && pgNum < 41) {
+		if (pgUp) {
 			pgNum++;
-		} else if (pgNum > 1) {
+		} else if (!pgUp) {
 			pgNum--;
 		}
+
 		pageNo = Integer.toString(pgNum);
-		mPage.setText(pageNo);
 
 		// Here we handle if the user has selected to display own lines
+		// TODO: Works but is very slow when we reach page limits. Look to make
+		// this more efficent. It needs two clicks because it finds the page its
+		// currently on and treats it as a valid page.
 		if (ownLines) {
+			valid = true;
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
 			// Here we make sure to filter out any empty pages (where the
 			// character doesn't appear)
-			while (mCursor.getCount() == 0 && pgNum < 41) {
-				// TODO: This is hardcoded for testing
-				if (pgUp && pgNum < 41) {
+			while (mCursor.getCount() == 0 && pgNum < lastPage && pgNum > 1) {
+				// valid = true;
+				if (pgUp) {
 					pgNum++;
-				} else if (pgNum > 1) {
+				} else if (!pgUp) {
 					pgNum--;
 				}
 				pageNo = Integer.toString(pgNum);
 				mCursor = mDbAdapter.fetchCharacter(character, pageNo);
 			}
-
+			if (mCursor.getCount() == 0 || pgNum >= lastPage || pgNum <= 1) {
+				valid = false;
+			}
 		} else {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
-		startManagingCursor(mCursor);
-		fillData();
+		if (valid) {
+			mPage.setText(pageNo);
+			startManagingCursor(mCursor);
+			fillData();
+		} else {
+			Toast.makeText(MainActivity.this,
+					"No more pages where this character appears.",
+					Toast.LENGTH_SHORT).show();
+		}
+		mDbAdapter.close();
 	}
 
 }

@@ -25,6 +25,7 @@ package com.lines;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Set;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -56,7 +57,8 @@ import com.lines.database.PlayDbAdapter;
  * 
  */
 
-// TODO: Order character list based on importance (number of lines?)
+// TODO: Set characterSpinner enability based on whether ownLines checkbox is
+// checked or not.
 
 public class OptionsActivity extends Activity {
 
@@ -77,7 +79,6 @@ public class OptionsActivity extends Activity {
 	private ArrayAdapter<String> mAdapterChar;
 	private ArrayAdapter<String> mAdapterAct;
 	private ArrayAdapter<String> mAdapterPage;
-	private int resource;
 	private String pageNo;
 	private String actNo;
 	private String character;
@@ -113,13 +114,14 @@ public class OptionsActivity extends Activity {
 		mOwnLineHelp = (ImageButton) findViewById(R.id.imageButtonOwnLine);
 		mStageHelp = (ImageButton) findViewById(R.id.imageButtonStage);
 
+		mDbAdapter = new PlayDbAdapter(this);
+
 		// Initialise Spinners
 		populateCharacters();
 		populateActs();
-		//populatePages("1");
 
-		mAct.setOnItemSelectedListener(new MyOnItemSelectedListener());
-		mMode.setOnItemSelectedListener(new MyOnItemSelectedListener());
+		mAct.setOnItemSelectedListener(new ActOnItemSelectedListener());
+		mMode.setOnItemSelectedListener(new ModeOnItemSelectedListener());
 
 		// Store user's configurations and move to main screen
 		mContinue.setOnClickListener(new View.OnClickListener() {
@@ -191,37 +193,33 @@ public class OptionsActivity extends Activity {
 	 * 
 	 */
 	private void populateCharacters() {
-		mDbAdapter = new PlayDbAdapter(this);
 		mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 
-		// First get the data from "character" column
+		// First get the data from "character" column and filter out unwanted
+		// characters (e.g. STAGE)
+		// TODO: "and" could cause later problems. Look to search for
+		// certain word than character sequence
 		if (mCursor.moveToFirst()) {
 			do {
-				characters.add(mCursor.getString(mCursor
-						.getColumnIndex("character")));
+				String character = mCursor.getString(mCursor
+						.getColumnIndex("character"));
+				if (!(character.equals("STAGE.") || character.contains("and"))) {
+					characters.add(character);
+				}
 			} while (mCursor.moveToNext());
 		}
 
-		// Then we remove duplicates to get exact list of characters
-		HashSet<String> h = new HashSet<String>();
-		h.addAll(characters);
-		characters.clear();
-		characters.addAll(h);
-
-		// Here we remove some items from the list such as stage directions and
-		// lines delivered by more than one character
-		for (int i = 0; i < characters.size(); i++) {
-			// TODO: "and" could cause later problems. Look to search for
-			// certain word than character sequence
-			// TODO: Still a little buggy. only filters out one "and"
-			Log.d(TAG, characters.get(i));
-			if (characters.get(i).equals("STAGE.")
-					|| characters.get(i).contains("and")) {
-				Log.d("REMOVED", characters.get(i));
-				characters.remove(i);
-			}
+		// Sort characters based on number of lines they have
+		Set<String> unique = new HashSet<String>(characters);
+		for (String key : unique) {
+			Log.d(TAG, (key + ": " + Collections.frequency(characters, key)));
 		}
+
+		characters.clear();
+		characters.addAll(unique);
+
+		// TODO: Order character list based on importance (number of lines?)
 
 		// Set contents of Character Spinner
 		mAdapterChar = new ArrayAdapter<String>(OptionsActivity.this,
@@ -229,7 +227,7 @@ public class OptionsActivity extends Activity {
 		mAdapterChar
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mChar.setAdapter(mAdapterChar);
-		
+
 		mCursor.close();
 		mDbAdapter.close();
 	}
@@ -239,7 +237,6 @@ public class OptionsActivity extends Activity {
 	 * 
 	 */
 	private void populateActs() {
-		mDbAdapter = new PlayDbAdapter(this);
 		mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 
@@ -263,11 +260,9 @@ public class OptionsActivity extends Activity {
 		mAdapterAct
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mAct.setAdapter(mAdapterAct);
-		
+
 		mCursor.close();
 		mDbAdapter.close();
-
-		// TODO: Sort "acts" array
 	}
 
 	/**
@@ -275,17 +270,14 @@ public class OptionsActivity extends Activity {
 	 * 
 	 */
 	// TODO: Convert act numbers to roman numerals maybe
-	// TODO: Doesn't work when we select a new act
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
-		mDbAdapter = new PlayDbAdapter(this);
 		mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllPages(act);
 
 		// First get the data from "page" column
 		if (mCursor.moveToFirst()) {
 			do {
-				//Log.d(TAG, mCursor.getString(mCursor.getColumnIndex("page")));
 				pages.add(mCursor.getString(mCursor.getColumnIndex("page")));
 			} while (mCursor.moveToNext());
 		}
@@ -295,9 +287,9 @@ public class OptionsActivity extends Activity {
 		h.addAll(pages);
 		pages.clear();
 		pages.addAll(h);
-		
+
 		Object obj = Collections.min(pages);
-		
+
 		// Finally sort the page numbers
 		int currentPage = Integer.valueOf((String) obj);
 		ArrayList<String> temp = new ArrayList<String>();
@@ -308,7 +300,7 @@ public class OptionsActivity extends Activity {
 				currentPage++;
 			}
 		}
-		
+
 		for (int i = 0; i < temp.size(); i++) {
 			Log.d(TAG, temp.get(i));
 		}
@@ -319,7 +311,7 @@ public class OptionsActivity extends Activity {
 		mAdapterPage
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mPage.setAdapter(mAdapterPage);
-		
+
 		mCursor.close();
 		mDbAdapter.close();
 	}
@@ -372,17 +364,9 @@ public class OptionsActivity extends Activity {
 	 * @author Dan
 	 * 
 	 */
-	public class MyOnItemSelectedListener implements OnItemSelectedListener {
+	public class ModeOnItemSelectedListener implements OnItemSelectedListener {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {
-			// Extract the act number that we want to search for
-			String act = mAct.getSelectedItem().toString();
-			String words[] = act.split("\\s+");
-			act = words[1];
-			
-			Log.d(TAG, act);
-			
-			populatePages(act);
 
 			if (mMode.getSelectedItem().equals("Normal")) {
 				mBreak.setEnabled(false);
@@ -393,6 +377,23 @@ public class OptionsActivity extends Activity {
 				mOwn.setEnabled(false);
 				mOwn.setChecked(false);
 			}
+		}
+
+		public void onNothingSelected(AdapterView<?> arg0) {
+			// Do nothing
+		}
+
+	}
+
+	public class ActOnItemSelectedListener implements OnItemSelectedListener {
+		public void onItemSelected(AdapterView<?> parent, View v, int pos,
+				long id) {
+			// Extract the act number that we want to search for
+			String act = mAct.getSelectedItem().toString();
+			String words[] = act.split("\\s+");
+			act = words[1];
+
+			populatePages(act);
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
