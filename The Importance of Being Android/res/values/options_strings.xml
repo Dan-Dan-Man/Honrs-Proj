@@ -3,77 +3,8 @@
     <!-- String resource for Options Screen -->
 
     <string name="char_select">Select Character</string>
-
-    <string-array name="char_array">
-        <item>Jack.</item>
-        <item>Algernon.</item>
-        <item>Chasuble.</item>
-        <item>Merriman.</item>
-        <item>Lane.</item>
-        <item>Lady Bracknell.</item>
-        <item>Gwendolen.</item>
-        <item>Cecily.</item>
-        <item>Miss Prism.</item>
-    </string-array>
-
     <string name="act_select">Select Act</string>
-
-    <string-array name="act_array">
-        <item>Act I</item>
-        <item>Act II</item>
-        <item>Act III</item>
-    </string-array>
-
     <string name="page_select">Select Page</string>
-
-    <string-array name="act1_array">
-        <item>1</item>
-        <item>2</item>
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-        <item>7</item>
-        <item>8</item>
-        <item>9</item>
-        <item>10</item>
-        <item>11</item>
-        <item>12</item>
-        <item>13</item>
-        <item>14</item>
-    </string-array>
-    <string-array name="act2_array">
-        <item>15</item>
-        <item>16</item>
-        <item>17</item>
-        <item>18</item>
-        <item>19</item>
-        <item>20</item>
-        <item>21</item>
-        <item>22</item>
-        <item>23</item>
-        <item>24</item>
-        <item>25</item>
-        <item>26</item>
-        <item>27</item>
-        <item>28</item>
-        <item>29</item>
-        <item>30</item>
-        <item>31</item>
-        <item>32</item>
-    </string-array>
-    <string-array name="act3_array">
-        <item>33</item>
-        <item>34</item>
-        <item>35</item>
-        <item>36</item>
-        <item>37</item>
-        <item>38</item>
-        <item>39</item>
-        <item>40</item>
-        <item>41</item>
-    </string-array>
-
     <string name="mode_select">Select Mode</string>
 
     <string-array name="mode_array">
@@ -90,9 +21,9 @@
     <string name="cont">Continue</string>
     <string name="dismiss">Dismiss</string>
     <string name="mode_help">In NORMAL mode, the script is available to read with no hidden text, and stats are not recorded. \n\nIn REHEARSAL mode, the selected character\'s lines will be hidden, and stats will be recorded.</string>
-    <string name="cue_help">Cue Words will underline relevent words from the previous line delieved by another character, to help you remember the context of yor current line.</string>
+    <string name="cue_help">Cue Words will underline relevent words from the previous line delivered by another character, to help you remember the context of yor current line.</string>
     <string name="break_help">Breaking up the text will split each line by sentence. When pressing \"Next\", instead of revealing the whole line, you will only reveal the next sentence. \n\n Not available in NORMAL mode.</string>
-    <string name="own_line_help">Here you will only display the lines delivred by your selected character. \n\n Not available in REHEARSAL mode.</string>
+    <string name="own_line_help">Here you will only display the lines delivered by your selected character. \n\n Not available in REHEARSAL mode.</string>
     <string name="stage_help">Toggling this will either hide or show the stage directions.</string>
 
 </resources>

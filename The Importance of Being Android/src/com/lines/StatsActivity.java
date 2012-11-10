@@ -21,9 +21,19 @@
 
 package com.lines;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
 import android.app.Activity;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.LayoutParams;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -35,6 +45,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.android.R;
+import com.lines.database.PlayDbAdapter;
 
 /**
  * The Stats screen where the user can view some statistics of their
@@ -57,10 +68,17 @@ public class StatsActivity extends Activity {
 	private TextView mPromptsPercent;
 	private TextView mCompleteNum;
 	private TextView mCompletePercent;
-	private ArrayAdapter<CharSequence> mAdapterChar;
-	private ArrayAdapter<CharSequence> mAdapterAct;
-	private ArrayAdapter<CharSequence> mAdapterPage;
-	private int resource;
+	private ArrayAdapter<String> mAdapterChar;
+	private ArrayAdapter<String> mAdapterAct;
+	private ArrayAdapter<String> mAdapterPage;
+	private ArrayList<String> characters = new ArrayList<String>();
+	private ArrayList<String> acts = new ArrayList<String>();
+	private ArrayList<String> pages;
+	private PlayDbAdapter mDbAdapter;
+	private Cursor mCursor;
+	private String currentPage = "All";
+	private String currentAct = "All";
+	private static final String TAG = "StatsActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -79,27 +97,199 @@ public class StatsActivity extends Activity {
 		mCompleteNum = (TextView) findViewById(R.id.textCompleteNum);
 		mCompletePercent = (TextView) findViewById(R.id.textCompletePercent);
 
-		// Set contents of Character Spinner
-		mAdapterChar = ArrayAdapter.createFromResource(StatsActivity.this,
-				R.array.stats_char_array, R.layout.spinner_text_layout);
-		mAdapterChar
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mChar.setAdapter(mAdapterChar);
+		mDbAdapter = new PlayDbAdapter(this);
 
-		// Set contents of Act Spinner
-		mAdapterAct = ArrayAdapter.createFromResource(StatsActivity.this,
-				R.array.stats_act_array, R.layout.spinner_text_layout);
-		mAdapterAct
-				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		mAct.setAdapter(mAdapterAct);
+		// Initialise Spinners
+		populateCharacters();
+		populateActs();
 
-		mAct.setOnItemSelectedListener(new MyOnItemSelectedListener());
+		// Retrieve User choice from previous Activity
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			currentPage = extras.getString("EXTRA_PAGE");
+			currentAct = extras.getString("EXTRA_ACT");
+		} else {
+			Log.i(TAG, "No user choice to pass through");
+		}
+		
+		for (int i = 0; i < mAct.getCount(); i++) {
+			if (mAct.getItemAtPosition(i).equals(currentAct)) {
+				mAct.setSelection(i);
+				break;
+			}
+		}
+
+		mAct.setOnItemSelectedListener(new ActOnItemSelectedListener());
 
 		mClear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				showPopup();
 			}
 		});
+	}
+
+	/**
+	 * Here we get the list of characters in the database
+	 * 
+	 */
+	private void populateCharacters() {
+		mDbAdapter.open();
+		mCursor = mDbAdapter.fetchAllLines();
+
+		// First get the data from "character" column and filter out unwanted
+		// characters (e.g. STAGE)
+		// TODO: "and" could cause later problems. Look to search for
+		// certain word than character sequence
+		if (mCursor.moveToFirst()) {
+			do {
+				String character = mCursor.getString(mCursor
+						.getColumnIndex("character"));
+				if (!(character.equals("STAGE.") || character.contains("and"))) {
+					characters.add(character);
+				}
+			} while (mCursor.moveToNext());
+		}
+
+		HashMap<String, Integer> charOccur = new HashMap<String, Integer>();
+
+		// Get the number of lines spoken by each character and store in HashMap
+		Set<String> unique = new HashSet<String>(characters);
+		for (String key : unique) {
+			charOccur.put(key, Collections.frequency(characters, key));
+		}
+
+		characters.clear();
+
+		characters.add("All");
+
+		// Sort character list based on the number of lines they have
+		while (charOccur.size() > 0) {
+			int max = Collections.max(charOccur.values());
+			characters.add(getKeyByValue(charOccur, max));
+			charOccur.remove(getKeyByValue(charOccur, max));
+		}
+
+		// Set contents of Character Spinner
+		mAdapterChar = new ArrayAdapter<String>(StatsActivity.this,
+				R.layout.spinner_text_layout, characters);
+		mAdapterChar
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mChar.setAdapter(mAdapterChar);
+
+		mCursor.close();
+		onDestroy();
+	}
+
+	/**
+	 * Get the key of the HashMap based on the value.
+	 * 
+	 * @param map
+	 * @param value
+	 * @return
+	 */
+	public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+		for (Entry<T, E> entry : map.entrySet()) {
+			if (value.equals(entry.getValue())) {
+				return entry.getKey();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Here we get the number of acts in the database
+	 * 
+	 */
+	private void populateActs() {
+		mDbAdapter.open();
+		mCursor = mDbAdapter.fetchAllLines();
+
+		// First get the data from "act" column
+		if (mCursor.moveToFirst()) {
+			do {
+				acts.add("Act "
+						+ mCursor.getString(mCursor.getColumnIndex("act")));
+			} while (mCursor.moveToNext());
+		}
+
+		// Then we remove duplicates to get exact number of acts
+		HashSet<String> h = new HashSet<String>();
+		h.addAll(acts);
+		acts.clear();
+		acts.add("All");
+		acts.addAll(h);
+
+		// Set contents of Act Spinner
+		mAdapterAct = new ArrayAdapter<String>(StatsActivity.this,
+				R.layout.spinner_text_layout, acts);
+		mAdapterAct
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mAct.setAdapter(mAdapterAct);
+
+		mCursor.close();
+		onDestroy();
+	}
+
+	/**
+	 * Here we get the number of pages in the database
+	 * 
+	 */
+	// TODO: Convert act numbers to roman numerals maybe
+	private void populatePages(String act) {
+		pages = new ArrayList<String>();
+		mDbAdapter.open();
+		if (act.equals("All")) {
+			mCursor = mDbAdapter.fetchAllLines();
+		} else {
+			mCursor = mDbAdapter.fetchAllPages(act);
+		}
+
+		// First get the data from "page" column
+		if (mCursor.moveToFirst()) {
+			do {
+				pages.add(mCursor.getString(mCursor.getColumnIndex("page")));
+			} while (mCursor.moveToNext());
+		}
+
+		// Then we remove duplicates to get exact number of pages
+		HashSet<String> h = new HashSet<String>();
+		h.addAll(pages);
+		pages.clear();
+		pages.addAll(h);
+
+		Object obj = Collections.min(pages);
+
+		// Finally sort the page numbers
+		int pg = Integer.valueOf((String) obj);
+		ArrayList<String> temp = new ArrayList<String>();
+		temp.add("All");
+		for (int i = 0; i < pages.size(); i++) {
+			if (Integer.parseInt(pages.get(i)) == pg) {
+				temp.add(pages.get(i));
+				i = -1;
+				pg++;
+			}
+		}
+
+		// Set contents of Page Spinner
+		mAdapterPage = new ArrayAdapter<String>(StatsActivity.this,
+				R.layout.spinner_text_layout, temp);
+		mAdapterPage
+				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		mPage.setAdapter(mAdapterPage);
+
+		mCursor.close();
+		onDestroy();
+		
+		Log.d(TAG, currentPage);
+		for (int i = 0; i < mPage.getCount(); i++) {
+			Log.d(TAG, "Checking item: " + mPage.getItemAtPosition(i));
+			if (mPage.getItemAtPosition(i).equals(currentPage)) {
+				mPage.setSelection(i);
+				break;
+			}
+		}
+		currentPage = "All";
 	}
 
 	/**
@@ -150,24 +340,19 @@ public class StatsActivity extends Activity {
 	 * @author Dan
 	 * 
 	 */
-	public class MyOnItemSelectedListener implements OnItemSelectedListener {
+	public class ActOnItemSelectedListener implements OnItemSelectedListener {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {
-
-			// Initialise resource
-			resource = R.array.stats_act1_array;
-
-			if (mAct.getSelectedItem().equals("Act II")) {
-				resource = R.array.stats_act2_array;
-			} else if (mAct.getSelectedItem().equals("Act III")) {
-				resource = R.array.stats_act3_array;
+			// Extract the act number that we want to search for
+			String act = mAct.getSelectedItem().toString();
+			String words[] = act.split("\\s+");
+			if (act.equals("All")) {
+				act = words[0];
+			} else {
+				act = words[1];
 			}
 
-			mAdapterPage = ArrayAdapter.createFromResource(StatsActivity.this,
-					resource, R.layout.spinner_text_layout);
-			mAdapterPage
-					.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-			mPage.setAdapter(mAdapterPage);
+			populatePages(act);
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
@@ -175,5 +360,21 @@ public class StatsActivity extends Activity {
 		}
 
 	}
-
+	
+	/**
+	 * Close adapter when we are finished.
+	 * 
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mDbAdapter != null) {
+			mDbAdapter.close();
+		}
+	}
+	
+	@Override
+	protected void onPause() {
+		super.onPause();
+	}
 }

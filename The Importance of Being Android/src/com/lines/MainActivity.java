@@ -22,9 +22,12 @@
 package com.lines;
 
 import android.app.ListActivity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.SimpleCursorAdapter;
@@ -62,6 +65,9 @@ public class MainActivity extends ListActivity {
 	private boolean stage;
 	private int pgNum;
 	private int lastPage;
+	private static final int OPTIONS = 0;
+	private static final int STATS = 1;
+	private static final int QUICK_SEARCH = 2;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -143,6 +149,40 @@ public class MainActivity extends ListActivity {
 				return true;
 			}
 		});
+	}
+
+	/**
+	 * Initialise our Menu
+	 * 
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		menu.add(0, OPTIONS, 0, "Options");
+		menu.add(0, STATS, 1, "Statistics");
+		menu.add(0, QUICK_SEARCH, 2, "Quick Search");
+		return true;
+	}
+
+	/**
+	 * Here we program what each menu item does.
+	 * 
+	 */
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case (OPTIONS):
+			finish();
+			break;
+		case (STATS):
+			Intent i = new Intent(MainActivity.this, StatsActivity.class);
+			i.putExtra("EXTRA_ACT", mAct.getText());
+			i.putExtra("EXTRA_PAGE", mPage.getText());
+			MainActivity.this.startActivity(i);
+			onDestroy();
+			break;
+		case (QUICK_SEARCH):
+			break;
+		}
+		return false;
 	}
 
 	/**
@@ -235,7 +275,13 @@ public class MainActivity extends ListActivity {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
 		if (valid) {
+			String act = "";
+			if (mCursor.moveToFirst()) {
+				act = "Act "
+						+ (mCursor.getString(mCursor.getColumnIndex("act")));
+			}
 			mPage.setText(pageNo);
+			mAct.setText(act);
 			startManagingCursor(mCursor);
 			fillData();
 		} else {
@@ -244,6 +290,18 @@ public class MainActivity extends ListActivity {
 					Toast.LENGTH_SHORT).show();
 		}
 		mDbAdapter.close();
+	}
+
+	/**
+	 * Close adapter when we are finished.
+	 * 
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mDbAdapter != null) {
+			mDbAdapter.close();
+		}
 	}
 
 }

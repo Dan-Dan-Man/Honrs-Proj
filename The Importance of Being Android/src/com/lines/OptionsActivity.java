@@ -24,7 +24,11 @@ package com.lines;
 // TODO: Filter available page numbers based on character selection
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import android.app.Activity;
@@ -210,16 +214,22 @@ public class OptionsActivity extends Activity {
 			} while (mCursor.moveToNext());
 		}
 
-		// Sort characters based on number of lines they have
+		HashMap<String, Integer> charOccur = new HashMap<String, Integer>();
+
+		// Get the number of lines spoken by each character and store in HashMap
 		Set<String> unique = new HashSet<String>(characters);
 		for (String key : unique) {
-			Log.d(TAG, (key + ": " + Collections.frequency(characters, key)));
+			charOccur.put(key, Collections.frequency(characters, key));
 		}
 
 		characters.clear();
-		characters.addAll(unique);
 
-		// TODO: Order character list based on importance (number of lines?)
+		// Sort character list based on the number of lines they have
+		while (charOccur.size() > 0) {
+			int max = Collections.max(charOccur.values());
+			characters.add(getKeyByValue(charOccur, max));
+			charOccur.remove(getKeyByValue(charOccur, max));
+		}
 
 		// Set contents of Character Spinner
 		mAdapterChar = new ArrayAdapter<String>(OptionsActivity.this,
@@ -229,7 +239,23 @@ public class OptionsActivity extends Activity {
 		mChar.setAdapter(mAdapterChar);
 
 		mCursor.close();
-		mDbAdapter.close();
+		onDestroy();
+	}
+
+	/**
+	 * Get the key of the HashMap based on the value.
+	 * 
+	 * @param map
+	 * @param value
+	 * @return
+	 */
+	public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+		for (Entry<T, E> entry : map.entrySet()) {
+			if (value.equals(entry.getValue())) {
+				return entry.getKey();
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -262,7 +288,7 @@ public class OptionsActivity extends Activity {
 		mAct.setAdapter(mAdapterAct);
 
 		mCursor.close();
-		mDbAdapter.close();
+		onDestroy();
 	}
 
 	/**
@@ -301,10 +327,6 @@ public class OptionsActivity extends Activity {
 			}
 		}
 
-		for (int i = 0; i < temp.size(); i++) {
-			Log.d(TAG, temp.get(i));
-		}
-
 		// Set contents of Page Spinner
 		mAdapterPage = new ArrayAdapter<String>(OptionsActivity.this,
 				R.layout.spinner_text_layout, temp);
@@ -313,7 +335,7 @@ public class OptionsActivity extends Activity {
 		mPage.setAdapter(mAdapterPage);
 
 		mCursor.close();
-		mDbAdapter.close();
+		onDestroy();
 	}
 
 	/**
@@ -358,8 +380,20 @@ public class OptionsActivity extends Activity {
 	}
 
 	/**
-	 * This class updates the page spinner depending on the selection made in
-	 * the act spinner.
+	 * Close adapter when we are finished.
+	 * 
+	 */
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		if (mDbAdapter != null) {
+			mDbAdapter.close();
+		}
+	}
+
+	/**
+	 * This class updates the available configurations depending on the
+	 * selection made in the mode spinner.
 	 * 
 	 * @author Dan
 	 * 
@@ -385,6 +419,13 @@ public class OptionsActivity extends Activity {
 
 	}
 
+	/**
+	 * This class updates the page spinner depending on the selection made in
+	 * the act spinner.
+	 * 
+	 * @author Dan
+	 * 
+	 */
 	public class ActOnItemSelectedListener implements OnItemSelectedListener {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {

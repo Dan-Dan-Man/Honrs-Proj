@@ -25,12 +25,10 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
@@ -191,6 +189,7 @@ public class HomeActivity extends Activity {
 	 * @throws IOException
 	 */
 	private void readFile() throws IOException {
+		// TODO: Need to make sure a new act starts on a new page.
 
 		String text = "";
 		AssetManager am = getAssets();
@@ -220,7 +219,6 @@ public class HomeActivity extends Activity {
 		}
 
 		// Read line-by-line and pick out the relevent information
-		// TODO: Filter out stuff we don't want in the database
 		while (dis.available() != 0) {
 
 			lineNo++;
@@ -360,7 +358,7 @@ public class HomeActivity extends Activity {
 	}
 
 	/**
-	 * Destroy adapter when we are finished.
+	 * Close adapter when we are finished.
 	 * 
 	 */
 	@Override
