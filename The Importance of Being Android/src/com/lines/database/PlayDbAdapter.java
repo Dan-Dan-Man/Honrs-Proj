@@ -119,13 +119,21 @@ public class PlayDbAdapter {
 				KEY_COMPLETIONS }, KEY_PAGE + "= ?", new String[] { page },
 				null, null, null);
 	}
-	
+
 	public Cursor fetchAllPages(String act) {
 		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
 				KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE, KEY_NOTE,
 				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS,
-				KEY_COMPLETIONS }, KEY_ACT + "= ?", new String[] { act },
-				null, null, null);
+				KEY_COMPLETIONS }, KEY_ACT + "= ?", new String[] { act }, null,
+				null, null);
+	}
+
+	public Cursor fetchFilteredPages(String act, String character) {
+		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
+				KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE, KEY_NOTE,
+				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS,
+				KEY_COMPLETIONS }, KEY_ACT + "= ?" + " and " + KEY_CHARACTER
+				+ "=?", new String[] { act, character }, null, null, null);
 	}
 
 	public Cursor fetchCharacter(String character, String page) {
@@ -134,6 +142,22 @@ public class PlayDbAdapter {
 				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS,
 				KEY_COMPLETIONS }, KEY_CHARACTER + "= ?" + " and " + KEY_PAGE
 				+ "= ?", new String[] { character, page }, null, null, null);
+	}
+
+	public Cursor fetchActs(String character) {
+		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
+				KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE, KEY_NOTE,
+				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS,
+				KEY_COMPLETIONS }, KEY_CHARACTER + "= ?",
+				new String[] { character }, null, null, null);
+	}
+
+	public Cursor fetchAllFilteredPages(String character) {
+		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
+				KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE, KEY_NOTE,
+				KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS, KEY_PROMPTS,
+				KEY_COMPLETIONS }, KEY_CHARACTER + "= ?",
+				new String[] { character }, null, null, null);
 	}
 
 	//

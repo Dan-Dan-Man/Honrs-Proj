@@ -176,8 +176,10 @@ public class MainActivity extends ListActivity {
 			Intent i = new Intent(MainActivity.this, StatsActivity.class);
 			i.putExtra("EXTRA_ACT", mAct.getText());
 			i.putExtra("EXTRA_PAGE", mPage.getText());
+			i.putExtra("EXTRA_CHARACTER", character);
 			MainActivity.this.startActivity(i);
-			onDestroy();
+			mCursor.close();
+			mDbAdapter.close();
 			break;
 		case (QUICK_SEARCH):
 			break;

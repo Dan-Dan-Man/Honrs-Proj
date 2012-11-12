@@ -78,6 +78,7 @@ public class StatsActivity extends Activity {
 	private Cursor mCursor;
 	private String currentPage = "All";
 	private String currentAct = "All";
+	private String character = "All";
 	private static final String TAG = "StatsActivity";
 
 	@Override
@@ -101,25 +102,26 @@ public class StatsActivity extends Activity {
 
 		// Initialise Spinners
 		populateCharacters();
-		populateActs();
 
 		// Retrieve User choice from previous Activity
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			currentPage = extras.getString("EXTRA_PAGE");
 			currentAct = extras.getString("EXTRA_ACT");
+			character = extras.getString("EXTRA_CHARACTER");
 		} else {
 			Log.i(TAG, "No user choice to pass through");
 		}
-		
-		for (int i = 0; i < mAct.getCount(); i++) {
-			if (mAct.getItemAtPosition(i).equals(currentAct)) {
-				mAct.setSelection(i);
+
+		for (int i = 0; i < mChar.getCount(); i++) {
+			if (mChar.getItemAtPosition(i).equals(character)) {
+				mChar.setSelection(i);
 				break;
 			}
 		}
 
 		mAct.setOnItemSelectedListener(new ActOnItemSelectedListener());
+		mChar.setOnItemSelectedListener(new CharOnItemSelectedListener());
 
 		mClear.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -201,8 +203,13 @@ public class StatsActivity extends Activity {
 	 * 
 	 */
 	private void populateActs() {
+		acts = new ArrayList<String>();
 		mDbAdapter.open();
-		mCursor = mDbAdapter.fetchAllLines();
+		if (mChar.getSelectedItem().toString().equals("All")) {
+			mCursor = mDbAdapter.fetchAllLines();
+		} else {
+			mCursor = mDbAdapter.fetchActs(mChar.getSelectedItem().toString());
+		}
 
 		// First get the data from "act" column
 		if (mCursor.moveToFirst()) {
@@ -228,6 +235,15 @@ public class StatsActivity extends Activity {
 
 		mCursor.close();
 		onDestroy();
+
+		for (int i = 0; i < mAct.getCount(); i++) {
+			if (mAct.getItemAtPosition(i).equals(currentAct)) {
+				mAct.setSelection(i);
+				break;
+			}
+		}
+
+		currentAct = "All";
 	}
 
 	/**
@@ -238,10 +254,22 @@ public class StatsActivity extends Activity {
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
 		mDbAdapter.open();
-		if (act.equals("All")) {
+		// If both spinners are "All"
+		if (act.equals("All")
+				&& mChar.getSelectedItem().toString().equals("All")) {
 			mCursor = mDbAdapter.fetchAllLines();
-		} else {
+			// If character spinner is "All"
+		} else if (mChar.getSelectedItem().toString().equals("All")
+				&& !act.equals("All")) {
 			mCursor = mDbAdapter.fetchAllPages(act);
+			// If act spinner is "All"
+		} else if (!mChar.getSelectedItem().toString().equals("All")
+				&& act.equals("All")) {
+			mCursor = mDbAdapter.fetchActs(mChar.getSelectedItem().toString());
+			// If neither spinner is "All"
+		} else {
+			mCursor = mDbAdapter.fetchFilteredPages(act, mChar
+					.getSelectedItem().toString());
 		}
 
 		// First get the data from "page" column
@@ -257,17 +285,17 @@ public class StatsActivity extends Activity {
 		pages.clear();
 		pages.addAll(h);
 
-		Object obj = Collections.min(pages);
-
-		// Finally sort the page numbers
-		int pg = Integer.valueOf((String) obj);
+		int pg = findMin(pages);
 		ArrayList<String> temp = new ArrayList<String>();
 		temp.add("All");
 		for (int i = 0; i < pages.size(); i++) {
 			if (Integer.parseInt(pages.get(i)) == pg) {
 				temp.add(pages.get(i));
+				pages.remove(i);
 				i = -1;
-				pg++;
+				if (pages.size() > 0) {
+					pg = findMin(pages);
+				}
 			}
 		}
 
@@ -280,16 +308,30 @@ public class StatsActivity extends Activity {
 
 		mCursor.close();
 		onDestroy();
-		
-		Log.d(TAG, currentPage);
+
 		for (int i = 0; i < mPage.getCount(); i++) {
-			Log.d(TAG, "Checking item: " + mPage.getItemAtPosition(i));
 			if (mPage.getItemAtPosition(i).equals(currentPage)) {
 				mPage.setSelection(i);
 				break;
 			}
 		}
 		currentPage = "All";
+	}
+
+	/**
+	 * Find minimum value in ArrayList
+	 * 
+	 * @param pages
+	 * @return
+	 */
+	private int findMin(ArrayList<String> pages) {
+		int min = Integer.MAX_VALUE;
+		for (String page : pages) {
+			if (Integer.parseInt(page) < min) {
+				min = Integer.parseInt(page);
+			}
+		}
+		return min;
 	}
 
 	/**
@@ -360,7 +402,7 @@ public class StatsActivity extends Activity {
 		}
 
 	}
-	
+
 	/**
 	 * Close adapter when we are finished.
 	 * 
@@ -372,9 +414,28 @@ public class StatsActivity extends Activity {
 			mDbAdapter.close();
 		}
 	}
-	
+
 	@Override
 	protected void onPause() {
 		super.onPause();
+	}
+
+	/**
+	 * This class updates the page spinner depending on the selection made in
+	 * the act spinner.
+	 * 
+	 * @author Dan
+	 * 
+	 */
+	public class CharOnItemSelectedListener implements OnItemSelectedListener {
+		public void onItemSelected(AdapterView<?> parent, View v, int pos,
+				long id) {
+			populateActs();
+		}
+
+		public void onNothingSelected(AdapterView<?> arg0) {
+			// Do nothing
+		}
+
 	}
 }

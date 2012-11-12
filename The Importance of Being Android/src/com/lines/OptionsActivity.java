@@ -21,12 +21,10 @@
 
 package com.lines;
 
-// TODO: Filter available page numbers based on character selection
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -36,7 +34,6 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.LayoutParams;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
@@ -60,9 +57,6 @@ import com.lines.database.PlayDbAdapter;
  * @author Dan
  * 
  */
-
-// TODO: Set characterSpinner enability based on whether ownLines checkbox is
-// checked or not.
 
 public class OptionsActivity extends Activity {
 
@@ -122,10 +116,25 @@ public class OptionsActivity extends Activity {
 
 		// Initialise Spinners
 		populateCharacters();
-		populateActs();
+
+		mChar.setEnabled(false);
 
 		mAct.setOnItemSelectedListener(new ActOnItemSelectedListener());
 		mMode.setOnItemSelectedListener(new ModeOnItemSelectedListener());
+		mChar.setOnItemSelectedListener(new CharOnItemSelectedListener());
+
+		// Set whether we can select character based on the OwnLines Checkbox
+		mOwn.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				if (mOwn.isChecked()) {
+					mChar.setEnabled(true);
+					populateActs(true);
+				} else {
+					mChar.setEnabled(false);
+					populateActs(false);
+				}
+			}
+		});
 
 		// Store user's configurations and move to main screen
 		mContinue.setOnClickListener(new View.OnClickListener() {
@@ -139,13 +148,17 @@ public class OptionsActivity extends Activity {
 
 				pageNo = mPage.getSelectedItem().toString();
 				actNo = mAct.getSelectedItem().toString();
-				character = mChar.getSelectedItem().toString();
+				
+				if (mChar.isEnabled()) {
+					character = mChar.getSelectedItem().toString();
+				} else {
+					character = "All";
+				}
 
 				// Once we obtain the user's selection, we need to isolate the
 				// page number
 				String words[] = pageNo.split("\\s+");
 				pageNo = words[0];
-				Log.d(TAG, "Page selected: " + pageNo);
 
 				Intent i = new Intent(OptionsActivity.this, MainActivity.class);
 				// Pass through User selection
@@ -259,12 +272,19 @@ public class OptionsActivity extends Activity {
 	}
 
 	/**
-	 * Here we get the number of acts in the database
+	 * Here we get the number of acts in the database. "Filter" decides if we
+	 * need to filter out Acts which the selected character doesn't appear in.
 	 * 
+	 * @param filter
 	 */
-	private void populateActs() {
+	private void populateActs(boolean filter) {
+		acts = new ArrayList<String>();
 		mDbAdapter.open();
-		mCursor = mDbAdapter.fetchAllLines();
+		if (filter) {
+			mCursor = mDbAdapter.fetchActs(mChar.getSelectedItem().toString());
+		} else {
+			mCursor = mDbAdapter.fetchAllLines();
+		}
 
 		// First get the data from "act" column
 		if (mCursor.moveToFirst()) {
@@ -299,7 +319,13 @@ public class OptionsActivity extends Activity {
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
 		mDbAdapter.open();
-		mCursor = mDbAdapter.fetchAllPages(act);
+
+		if (mChar.isEnabled()) {
+			mCursor = mDbAdapter.fetchFilteredPages(act, mChar
+					.getSelectedItem().toString());
+		} else {
+			mCursor = mDbAdapter.fetchAllPages(act);
+		}
 
 		// First get the data from "page" column
 		if (mCursor.moveToFirst()) {
@@ -314,16 +340,17 @@ public class OptionsActivity extends Activity {
 		pages.clear();
 		pages.addAll(h);
 
-		Object obj = Collections.min(pages);
-
 		// Finally sort the page numbers
-		int currentPage = Integer.valueOf((String) obj);
+		int currentPage = findMin(pages);
 		ArrayList<String> temp = new ArrayList<String>();
 		for (int i = 0; i < pages.size(); i++) {
 			if (Integer.parseInt(pages.get(i)) == currentPage) {
 				temp.add(pages.get(i));
+				pages.remove(i);
 				i = -1;
-				currentPage++;
+				if (pages.size() > 0) {
+					currentPage = findMin(pages);
+				}
 			}
 		}
 
@@ -336,6 +363,22 @@ public class OptionsActivity extends Activity {
 
 		mCursor.close();
 		onDestroy();
+	}
+	
+	/**
+	 * Find minimum value in ArrayList
+	 * 
+	 * @param pages
+	 * @return
+	 */
+	private int findMin(ArrayList<String> pages) {
+		int min = Integer.MAX_VALUE;
+		for (String page : pages) {
+			if (Integer.parseInt(page) < min) {
+				min = Integer.parseInt(page);
+			}
+		}
+		return min;
 	}
 
 	/**
@@ -406,10 +449,14 @@ public class OptionsActivity extends Activity {
 				mBreak.setEnabled(false);
 				mBreak.setChecked(false);
 				mOwn.setEnabled(true);
+				mChar.setEnabled(false);
+				populateActs(false);
 			} else {
 				mBreak.setEnabled(true);
 				mOwn.setEnabled(false);
 				mOwn.setChecked(false);
+				mChar.setEnabled(true);
+				populateActs(true);
 			}
 		}
 
@@ -435,6 +482,25 @@ public class OptionsActivity extends Activity {
 			act = words[1];
 
 			populatePages(act);
+		}
+
+		public void onNothingSelected(AdapterView<?> arg0) {
+			// Do nothing
+		}
+
+	}
+
+	/**
+	 * This class updates the page spinner depending on the selection made in
+	 * the act spinner.
+	 * 
+	 * @author Dan
+	 * 
+	 */
+	public class CharOnItemSelectedListener implements OnItemSelectedListener {
+		public void onItemSelected(AdapterView<?> parent, View v, int pos,
+				long id) {
+			populateActs(true);
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
