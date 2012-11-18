@@ -3,6 +3,6 @@
 
     <string name="prev">Prev</string>
     <string name="next">Next</string>
-    <string name="prompt">Prompt</string>
+    <string name="line">LINE!</string>
 
 </resources>

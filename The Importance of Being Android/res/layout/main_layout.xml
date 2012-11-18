@@ -92,7 +92,7 @@
                 android:layout_centerHorizontal="true"
                 android:background="#365812"
                 android:gravity="center"
-                android:text="@string/prompt"
+                android:text="@string/line"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#FFFFFF" />
 
