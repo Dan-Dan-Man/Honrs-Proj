@@ -210,6 +210,53 @@ public class MainActivity extends ListActivity {
 		lastPage = Integer.parseInt(page);
 	}
 
+	/**
+	 * This method filters out stage directions from the script
+	 * 
+	 * @param lines
+	 * @return
+	 */
+	private ArrayList<Line> filterStage(ArrayList<Line> lines) {
+		ArrayList<Character> lineArray;
+		// If the character's name is "STAGE." then we remove the whole line
+		for (int i = 0; i < lines.size(); i++) {
+			if (lines.get(i).getCharacter().equals("STAGE.")) {
+				lines.remove(i);
+				i--;
+				// Otherwise we need to check if the line contains a stage
+				// direction, and remove the characters
+			} else {
+				// Create list of chars of the current line
+				lineArray = new ArrayList<Character>();
+				for (int j = 0; j < lines.get(i).getLine().toCharArray().length; j++) {
+					lineArray.add(lines.get(i).getLine().toCharArray()[j]);
+				}
+				// Loop through the list of chars and remove everything in
+				// between '[' and ']'
+				for (int j = 0; j < lineArray.size(); j++) {
+					if (lineArray.get(j) == '[') {
+						do {
+							lineArray.remove(j);
+						} while (lineArray.get(j) != ']');
+						lineArray.remove(j);
+					}
+				}
+				// Concatenate our chars list to one string
+				StringBuilder sb = new StringBuilder();
+				for (char s : lineArray) {
+					sb.append(s);
+				}
+				// Finally delete the old line and replace it with the new
+				// filtered one
+				String character = lines.get(i).getCharacter();
+				lines.remove(i);
+				Line newLine = new Line(character, sb.toString());
+				lines.add(i, newLine);
+			}
+		}
+		return lines;
+	}
+
 	// TODO: Find out exactly what this does. Don't think I need it
 	// // Called with the result of the other activity
 	// // requestCode was the origin request code send to the activity
@@ -286,6 +333,11 @@ public class MainActivity extends ListActivity {
 				lines.add(line);
 			} while (mCursor.moveToNext());
 		}
+		// If stage directions are toggled off, then we need to filter these out
+		if (!stage) {
+			filterStage(lines);
+		}
+
 		// Finally show data in our custom listview
 		LineAdapter adapter = new LineAdapter(this, R.layout.play_list_layout,
 				lines);
