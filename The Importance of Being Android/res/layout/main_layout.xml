@@ -72,7 +72,7 @@
         <ListView
             android:id="@id/android:list"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="390dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true" >
         </ListView>
@@ -85,8 +85,8 @@
             android:layout_marginTop="5dp"
             android:background="#500000" >
 
-            <TextView
-                android:id="@+id/textPrompt"
+            <Button
+                android:id="@+id/buttonPrompt"
                 android:layout_width="120dp"
                 android:layout_height="fill_parent"
                 android:layout_centerHorizontal="true"
@@ -103,7 +103,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
                 android:layout_alignParentTop="true"
-                android:layout_toRightOf="@+id/textPrompt"
+                android:layout_toRightOf="@+id/buttonPrompt"
                 android:background="@null"
                 android:text="@string/next"
                 android:textColor="#FFFFFF"
@@ -116,7 +116,7 @@
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@+id/textPrompt"
+                android:layout_toLeftOf="@+id/buttonPrompt"
                 android:background="@null"
                 android:text="@string/prev"
                 android:textColor="#FFFFFF"
