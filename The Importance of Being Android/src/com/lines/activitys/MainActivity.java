@@ -55,11 +55,13 @@ public class MainActivity extends ListActivity {
 	private TextView mAct;
 	private Button mNext;
 	private Button mPrev;
+	private Button mPrompt;
 	private Cursor mCursor;
 	private PlayDbAdapter mDbAdapter;
 	private String pageNo;
 	private String actNo;
 	private String character;
+	private String currentLine;
 	private boolean rehearsal;
 	private boolean cue;
 	private boolean breakUp;
@@ -67,6 +69,7 @@ public class MainActivity extends ListActivity {
 	private boolean stage;
 	private int pgNum;
 	private int lastPage;
+	private int visibleWords = 1;
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private static final int OPTIONS = 0;
 	private static final int STATS = 1;
@@ -80,6 +83,7 @@ public class MainActivity extends ListActivity {
 
 		mNext = (Button) findViewById(R.id.buttonNext);
 		mPrev = (Button) findViewById(R.id.buttonPrev);
+		mPrompt = (Button) findViewById(R.id.buttonPrompt);
 		mAct = (TextView) findViewById(R.id.textAct);
 		mPage = (TextView) findViewById(R.id.textPage);
 
@@ -121,6 +125,7 @@ public class MainActivity extends ListActivity {
 		mNext.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (rehearsal) {
+					visibleWords = 1;
 					fillData("forward");
 				}
 			}
@@ -143,6 +148,7 @@ public class MainActivity extends ListActivity {
 		// When Prev button is pressed, play jumps until user's prev line.
 		mPrev.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
+				visibleWords = 1;
 				fillData("back");
 			}
 		});
@@ -154,6 +160,20 @@ public class MainActivity extends ListActivity {
 					switchPage(false);
 				}
 				return true;
+			}
+		});
+
+		// Reveal word from current line if prompt button is pressed.
+		mPrompt.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// TODO Auto-generated method stub
+				if (rehearsal) {
+					revealWord();
+				} else {
+					Toast.makeText(MainActivity.this,
+							"Feature only available in Rehearsal mode!",
+							Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 	}
@@ -192,6 +212,41 @@ public class MainActivity extends ListActivity {
 			break;
 		}
 		return false;
+	}
+
+	/**
+	 * Here we reveal the appropriate word from the current line to the user.
+	 * 
+	 */
+	private void revealWord() {
+		Log.d(TAG, currentLine);
+		String words[] = currentLine.split("\\s+");
+
+		// Only obtain next word if there are any left
+		if (visibleWords <= words.length) {
+			String line = "";
+			// Construct the new line revealing the correct amount of words
+			for (int i = 0; i < visibleWords; i++) {
+				line += words[i] + " ";
+			}
+			// Update the line we are working with
+			lines.remove(lines.size() - 1);
+			Line newLine = new Line(character, line);
+			lines.add(newLine);
+
+			// Update the Listview
+			LineAdapter adapter = new LineAdapter(this,
+					R.layout.play_list_layout, lines);
+			setListAdapter(adapter);
+
+			this.setSelection(adapter.getCount());
+
+			visibleWords++;
+		} else {
+			Toast.makeText(MainActivity.this,
+					"No more hidden words for current line!",
+					Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	/**
@@ -279,7 +334,7 @@ public class MainActivity extends ListActivity {
 	private void fillData(String command) {
 		Line line;
 		String currentChar;
-		String currentLine;
+		String newLine;
 		int visibleLines = 0;
 
 		// Get the number of visible lines
@@ -296,7 +351,7 @@ public class MainActivity extends ListActivity {
 				// Get current row's character and line
 				currentChar = mCursor.getString(mCursor
 						.getColumnIndex("character"));
-				currentLine = "\n\n\n\n\n";
+				newLine = "\n";
 				// If we're in rehearsal mode then we need to check which lines
 				// to show/hide
 				if (rehearsal) {
@@ -304,32 +359,34 @@ public class MainActivity extends ListActivity {
 						// If we are revealing the next line, then we need to
 						// keep a count of when to stop
 						if (command.equals("forward") && visibleLines >= 1) {
-							currentLine = mCursor.getString(mCursor
+							newLine = mCursor.getString(mCursor
 									.getColumnIndex("line"));
 							visibleLines--;
 							// Similar for hiding current line, we need to keep
 							// a count of when to stop
 						} else if (command.equals("back") && visibleLines >= 3) {
-							currentLine = mCursor.getString(mCursor
+							newLine = mCursor.getString(mCursor
 									.getColumnIndex("line"));
 							visibleLines--;
 						} else {
+							// Before we exit, store the current line
+							currentLine = mCursor.getString(mCursor
+									.getColumnIndex("line"));
 							mCursor.moveToLast();
 						}
 					} else {
 						// If we haven't reached the user's current line, then
 						// store it for showing
-						currentLine = mCursor.getString(mCursor
+						newLine = mCursor.getString(mCursor
 								.getColumnIndex("line"));
 					}
 					// Since we're not in rehearsal mode, we just want all the
 					// lines from the Cursor
 				} else {
-					currentLine = mCursor.getString(mCursor
-							.getColumnIndex("line"));
+					newLine = mCursor.getString(mCursor.getColumnIndex("line"));
 				}
 				// Create new line and add it to ArrayList
-				line = new Line(currentChar, currentLine);
+				line = new Line(currentChar, newLine);
 				lines.add(line);
 			} while (mCursor.moveToNext());
 		}
@@ -402,6 +459,7 @@ public class MainActivity extends ListActivity {
 			}
 			mPage.setText(pageNo);
 			mAct.setText(act);
+			visibleWords = 1;
 			startManagingCursor(mCursor);
 			lines = new ArrayList<Line>();
 			fillData("");
