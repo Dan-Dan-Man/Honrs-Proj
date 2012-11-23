@@ -26,11 +26,15 @@ import java.util.ArrayList;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -74,6 +78,11 @@ public class MainActivity extends ListActivity {
 	private static final int OPTIONS = 0;
 	private static final int STATS = 1;
 	private static final int QUICK_SEARCH = 2;
+	private static final int ADD_NOTE = 0;
+	private static final int VIEW_NOTES = 1;
+	private static final int RECORD = 2;
+	private static final int ADD_RECORD = 3;
+	private static final int STRIKE = 4;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -212,6 +221,43 @@ public class MainActivity extends ListActivity {
 			break;
 		}
 		return false;
+	}
+
+	// Initalise our Context Menu
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.setHeaderTitle("Option");
+		menu.add(0, ADD_NOTE, 0, "Add new note");
+		menu.add(0, VIEW_NOTES, 1, "View available notes");
+		menu.add(0, RECORD, 2, "Begin recording");
+		menu.add(0, ADD_RECORD, 3, "Apply recording");
+		menu.add(0, STRIKE, 4, "Strikeout text");
+	}
+
+	public boolean onContextItemSelected(MenuItem item) {
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
+				.getMenuInfo();
+		switch (item.getItemId()) {
+		case ADD_NOTE:
+			return true;
+		case VIEW_NOTES:
+			return true;
+		case RECORD:
+			return true;
+		case ADD_RECORD:
+			return true;
+		case STRIKE:
+			// TODO: Doesn't work
+			View listItem = getListView().getAdapter().getView(info.position,
+					null, null);
+			TextView textLine = (TextView) listItem.findViewById(R.id.textLine);
+			textLine.setPaintFlags(textLine.getPaintFlags()
+					| Paint.STRIKE_THRU_TEXT_FLAG);
+			return true;
+		}
+		return super.onContextItemSelected(item);
 	}
 
 	/**
