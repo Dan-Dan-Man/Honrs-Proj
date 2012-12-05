@@ -39,7 +39,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.android.R;
-import com.lines.database.PlayDbAdapter;
+import com.lines.database.play.PlayDbAdapter;
 
 /**
  * The Home Screen where the user will start off.

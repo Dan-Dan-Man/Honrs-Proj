@@ -23,7 +23,9 @@ package com.lines.activitys;
 
 import java.util.ArrayList;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Paint;
@@ -31,18 +33,21 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.R;
 import com.lines.classes.Line;
 import com.lines.classes.LineAdapter;
-import com.lines.database.PlayDbAdapter;
+import com.lines.database.notes.NoteDbAdapter;
+import com.lines.database.play.PlayDbAdapter;
 
 /**
  * The Main Screen where the user will rehearse their lines.
@@ -51,7 +56,10 @@ import com.lines.database.PlayDbAdapter;
  * 
  */
 
-// TODO: Bottom of list is hidden behind buttons
+// TODO: If we exit the app and try to re-enter, its crashes. To with adapter
+// being closed
+
+// TODO: Bottom of list is hidden behind buttons - Temporarily fixed
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -62,6 +70,7 @@ public class MainActivity extends ListActivity {
 	private Button mPrompt;
 	private Cursor mCursor;
 	private PlayDbAdapter mDbAdapter;
+	private NoteDbAdapter mNDbAdapter;
 	private String pageNo;
 	private String actNo;
 	private String character;
@@ -116,6 +125,10 @@ public class MainActivity extends ListActivity {
 
 		mDbAdapter = new PlayDbAdapter(this);
 		mDbAdapter.open();
+
+		mNDbAdapter = new NoteDbAdapter(this);
+		mNDbAdapter.open();
+
 		getLastPage();
 
 		if (ownLines) {
@@ -241,6 +254,7 @@ public class MainActivity extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case ADD_NOTE:
+			newNote(info.id);
 			return true;
 		case VIEW_NOTES:
 			return true;
@@ -264,6 +278,8 @@ public class MainActivity extends ListActivity {
 	 * Here we reveal the appropriate word from the current line to the user.
 	 * 
 	 */
+	// TODO: If line starts with a stage direction and stage directions are
+	// filtered out, then user has to press prompt twice to reveal first word.
 	private void revealWord() {
 		Log.d(TAG, currentLine);
 		String words[] = currentLine.split("\\s+");
@@ -372,6 +388,36 @@ public class MainActivity extends ListActivity {
 	// }
 
 	/**
+	 * This method extracts the stage directions from the current line when the
+	 * user wants to reveal a word and stage directions are toggled off.
+	 * 
+	 */
+	private void filterStageFromLine() {
+		// Create list of chars of the current line
+		ArrayList<Character> lineArray = new ArrayList<Character>();
+		for (int j = 0; j < currentLine.toCharArray().length; j++) {
+			lineArray.add(currentLine.toCharArray()[j]);
+		}
+		// Loop through the list of chars and remove everything in
+		// between '[' and ']'
+		for (int j = 0; j < lineArray.size(); j++) {
+			if (lineArray.get(j) == '[') {
+				do {
+					lineArray.remove(j);
+				} while (lineArray.get(j) != ']');
+				lineArray.remove(j);
+			}
+		}
+		// Concatenate our chars list to one string
+		StringBuilder sb = new StringBuilder();
+		for (char s : lineArray) {
+			sb.append(s);
+		}
+
+		currentLine = sb.toString();
+	}
+
+	/**
 	 * Here we fill the list with lines from the play. Command tells us if we
 	 * are to reveal next line, hide current line, or do nothing.
 	 * 
@@ -418,6 +464,9 @@ public class MainActivity extends ListActivity {
 							// Before we exit, store the current line
 							currentLine = mCursor.getString(mCursor
 									.getColumnIndex("line"));
+							if (!stage) {
+								filterStageFromLine();
+							}
 							mCursor.moveToLast();
 						}
 					} else {
@@ -527,6 +576,88 @@ public class MainActivity extends ListActivity {
 		if (mDbAdapter != null) {
 			mDbAdapter.close();
 		}
+	}
+
+	/**
+	 * This method creates and shows a popup to the user when they are creating
+	 * a new performance note.
+	 * 
+	 * @param id
+	 * 
+	 */
+	private void newNote(long id) {
+
+		LayoutInflater li = LayoutInflater.from(this);
+		View notesView = li.inflate(R.layout.add_note_layout, null);
+
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+		alertDialogBuilder.setView(notesView);
+
+		final EditText title = (EditText) notesView
+				.findViewById(R.id.editTitle);
+
+		final EditText note = (EditText) notesView.findViewById(R.id.editNote);
+
+		int page = Integer.parseInt(mPage.getText().toString());
+		// We need to de-increment the page number so we can obtain the correct
+		// lineNumber
+		page--;
+
+		// TODO: This may not work for all cases. Temporary solution.
+		final long lineNumber = (page * 23) + id;
+
+		Log.d(TAG, Long.toString(lineNumber));
+
+		// Display the correct line number
+		id++;
+
+		String defaultTitle = "Page " + mPage.getText();
+		defaultTitle += " - Line " + Long.toString(id);
+
+		// Set default title
+		title.setText(defaultTitle);
+
+		// set dialog message
+		alertDialogBuilder
+				.setCancelable(false)
+				.setPositiveButton("Save",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// Check that both textboxes contain text and
+								// then save.
+								String textTitle = title.getText().toString();
+								String noteTitle = note.getText().toString();
+								saveNote(lineNumber, textTitle, noteTitle);
+
+							}
+						})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		// show it
+		alertDialog.show();
+	}
+
+	/**
+	 * When the user decides to save their note, save to a new database.
+	 * 
+	 * @param number
+	 * @param title
+	 * @param note
+	 * 
+	 */
+	private void saveNote(long number, String title, String note) {
+		mNDbAdapter.createNote((int) number, title, note);
+		Toast.makeText(getApplicationContext(), "New performance note saved!",
+				Toast.LENGTH_LONG).show();
 	}
 
 }

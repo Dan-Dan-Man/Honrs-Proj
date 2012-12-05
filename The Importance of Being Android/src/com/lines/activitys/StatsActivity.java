@@ -45,7 +45,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.android.R;
-import com.lines.database.PlayDbAdapter;
+import com.lines.database.play.PlayDbAdapter;
 
 /**
  * The Stats screen where the user can view some statistics of their

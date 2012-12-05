@@ -47,7 +47,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.android.R;
-import com.lines.database.PlayDbAdapter;
+import com.lines.database.play.PlayDbAdapter;
 
 /**
  * The Options Screen where the user can choose the part they want to select and
