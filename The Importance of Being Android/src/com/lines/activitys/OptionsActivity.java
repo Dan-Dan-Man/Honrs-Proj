@@ -46,13 +46,13 @@ import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.example.android.R;
+import com.lines.R;
 import com.lines.classes.LinesApp;
 import com.lines.database.play.PlayDbAdapter;
 
 /**
  * The Options Screen where the user can choose the part they want to select and
- * the part of the play to rehearse. They can also make diffirent configurations
+ * the part of the play to rehearse. They can also make different configurations
  * to suit their needs.
  * 
  * @author Dan
@@ -116,13 +116,13 @@ public class OptionsActivity extends Activity {
 
 		LinesApp app = (LinesApp) this.getApplication();
 		mDbAdapter = app.getPlayAdapter();
-		//mDbAdapter = new PlayDbAdapter(this);
 
 		// Initialise Spinners
 		populateCharacters();
 
 		mChar.setEnabled(false);
 
+		// Set listeners for the spinners
 		mAct.setOnItemSelectedListener(new ActOnItemSelectedListener());
 		mMode.setOnItemSelectedListener(new ModeOnItemSelectedListener());
 		mChar.setOnItemSelectedListener(new CharOnItemSelectedListener());
@@ -221,7 +221,6 @@ public class OptionsActivity extends Activity {
 	 * 
 	 */
 	private void populateCharacters() {
-		//mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 
 		// First get the data from "character" column and filter out unwanted
@@ -263,15 +262,15 @@ public class OptionsActivity extends Activity {
 		mChar.setAdapter(mAdapterChar);
 
 		mCursor.close();
-		onDestroy();
 	}
 
 	/**
 	 * Get the key of the HashMap based on the value.
 	 * 
-	 * @param map
-	 * @param value
-	 * @return
+	 * @param map - the map we want to search through
+	 * @param value - the element we are looking for in the map
+	 * @return - the key in the map associated with value
+	 * 
 	 */
 	public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
 		for (Entry<T, E> entry : map.entrySet()) {
@@ -290,7 +289,6 @@ public class OptionsActivity extends Activity {
 	 */
 	private void populateActs(boolean filter) {
 		acts = new ArrayList<String>();
-		//mDbAdapter.open();
 		if (filter) {
 			mCursor = mDbAdapter.fetchActs(mChar.getSelectedItem().toString());
 		} else {
@@ -319,7 +317,6 @@ public class OptionsActivity extends Activity {
 		mAct.setAdapter(mAdapterAct);
 
 		mCursor.close();
-		onDestroy();
 	}
 
 	/**
@@ -329,7 +326,6 @@ public class OptionsActivity extends Activity {
 	// TODO: Convert act numbers to roman numerals maybe
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
-		//mDbAdapter.open();
 
 		if (mChar.isEnabled()) {
 			mCursor = mDbAdapter.fetchFilteredPages(act, mChar
@@ -373,14 +369,14 @@ public class OptionsActivity extends Activity {
 		mPage.setAdapter(mAdapterPage);
 
 		mCursor.close();
-		onDestroy();
 	}
 	
 	/**
 	 * Find minimum value in ArrayList
 	 * 
-	 * @param pages
-	 * @return
+	 * @param pages - arraylist to search
+	 * @return - minimum value in list
+	 * 
 	 */
 	private int findMin(ArrayList<String> pages) {
 		int min = Integer.MAX_VALUE;
@@ -396,10 +392,11 @@ public class OptionsActivity extends Activity {
 	 * This method creates and shows a popup to the user, displaying a relevent
 	 * help message.
 	 * 
-	 * @param msg
+	 * @param msg - decides which message we are displaying to the user
 	 * 
 	 */
 	private void showPopup(String msg) {
+		// Create popup
 		LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
 				.getSystemService(LAYOUT_INFLATER_SERVICE);
 		View popupView = layoutInflater.inflate(R.layout.help_popup_layout,
@@ -432,18 +429,6 @@ public class OptionsActivity extends Activity {
 
 		popupWindow.showAsDropDown(mCueHelp, 50, -150);
 	}
-
-	/**
-	 * Close adapter when we are finished.
-	 * 
-	 */
-//	@Override
-//	protected void onDestroy() {
-//		super.onDestroy();
-//		if (mDbAdapter != null) {
-//			mDbAdapter.close();
-//		}
-//	}
 
 	/**
 	 * This class updates the available configurations depending on the

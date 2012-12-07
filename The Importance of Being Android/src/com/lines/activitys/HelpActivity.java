@@ -21,7 +21,7 @@
 
 package com.lines.activitys;
 
-import com.example.android.R;
+import com.lines.R;
 
 import android.app.Activity;
 import android.os.Bundle;

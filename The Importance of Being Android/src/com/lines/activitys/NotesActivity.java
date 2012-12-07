@@ -40,12 +40,18 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.example.android.R;
+import com.lines.R;
 import com.lines.classes.LinesApp;
 import com.lines.classes.NoteAdapter;
 import com.lines.database.notes.NoteDbAdapter;
 import com.lines.database.play.PlayDbAdapter;
 
+/**
+ * This activity displays the list of performance notes the user has created.
+ * 
+ * @author Dan
+ * 
+ */
 // TODO: Order of notes is messed up if we delete a note then create a new one.
 public class NotesActivity extends ListActivity {
 
@@ -65,23 +71,20 @@ public class NotesActivity extends ListActivity {
 		LinesApp app = (LinesApp) this.getApplication();
 		mDbAdapter = app.getPlayAdapter();
 		mNDbAdapter = app.getNoteAdapter();
-		//mNDbAdapter = new NoteDbAdapter(this);
-		//mNDbAdapter.open();
-
-		//mDbAdapter = new PlayDbAdapter(this);
 
 		mCursor = mNDbAdapter.fetchAllNotes();
 
 		Log.d(TAG, "No. of notes: " + mCursor.getCount());
-
-		//mNDbAdapter.close();
 
 		startManagingCursor(mCursor);
 		fillData();
 		registerForContextMenu(getListView());
 	}
 
-	// Initalise our Context Menu
+	/**
+	 * Initalise our Context Menu
+	 * 
+	 */
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
@@ -89,7 +92,10 @@ public class NotesActivity extends ListActivity {
 		menu.add(0, DELETE_ID, 0, "Delete");
 	}
 
-	// Delete entry when Delete is selected in the context menu
+	/**
+	 * Delete entry when Delete is selected in the context menu
+	 * 
+	 */
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
@@ -102,25 +108,38 @@ public class NotesActivity extends ListActivity {
 		return super.onContextItemSelected(item);
 	}
 
+	/**
+	 * When an item in the list is clicked on, expand the note for the user.
+	 * 
+	 */
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
-		viewNote(id);
+		viewNote(id, "", "", true);
 
 	}
 
+	/**
+	 * Delete the selected note from the database.
+	 * 
+	 * @param info
+	 *            - use this to delete the correct row
+	 */
 	// TODO: Not working correctly
 	private void deleteNote(AdapterContextMenuInfo info) {
-		//mNDbAdapter.open();
 		long id = info.id + 1;
 		mNDbAdapter.deleteNote(id);
-		//mNDbAdapter.close();
 		// TODO: Update play database if there are no notes left for a line.
 	}
 
+	/**
+	 * Fill the list with the items in the Note database.
+	 * 
+	 */
 	private void fillData() {
 		String note;
 		notes = new ArrayList<String>();
 
+		// Populate arraylist with database data
 		if (mCursor.moveToFirst()) {
 			do {
 				// Get current row's character and line
@@ -128,6 +147,8 @@ public class NotesActivity extends ListActivity {
 				notes.add(note);
 			} while (mCursor.moveToNext());
 		}
+
+		// Fill list with our custom adapter
 		NoteAdapter adapter = new NoteAdapter(this, R.layout.note_row_layout,
 				notes);
 		setListAdapter(adapter);
@@ -138,26 +159,38 @@ public class NotesActivity extends ListActivity {
 	 * a new performance note.
 	 * 
 	 * @param id
+	 *            - pass this through so we can obtain the overall line number
+	 * @param defaultTitle
+	 *            - if we are recalling this method cause the user made and
+	 *            error, then display his previous title
+	 * @param defaultNote
+	 *            - if we are recalling this method cause the user made and
+	 *            error, then display his previous note
+	 * @param fresh
+	 *            - denotes if we are calling this method for the first time for
+	 *            the current note.
 	 * 
 	 */
-	private void viewNote(long id) {
+	private void viewNote(long id, String defaultTitle, String defaultNote,
+			boolean fresh) {
 
 		final int lineNumber;
 		String title;
 		String note;
 
-		//mNDbAdapter.open();
-
 		id++;
 
-		Log.d(TAG, Long.toString(id));
+		final long newId = id;
 
-		mCursor = mNDbAdapter.fetchNote(id);
+		Log.d(TAG, Long.toString(newId));
 
-		// lineNumber = (mCursor.getInt(mCursor.getColumnIndex("number")));
+		mCursor = mNDbAdapter.fetchNote(newId);
+
+		lineNumber = (mCursor.getInt(mCursor.getColumnIndex("number")));
 		title = (mCursor.getString(mCursor.getColumnIndex("title")));
 		note = (mCursor.getString(mCursor.getColumnIndex("note")));
 
+		// Create alert dialog to display current Note
 		LayoutInflater li = LayoutInflater.from(this);
 		View notesView = li.inflate(R.layout.add_note_layout, null);
 
@@ -171,9 +204,17 @@ public class NotesActivity extends ListActivity {
 		final EditText editNote = (EditText) notesView
 				.findViewById(R.id.editNote);
 
-		// Set default title
-		editTitle.setText(title);
-		editNote.setText(note);
+		// If we are opening a fresh performance note dialog, then display the
+		// saved title and note
+		if (fresh) {
+			// Set default title
+			editTitle.setText(title);
+			editNote.setText(note);
+			// Otherwise set the text the user has already entered
+		} else {
+			editTitle.setText(defaultTitle);
+			editNote.setText(defaultNote);
+		}
 
 		// set dialog message
 		alertDialogBuilder
@@ -187,7 +228,22 @@ public class NotesActivity extends ListActivity {
 										.toString();
 								String noteTitle = editNote.getText()
 										.toString();
-								// saveNote(lineNumber, textTitle, noteTitle);
+								// If either textboxes are blank, then recall
+								// method and close the current one
+								if (textTitle.equals("")
+										|| noteTitle.equals("")) {
+									Toast.makeText(
+											getApplicationContext(),
+											"Invalid Note! Both fields must contain some text!",
+											Toast.LENGTH_LONG).show();
+									dialog.cancel();
+									long oldId = newId - 1;
+									viewNote(oldId, textTitle, noteTitle, false);
+									// Otherwise save to Note database
+								} else {
+									// saveNote(lineNumber, textTitle,
+									// noteTitle);
+								}
 
 							}
 						})
@@ -203,8 +259,6 @@ public class NotesActivity extends ListActivity {
 
 		// show it
 		alertDialog.show();
-
-		//mNDbAdapter.close();
 	}
 
 	/**
@@ -216,14 +270,10 @@ public class NotesActivity extends ListActivity {
 	 * 
 	 */
 	private void saveNote(long number, String title, String note) {
-		//mDbAdapter.open();
-		//mNDbAdapter.open();
 		mNDbAdapter.createNote((int) number, title, note);
 		mDbAdapter.updateNotes(number, "Y");
 		Toast.makeText(getApplicationContext(), "New performance note saved!",
 				Toast.LENGTH_LONG).show();
-		//mDbAdapter.close();
-		//mNDbAdapter.close();
 	}
 
 }

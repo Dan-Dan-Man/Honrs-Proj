@@ -25,7 +25,6 @@ import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
-import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -44,7 +43,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.R;
+import com.lines.R;
 import com.lines.classes.Line;
 import com.lines.classes.LineAdapter;
 import com.lines.classes.LinesApp;
@@ -57,9 +56,6 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-
-// TODO: If we exit the app and try to re-enter, its crashes. To with adapter
-// being closed
 
 // TODO: Bottom of list is hidden behind buttons - Temporarily fixed
 public class MainActivity extends ListActivity {
@@ -128,13 +124,8 @@ public class MainActivity extends ListActivity {
 		LinesApp app = (LinesApp) this.getApplication();
 		mDbAdapter = app.getPlayAdapter();
 		mNDbAdapter = app.getNoteAdapter();
-		//mDbAdapter = new PlayDbAdapter(this);
-
-		//mNDbAdapter = new NoteDbAdapter(this);
 
 		getLastPage();
-		
-		//mDbAdapter.open();
 
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
@@ -238,7 +229,10 @@ public class MainActivity extends ListActivity {
 		return false;
 	}
 
-	// Initalise our Context Menu
+	/**
+	 * Initalise our Context Menu
+	 * 
+	 */
 	@Override
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
@@ -251,12 +245,16 @@ public class MainActivity extends ListActivity {
 		menu.add(0, STRIKE, 4, "Strikeout text");
 	}
 
+	/**
+	 * Program what each context item does.
+	 * 
+	 */
 	public boolean onContextItemSelected(MenuItem item) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case ADD_NOTE:
-			newNote(info.id);
+			newNote(info.id, "", "", true);
 			return true;
 		case VIEW_NOTES:
 			return true;
@@ -323,7 +321,6 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void getLastPage() {
-		//mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 		String page = "";
 
@@ -332,7 +329,6 @@ public class MainActivity extends ListActivity {
 		}
 
 		lastPage = Integer.parseInt(page);
-		//mDbAdapter.close();
 	}
 
 	/**
@@ -432,6 +428,9 @@ public class MainActivity extends ListActivity {
 	 * are to reveal next line, hide current line, or do nothing.
 	 * 
 	 * @param command
+	 *            - if we are in rehearsal mode, then we need to decide to
+	 *            reveal or hide words, based on whether the user clicks Next or
+	 *            Prev.
 	 */
 	private void fillData(String command) {
 		Line line;
@@ -440,10 +439,8 @@ public class MainActivity extends ListActivity {
 		String getNote;
 		boolean note;
 		int visibleLines = 0;
-		
+
 		Log.d(TAG, "No. of lines: " + Integer.toString(mCursor.getCount()));
-		
-		//mDbAdapter.open();
 
 		// Get the number of visible lines
 		for (Line l : lines) {
@@ -456,8 +453,9 @@ public class MainActivity extends ListActivity {
 		// Loop through each row in the Cursor
 		if (mCursor.moveToFirst()) {
 			do {
-				//int lineNo = mCursor.getInt(mCursor.getColumnIndex("number"));
-				//Log.d(TAG, "Current line No.: " + Integer.toString(lineNo));
+				// int lineNo =
+				// mCursor.getInt(mCursor.getColumnIndex("number"));
+				// Log.d(TAG, "Current line No.: " + Integer.toString(lineNo));
 				// Get current row's character and line
 				currentChar = mCursor.getString(mCursor
 						.getColumnIndex("character"));
@@ -527,17 +525,16 @@ public class MainActivity extends ListActivity {
 		if (rehearsal) {
 			this.setSelection(adapter.getCount());
 		}
-		//mDbAdapter.close();
 	}
 
 	/**
 	 * Switch Page either up or down
 	 * 
 	 * @param pgUp
+	 *            - Tells us if are going to the next or previous page.
 	 */
 	private void switchPage(boolean pgUp) {
 		boolean valid = true;
-		//mDbAdapter.open();
 		pgNum = Integer.parseInt(pageNo);
 
 		// Decide if we want to increment or decrement pages
@@ -550,8 +547,7 @@ public class MainActivity extends ListActivity {
 		pageNo = Integer.toString(pgNum);
 
 		// Here we handle if the user has selected to display own lines
-		// TODO: Works but is very slow when we reach page limits. Look to make
-		// this more efficent. It needs two clicks because it finds the page its
+		// TODO: It needs two clicks because it finds the page its
 		// currently on and treats it as a valid page.
 		if (ownLines) {
 			valid = true;
@@ -559,7 +555,6 @@ public class MainActivity extends ListActivity {
 			// Here we make sure to filter out any empty pages (where the
 			// character doesn't appear)
 			while (mCursor.getCount() == 0 && pgNum < lastPage && pgNum > 1) {
-				// valid = true;
 				if (pgUp) {
 					pgNum++;
 				} else if (!pgUp) {
@@ -574,6 +569,7 @@ public class MainActivity extends ListActivity {
 		} else {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
+		// Only display the page if we are on a valid page
 		if (valid) {
 			String act = "";
 			if (mCursor.moveToFirst()) {
@@ -591,29 +587,27 @@ public class MainActivity extends ListActivity {
 					"No more pages where this character appears.",
 					Toast.LENGTH_SHORT).show();
 		}
-		//mDbAdapter.close();
 	}
-
-	/**
-	 * Close adapter when we are finished.
-	 * 
-	 */
-//	@Override
-//	protected void onDestroy() {
-//		super.onDestroy();
-//		if (mDbAdapter != null) {
-//			mDbAdapter.close();
-//		}
-//	}
 
 	/**
 	 * This method creates and shows a popup to the user when they are creating
 	 * a new performance note.
 	 * 
 	 * @param id
+	 *            - pass this through so we can obtain the overall line number
+	 * @param defaultTitle
+	 *            - if we are recalling this method cause the user made and
+	 *            error, then display his previous title
+	 * @param defaultNote
+	 *            - if we are recalling this method cause the user made and
+	 *            error, then display his previous note
+	 * @param fresh
+	 *            - denotes if we are calling this method for the first time for
+	 *            the current note.
 	 * 
 	 */
-	private void newNote(long id) {
+	private void newNote(long id, String defaultTitle, String defaultNote,
+			boolean fresh) {
 
 		LayoutInflater li = LayoutInflater.from(this);
 		View notesView = li.inflate(R.layout.add_note_layout, null);
@@ -632,6 +626,9 @@ public class MainActivity extends ListActivity {
 		// lineNumber
 		page--;
 
+		// Obtain the line number
+		// TODO: If we change so that Acts start on a new page, then this will
+		// need to change
 		final long lineNumber = ((page * 23) + id) + 1;
 
 		Log.d(TAG, Long.toString(lineNumber));
@@ -639,8 +636,17 @@ public class MainActivity extends ListActivity {
 		// Display the correct line number
 		id++;
 
-		String defaultTitle = "Page " + mPage.getText();
-		defaultTitle += " - Line " + Long.toString(id);
+		final long newId = id;
+
+		// If we are opening a fresh performance note dialog, then display the
+		// default title
+		if (fresh) {
+			defaultTitle = "Page " + mPage.getText();
+			defaultTitle += " - Line " + Long.toString(newId);
+			// Otherwise set the text the user has already entered
+		} else {
+			note.setText(defaultNote);
+		}
 
 		// Set default title
 		title.setText(defaultTitle);
@@ -655,7 +661,21 @@ public class MainActivity extends ListActivity {
 								// then save.
 								String textTitle = title.getText().toString();
 								String noteTitle = note.getText().toString();
-								saveNote(lineNumber, textTitle, noteTitle);
+								// If either textboxes are blank, then recall
+								// method and close the current one
+								if (textTitle.equals("")
+										|| noteTitle.equals("")) {
+									Toast.makeText(
+											getApplicationContext(),
+											"Invalid Note! Both fields must contain some text!",
+											Toast.LENGTH_LONG).show();
+									dialog.cancel();
+									long oldId = newId - 1;
+									newNote(oldId, textTitle, noteTitle, false);
+									// Otherwise save to Note database
+								} else {
+									saveNote(lineNumber, textTitle, noteTitle);
+								}
 
 							}
 						})
@@ -674,16 +694,18 @@ public class MainActivity extends ListActivity {
 	}
 
 	/**
-	 * When the user decides to save their note, save to a new database.
+	 * When the user decides to save their note, save to Note database and
+	 * update our Play database
 	 * 
 	 * @param number
 	 * @param title
 	 * @param note
 	 * 
 	 */
+	// TODO: We are creating the note in the wrong place in the database. When a
+	// note is deleted, it acts as if it hasn't been and adds new notes after
+	// it, thus getting null pointers.
 	private void saveNote(long number, String title, String note) {
-		//mDbAdapter.open();
-		//mNDbAdapter.open();
 		long id = mNDbAdapter.createNote((int) number, title, note);
 		Log.d(TAG, "Insert at row: " + Long.toString(id));
 		mDbAdapter.updateNotes(number, "Y");
@@ -694,9 +716,6 @@ public class MainActivity extends ListActivity {
 		} else {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
-		//mDbAdapter.close();
-		//mNDbAdapter.close();
-		// TODO: After calling fillData(), notes icon is not getting displayed. Only does when we move page
 		fillData("");
 	}
 

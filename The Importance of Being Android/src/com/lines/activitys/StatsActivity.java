@@ -44,14 +44,13 @@ import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.example.android.R;
+import com.lines.R;
 import com.lines.classes.LinesApp;
 import com.lines.database.play.PlayDbAdapter;
 
 /**
  * The Stats screen where the user can view some statistics of their
- * performances with choice of filtering results. User can also review
- * performace notes and recordings made.
+ * performances with choice of filtering results.
  * 
  * @author Dan
  * 
@@ -99,9 +98,9 @@ public class StatsActivity extends Activity {
 		mCompleteNum = (TextView) findViewById(R.id.textCompleteNum);
 		mCompletePercent = (TextView) findViewById(R.id.textCompletePercent);
 
+		// Access adapter to Play database
 		LinesApp app = (LinesApp) this.getApplication();
 		mDbAdapter = app.getPlayAdapter();
-		//mDbAdapter = new PlayDbAdapter(this);
 
 		// Initialise Spinners
 		populateCharacters();
@@ -116,6 +115,7 @@ public class StatsActivity extends Activity {
 			Log.i(TAG, "No user choice to pass through");
 		}
 
+		// Set the default selected item in character spinner
 		for (int i = 0; i < mChar.getCount(); i++) {
 			if (mChar.getItemAtPosition(i).equals(character)) {
 				mChar.setSelection(i);
@@ -138,7 +138,6 @@ public class StatsActivity extends Activity {
 	 * 
 	 */
 	private void populateCharacters() {
-		//mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 
 		// First get the data from "character" column and filter out unwanted
@@ -182,15 +181,15 @@ public class StatsActivity extends Activity {
 		mChar.setAdapter(mAdapterChar);
 
 		mCursor.close();
-		onDestroy();
 	}
 
 	/**
 	 * Get the key of the HashMap based on the value.
 	 * 
-	 * @param map
-	 * @param value
-	 * @return
+	 * @param map - the map we want to search through
+	 * @param value - the element we are looking for in the map
+	 * @return - the key in the map associated with value
+	 * 
 	 */
 	public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
 		for (Entry<T, E> entry : map.entrySet()) {
@@ -237,8 +236,8 @@ public class StatsActivity extends Activity {
 		mAct.setAdapter(mAdapterAct);
 
 		mCursor.close();
-		onDestroy();
 
+		// Set default selected item in acts spinner
 		for (int i = 0; i < mAct.getCount(); i++) {
 			if (mAct.getItemAtPosition(i).equals(currentAct)) {
 				mAct.setSelection(i);
@@ -256,7 +255,6 @@ public class StatsActivity extends Activity {
 	// TODO: Convert act numbers to roman numerals maybe
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
-		//mDbAdapter.open();
 		// If both spinners are "All"
 		if (act.equals("All")
 				&& mChar.getSelectedItem().toString().equals("All")) {
@@ -310,8 +308,8 @@ public class StatsActivity extends Activity {
 		mPage.setAdapter(mAdapterPage);
 
 		mCursor.close();
-		onDestroy();
 
+		// Set default selected item in pages spinner
 		for (int i = 0; i < mPage.getCount(); i++) {
 			if (mPage.getItemAtPosition(i).equals(currentPage)) {
 				mPage.setSelection(i);
@@ -324,8 +322,9 @@ public class StatsActivity extends Activity {
 	/**
 	 * Find minimum value in ArrayList
 	 * 
-	 * @param pages
-	 * @return
+	 * @param pages - arraylist to search
+	 * @return - minimum value in list
+	 * 
 	 */
 	private int findMin(ArrayList<String> pages) {
 		int min = Integer.MAX_VALUE;
@@ -341,10 +340,9 @@ public class StatsActivity extends Activity {
 	 * This method creates and shows a popup to the user, displaying a relevent
 	 * help message.
 	 * 
-	 * @param msg
-	 * 
 	 */
 	public void showPopup() {
+		// TODO: Change to use alert dialog like for performance notes
 		LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
 				.getSystemService(LAYOUT_INFLATER_SERVICE);
 		View popupView = layoutInflater.inflate(R.layout.confirm_popup_layout,
@@ -405,18 +403,6 @@ public class StatsActivity extends Activity {
 		}
 
 	}
-
-	/**
-	 * Close adapter when we are finished.
-	 * 
-	 */
-//	@Override
-//	protected void onDestroy() {
-//		super.onDestroy();
-//		if (mDbAdapter != null) {
-//			mDbAdapter.close();
-//		}
-//	}
 
 	@Override
 	protected void onPause() {

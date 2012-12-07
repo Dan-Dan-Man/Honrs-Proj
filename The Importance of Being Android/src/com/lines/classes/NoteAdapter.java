@@ -12,7 +12,7 @@ import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.R;
+import com.lines.R;
 
 /**
  * Our custom adapter which will handle populating listviews with our lines

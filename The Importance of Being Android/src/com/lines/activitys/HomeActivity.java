@@ -29,8 +29,6 @@ import java.io.InputStream;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.AssetManager;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -38,7 +36,7 @@ import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.android.R;
+import com.lines.R;
 import com.lines.classes.LinesApp;
 import com.lines.database.play.PlayDbAdapter;
 
@@ -60,28 +58,26 @@ public class HomeActivity extends Activity {
 	private TextView mTop;
 	private TextView mMiddle;
 	private TextView mBottom;
+	private LinesApp app;
 	private static final String TAG = "HomeActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.home_layout);
-
-		// TODO: This check does not work right and database is populated
-		// everytime. Check ForumApp example and see if same thing happens
-		// there.
-		// Create and populate Database if one doesn't exist
-//		if (!checkDataBase()) {
-//			try {
-//				Log.d(TAG, "Creating new Database");
-//				readFile();
-//			} catch (IOException e) {
-//				// TODO: Add proper error handling
-//				Log.e(TAG, "Error");
-//			}
-//		}
-
-		Log.d(TAG, "Opening Database");
+		
+		// Create an object of the application class so we can check if a database for the play exists
+		app = (LinesApp) this.getApplication();
+		
+		// If database does not exist, then read default textfile ("earnest")
+		if (!app.dbExists()) {
+			try {
+				readFile();
+			} catch (IOException e) {
+				// TODO Add proper error handling
+				e.printStackTrace();
+			}
+		}
 
 		mTop = (TextView) findViewById(R.id.textTop);
 		mMiddle = (TextView) findViewById(R.id.textMiddle);
@@ -183,7 +179,7 @@ public class HomeActivity extends Activity {
 			mBottom.setText("Statistics");
 		}
 	}
-
+	
 	/**
 	 * Here we read the file, extracting the character name speaking the line.
 	 * 
@@ -204,11 +200,8 @@ public class HomeActivity extends Activity {
 		int actNo = 0;
 		int pageNo = 1;
 		
-		LinesApp app = (LinesApp) this.getApplication();
+		// Get adapter
 		mDbAdapter = app.getPlayAdapter();
-
-		//mDbAdapter = new PlayDbAdapter(this);
-		//mDbAdapter.open();
 
 		// Try to open the file, and alert the user if file doesn't exist
 		try {
@@ -279,8 +272,6 @@ public class HomeActivity extends Activity {
 						for (int j = 0; j < words.length; j++) {
 							text += words[j] + " ";
 						}
-
-						// Log.d(TAG, firstWord + " :::: " + text);
 					}
 				}
 				// If the firstWord isn't a character, then it is a stage
@@ -306,8 +297,8 @@ public class HomeActivity extends Activity {
 			// file, create a new row in the database. Filter out text we don't
 			// want in our database.
 			if (!isAllUpperCase(words[0])) {
-				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
-						"N", "N", "N", 0, 0, 0);
+				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo, "N",
+						"N", "N", 0, 0, 0);
 				// If we're not adding to the database, then we need to reduce
 				// the line count.
 			} else {
@@ -325,7 +316,6 @@ public class HomeActivity extends Activity {
 		is.close();
 		bis.close();
 		dis.close();
-		onDestroy();
 
 	}
 
@@ -333,8 +323,8 @@ public class HomeActivity extends Activity {
 	 * Method for checking if the first word of the current line is a character
 	 * name.
 	 * 
-	 * @param word
-	 * @return
+	 * @param word - check to see if this String is a character in the play
+	 * @return - true of false based on the result
 	 */
 	private boolean isCharacter(String word) {
 		// Check if the line is a stage direction
@@ -348,8 +338,8 @@ public class HomeActivity extends Activity {
 	/**
 	 * Method for checking if the current word is entirely capitals.
 	 * 
-	 * @param word
-	 * @return
+	 * @param word - check to see if this String is entirely uppercase
+	 * @return allCaps - true or false based on the result of the method
 	 */
 	private boolean isAllUpperCase(String word) {
 		boolean allCaps = true;
@@ -360,37 +350,5 @@ public class HomeActivity extends Activity {
 			}
 		}
 		return allCaps;
-	}
-
-	/**
-	 * Close adapter when we are finished.
-	 * 
-	 */
-//	@Override
-//	protected void onDestroy() {
-//		super.onDestroy();
-//		if (mDbAdapter != null) {
-//			mDbAdapter.close();
-//		}
-//	}
-
-	/**
-	 * This method checks if a Database exists.
-	 * 
-	 * @return
-	 */
-	private boolean checkDataBase() {
-		String DB_PATH = "/data/data/com.lines/databases/Play Data";
-		SQLiteDatabase checkDB = null;
-		try {
-			checkDB = SQLiteDatabase.openDatabase(DB_PATH, null,
-					SQLiteDatabase.OPEN_READONLY);
-			checkDB.close();
-		} catch (SQLiteException e) {
-			// database doesn't exist yet.
-		}
-
-		return checkDB != null ? true : false;
-
 	}
 }
