@@ -27,17 +27,6 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
-    <ImageButton
-        android:id="@+id/imageNote"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        android:background="@null"
-        android:src="@drawable/sym_action_chat" />
-
     <TextView
         android:id="@+id/textPageTitle"
         android:layout_width="wrap_content"
@@ -65,7 +54,7 @@
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/imageNote"
+        android:layout_below="@+id/imageAudio"
         android:layout_marginTop="5dp"
         android:background="#000000" >
 

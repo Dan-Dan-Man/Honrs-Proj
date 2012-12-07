@@ -81,6 +81,21 @@ public class NoteDbAdapter {
 		return mDb.delete(DB_TABLE, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
+	public Cursor fetchAllNotes() {
+		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
+				KEY_TITLE, KEY_NOTE }, null, null, null, null, null);
+	}
+
+	public Cursor fetchNote(long rowId) throws SQLException {
+		Cursor mCursor = mDb.query(true, DB_TABLE, new String[] { KEY_ROWID,
+				KEY_NUMBER, KEY_TITLE, KEY_NOTE }, KEY_ROWID + "=" + rowId,
+				null, null, null, null, null);
+		if (mCursor != null) {
+			mCursor.moveToFirst();
+		}
+		return mCursor;
+	}
+
 	private ContentValues createContentValues(int number, String title,
 			String note) {
 		ContentValues values = new ContentValues();

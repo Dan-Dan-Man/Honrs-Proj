@@ -121,7 +121,8 @@ public class HomeActivity extends Activity {
 			Intent i = new Intent(this, StatsActivity.class);
 			startActivityForResult(i, 0);
 		} else if (mMiddle.getText().toString().equals("Performance Notes")) {
-			// TODO: Create performance notes screen
+			Intent i = new Intent(this, NotesActivity.class);
+			startActivityForResult(i, 0);
 		} else if (mMiddle.getText().toString().equals("Recordings")) {
 			// TODO: Create recordings screen
 		} else if (mMiddle.getText().toString().equals("Help")) {
@@ -198,7 +199,7 @@ public class HomeActivity extends Activity {
 		BufferedInputStream bis;
 		DataInputStream dis;
 		String line = null;
-		int lineNo = 0;
+		int lineNo = -1;
 		int actNo = 0;
 		int pageNo = 1;
 
@@ -239,7 +240,7 @@ public class HomeActivity extends Activity {
 
 			// Keep count of what page we're on (23 lines/page)
 			// TODO: Subject to change depending on testing
-			if ((lineNo % 23) == 0) {
+			if ((lineNo % 23) == 0 && lineNo != 0) {
 				pageNo++;
 			}
 

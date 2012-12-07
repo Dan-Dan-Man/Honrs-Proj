@@ -77,7 +77,7 @@ public class PlayDbAdapter {
 		return mDb.insert(DB_TABLE, null, values);
 	}
 
-	/** * Update the Food */
+	/** * Update the Play */
 
 	public boolean updatePlay(long rowId, int number, String character,
 			String line, int act, int page, String note, String striked,
@@ -87,6 +87,19 @@ public class PlayDbAdapter {
 				completions);
 
 		return mDb.update(DB_TABLE, values, KEY_ROWID + "=" + rowId, null) > 0;
+	}
+
+	/**
+	 * Update the Notes column if their exists a performance note
+	 * 
+	 * @param rowId
+	 * @param note
+	 * @return
+	 */
+	public boolean updateNotes(long rowId, String note) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_NOTE, note);
+		return mDb.update(DB_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
 	// Probably don't need this, but keep it incase.

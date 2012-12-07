@@ -26,4 +26,14 @@
         android:text="LINE"
         android:textColor="#FFFFFF" />
 
+    <ImageButton
+        android:id="@+id/imageButtonNotes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/textCharacter"
+        android:layout_marginRight="15dp"
+        android:background="@null"
+        android:src="@drawable/sym_action_chat" />
+
 </RelativeLayout>

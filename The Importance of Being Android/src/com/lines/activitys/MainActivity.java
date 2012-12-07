@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -124,12 +125,12 @@ public class MainActivity extends ListActivity {
 		mAct.setText(actNo);
 
 		mDbAdapter = new PlayDbAdapter(this);
-		mDbAdapter.open();
 
 		mNDbAdapter = new NoteDbAdapter(this);
-		mNDbAdapter.open();
 
 		getLastPage();
+		
+		mDbAdapter.open();
 
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
@@ -140,8 +141,6 @@ public class MainActivity extends ListActivity {
 		startManagingCursor(mCursor);
 		fillData("");
 		registerForContextMenu(getListView());
-
-		mDbAdapter.close();
 
 		// When Next button is pressed, play jumps until user's next line.
 		mNext.setOnClickListener(new View.OnClickListener() {
@@ -228,7 +227,6 @@ public class MainActivity extends ListActivity {
 			i.putExtra("EXTRA_CHARACTER", character);
 			MainActivity.this.startActivity(i);
 			mCursor.close();
-			mDbAdapter.close();
 			break;
 		case (QUICK_SEARCH):
 			break;
@@ -283,6 +281,7 @@ public class MainActivity extends ListActivity {
 	private void revealWord() {
 		Log.d(TAG, currentLine);
 		String words[] = currentLine.split("\\s+");
+		boolean note;
 
 		// Only obtain next word if there are any left
 		if (visibleWords <= words.length) {
@@ -291,9 +290,12 @@ public class MainActivity extends ListActivity {
 			for (int i = 0; i < visibleWords; i++) {
 				line += words[i] + " ";
 			}
+			// When we create a new line, we want to keep the note value the
+			// same
+			note = lines.get(lines.size() - 1).getNote();
 			// Update the line we are working with
 			lines.remove(lines.size() - 1);
-			Line newLine = new Line(character, line);
+			Line newLine = new Line(character, line, note);
 			lines.add(newLine);
 
 			// Update the Listview
@@ -317,6 +319,7 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void getLastPage() {
+		mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 		String page = "";
 
@@ -325,6 +328,7 @@ public class MainActivity extends ListActivity {
 		}
 
 		lastPage = Integer.parseInt(page);
+		mDbAdapter.close();
 	}
 
 	/**
@@ -335,6 +339,7 @@ public class MainActivity extends ListActivity {
 	 */
 	private ArrayList<Line> filterStage(ArrayList<Line> lines) {
 		ArrayList<Character> lineArray;
+		boolean note;
 		// If the character's name is "STAGE." then we remove the whole line
 		for (int i = 0; i < lines.size(); i++) {
 			if (lines.get(i).getCharacter().equals("STAGE.")) {
@@ -366,8 +371,9 @@ public class MainActivity extends ListActivity {
 				// Finally delete the old line and replace it with the new
 				// filtered one
 				String character = lines.get(i).getCharacter();
+				note = lines.get(i).getNote();
 				lines.remove(i);
-				Line newLine = new Line(character, sb.toString());
+				Line newLine = new Line(character, sb.toString(), note);
 				lines.add(i, newLine);
 			}
 		}
@@ -427,7 +433,13 @@ public class MainActivity extends ListActivity {
 		Line line;
 		String currentChar;
 		String newLine;
+		String getNote;
+		boolean note;
 		int visibleLines = 0;
+		
+		Log.d(TAG, "No. of lines: " + Integer.toString(mCursor.getCount()));
+		
+		mDbAdapter.open();
 
 		// Get the number of visible lines
 		for (Line l : lines) {
@@ -440,10 +452,21 @@ public class MainActivity extends ListActivity {
 		// Loop through each row in the Cursor
 		if (mCursor.moveToFirst()) {
 			do {
+				//int lineNo = mCursor.getInt(mCursor.getColumnIndex("number"));
+				//Log.d(TAG, "Current line No.: " + Integer.toString(lineNo));
 				// Get current row's character and line
 				currentChar = mCursor.getString(mCursor
 						.getColumnIndex("character"));
 				newLine = "\n";
+				// Get the current value of whether there is a performance note
+				// or not
+				getNote = mCursor.getString(mCursor.getColumnIndex("note"));
+				if (getNote.equals("Y")) {
+					note = true;
+				} else {
+					note = false;
+				}
+
 				// If we're in rehearsal mode then we need to check which lines
 				// to show/hide
 				if (rehearsal) {
@@ -481,7 +504,7 @@ public class MainActivity extends ListActivity {
 					newLine = mCursor.getString(mCursor.getColumnIndex("line"));
 				}
 				// Create new line and add it to ArrayList
-				line = new Line(currentChar, newLine);
+				line = new Line(currentChar, newLine, note);
 				lines.add(line);
 			} while (mCursor.moveToNext());
 		}
@@ -500,6 +523,7 @@ public class MainActivity extends ListActivity {
 		if (rehearsal) {
 			this.setSelection(adapter.getCount());
 		}
+		mDbAdapter.close();
 	}
 
 	/**
@@ -604,8 +628,7 @@ public class MainActivity extends ListActivity {
 		// lineNumber
 		page--;
 
-		// TODO: This may not work for all cases. Temporary solution.
-		final long lineNumber = (page * 23) + id;
+		final long lineNumber = ((page * 23) + id) + 1;
 
 		Log.d(TAG, Long.toString(lineNumber));
 
@@ -655,9 +678,22 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void saveNote(long number, String title, String note) {
-		mNDbAdapter.createNote((int) number, title, note);
+		mDbAdapter.open();
+		mNDbAdapter.open();
+		long id = mNDbAdapter.createNote((int) number, title, note);
+		Log.d(TAG, "Insert at row: " + Long.toString(id));
+		mDbAdapter.updateNotes(number, "Y");
 		Toast.makeText(getApplicationContext(), "New performance note saved!",
 				Toast.LENGTH_LONG).show();
+		if (ownLines) {
+			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
+		} else {
+			mCursor = mDbAdapter.fetchPage(pageNo);
+		}
+		//mDbAdapter.close();
+		mNDbAdapter.close();
+		// TODO: After calling fillData(), notes icon is not getting displayed. Only does when we move page
+		fillData("");
 	}
 
 }
