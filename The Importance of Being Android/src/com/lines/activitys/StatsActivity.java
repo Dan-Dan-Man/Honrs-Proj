@@ -45,6 +45,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.android.R;
+import com.lines.classes.LinesApp;
 import com.lines.database.play.PlayDbAdapter;
 
 /**
@@ -98,7 +99,9 @@ public class StatsActivity extends Activity {
 		mCompleteNum = (TextView) findViewById(R.id.textCompleteNum);
 		mCompletePercent = (TextView) findViewById(R.id.textCompletePercent);
 
-		mDbAdapter = new PlayDbAdapter(this);
+		LinesApp app = (LinesApp) this.getApplication();
+		mDbAdapter = app.getPlayAdapter();
+		//mDbAdapter = new PlayDbAdapter(this);
 
 		// Initialise Spinners
 		populateCharacters();
@@ -135,7 +138,7 @@ public class StatsActivity extends Activity {
 	 * 
 	 */
 	private void populateCharacters() {
-		mDbAdapter.open();
+		//mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 
 		// First get the data from "character" column and filter out unwanted
@@ -204,7 +207,7 @@ public class StatsActivity extends Activity {
 	 */
 	private void populateActs() {
 		acts = new ArrayList<String>();
-		mDbAdapter.open();
+		//mDbAdapter.open();
 		if (mChar.getSelectedItem().toString().equals("All")) {
 			mCursor = mDbAdapter.fetchAllLines();
 		} else {
@@ -253,7 +256,7 @@ public class StatsActivity extends Activity {
 	// TODO: Convert act numbers to roman numerals maybe
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
-		mDbAdapter.open();
+		//mDbAdapter.open();
 		// If both spinners are "All"
 		if (act.equals("All")
 				&& mChar.getSelectedItem().toString().equals("All")) {
@@ -407,13 +410,13 @@ public class StatsActivity extends Activity {
 	 * Close adapter when we are finished.
 	 * 
 	 */
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mDbAdapter != null) {
-			mDbAdapter.close();
-		}
-	}
+//	@Override
+//	protected void onDestroy() {
+//		super.onDestroy();
+//		if (mDbAdapter != null) {
+//			mDbAdapter.close();
+//		}
+//	}
 
 	@Override
 	protected void onPause() {

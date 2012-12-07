@@ -47,6 +47,7 @@ import android.widget.Toast;
 import com.example.android.R;
 import com.lines.classes.Line;
 import com.lines.classes.LineAdapter;
+import com.lines.classes.LinesApp;
 import com.lines.database.notes.NoteDbAdapter;
 import com.lines.database.play.PlayDbAdapter;
 
@@ -124,13 +125,16 @@ public class MainActivity extends ListActivity {
 		mPage.setText(pageNo);
 		mAct.setText(actNo);
 
-		mDbAdapter = new PlayDbAdapter(this);
+		LinesApp app = (LinesApp) this.getApplication();
+		mDbAdapter = app.getPlayAdapter();
+		mNDbAdapter = app.getNoteAdapter();
+		//mDbAdapter = new PlayDbAdapter(this);
 
-		mNDbAdapter = new NoteDbAdapter(this);
+		//mNDbAdapter = new NoteDbAdapter(this);
 
 		getLastPage();
 		
-		mDbAdapter.open();
+		//mDbAdapter.open();
 
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
@@ -319,7 +323,7 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void getLastPage() {
-		mDbAdapter.open();
+		//mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 		String page = "";
 
@@ -328,7 +332,7 @@ public class MainActivity extends ListActivity {
 		}
 
 		lastPage = Integer.parseInt(page);
-		mDbAdapter.close();
+		//mDbAdapter.close();
 	}
 
 	/**
@@ -439,7 +443,7 @@ public class MainActivity extends ListActivity {
 		
 		Log.d(TAG, "No. of lines: " + Integer.toString(mCursor.getCount()));
 		
-		mDbAdapter.open();
+		//mDbAdapter.open();
 
 		// Get the number of visible lines
 		for (Line l : lines) {
@@ -523,7 +527,7 @@ public class MainActivity extends ListActivity {
 		if (rehearsal) {
 			this.setSelection(adapter.getCount());
 		}
-		mDbAdapter.close();
+		//mDbAdapter.close();
 	}
 
 	/**
@@ -533,7 +537,7 @@ public class MainActivity extends ListActivity {
 	 */
 	private void switchPage(boolean pgUp) {
 		boolean valid = true;
-		mDbAdapter.open();
+		//mDbAdapter.open();
 		pgNum = Integer.parseInt(pageNo);
 
 		// Decide if we want to increment or decrement pages
@@ -587,20 +591,20 @@ public class MainActivity extends ListActivity {
 					"No more pages where this character appears.",
 					Toast.LENGTH_SHORT).show();
 		}
-		mDbAdapter.close();
+		//mDbAdapter.close();
 	}
 
 	/**
 	 * Close adapter when we are finished.
 	 * 
 	 */
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mDbAdapter != null) {
-			mDbAdapter.close();
-		}
-	}
+//	@Override
+//	protected void onDestroy() {
+//		super.onDestroy();
+//		if (mDbAdapter != null) {
+//			mDbAdapter.close();
+//		}
+//	}
 
 	/**
 	 * This method creates and shows a popup to the user when they are creating
@@ -678,8 +682,8 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void saveNote(long number, String title, String note) {
-		mDbAdapter.open();
-		mNDbAdapter.open();
+		//mDbAdapter.open();
+		//mNDbAdapter.open();
 		long id = mNDbAdapter.createNote((int) number, title, note);
 		Log.d(TAG, "Insert at row: " + Long.toString(id));
 		mDbAdapter.updateNotes(number, "Y");
@@ -691,7 +695,7 @@ public class MainActivity extends ListActivity {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
 		//mDbAdapter.close();
-		mNDbAdapter.close();
+		//mNDbAdapter.close();
 		// TODO: After calling fillData(), notes icon is not getting displayed. Only does when we move page
 		fillData("");
 	}

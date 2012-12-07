@@ -41,6 +41,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.android.R;
+import com.lines.classes.LinesApp;
 import com.lines.classes.NoteAdapter;
 import com.lines.database.notes.NoteDbAdapter;
 import com.lines.database.play.PlayDbAdapter;
@@ -61,16 +62,19 @@ public class NotesActivity extends ListActivity {
 		setContentView(R.layout.view_notes_layout);
 		this.getListView().setDividerHeight(0);
 
-		mNDbAdapter = new NoteDbAdapter(this);
-		mNDbAdapter.open();
+		LinesApp app = (LinesApp) this.getApplication();
+		mDbAdapter = app.getPlayAdapter();
+		mNDbAdapter = app.getNoteAdapter();
+		//mNDbAdapter = new NoteDbAdapter(this);
+		//mNDbAdapter.open();
 
-		mDbAdapter = new PlayDbAdapter(this);
+		//mDbAdapter = new PlayDbAdapter(this);
 
 		mCursor = mNDbAdapter.fetchAllNotes();
 
 		Log.d(TAG, "No. of notes: " + mCursor.getCount());
 
-		mNDbAdapter.close();
+		//mNDbAdapter.close();
 
 		startManagingCursor(mCursor);
 		fillData();
@@ -106,10 +110,10 @@ public class NotesActivity extends ListActivity {
 
 	// TODO: Not working correctly
 	private void deleteNote(AdapterContextMenuInfo info) {
-		mNDbAdapter.open();
+		//mNDbAdapter.open();
 		long id = info.id + 1;
 		mNDbAdapter.deleteNote(id);
-		mNDbAdapter.close();
+		//mNDbAdapter.close();
 		// TODO: Update play database if there are no notes left for a line.
 	}
 
@@ -142,7 +146,7 @@ public class NotesActivity extends ListActivity {
 		String title;
 		String note;
 
-		mNDbAdapter.open();
+		//mNDbAdapter.open();
 
 		id++;
 
@@ -200,7 +204,7 @@ public class NotesActivity extends ListActivity {
 		// show it
 		alertDialog.show();
 
-		mNDbAdapter.close();
+		//mNDbAdapter.close();
 	}
 
 	/**
@@ -212,14 +216,14 @@ public class NotesActivity extends ListActivity {
 	 * 
 	 */
 	private void saveNote(long number, String title, String note) {
-		mDbAdapter.open();
-		mNDbAdapter.open();
+		//mDbAdapter.open();
+		//mNDbAdapter.open();
 		mNDbAdapter.createNote((int) number, title, note);
 		mDbAdapter.updateNotes(number, "Y");
 		Toast.makeText(getApplicationContext(), "New performance note saved!",
 				Toast.LENGTH_LONG).show();
-		mDbAdapter.close();
-		mNDbAdapter.close();
+		//mDbAdapter.close();
+		//mNDbAdapter.close();
 	}
 
 }

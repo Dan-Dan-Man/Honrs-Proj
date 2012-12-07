@@ -47,6 +47,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.android.R;
+import com.lines.classes.LinesApp;
 import com.lines.database.play.PlayDbAdapter;
 
 /**
@@ -113,7 +114,9 @@ public class OptionsActivity extends Activity {
 		mOwnLineHelp = (ImageButton) findViewById(R.id.imageButtonOwnLine);
 		mStageHelp = (ImageButton) findViewById(R.id.imageButtonStage);
 
-		mDbAdapter = new PlayDbAdapter(this);
+		LinesApp app = (LinesApp) this.getApplication();
+		mDbAdapter = app.getPlayAdapter();
+		//mDbAdapter = new PlayDbAdapter(this);
 
 		// Initialise Spinners
 		populateCharacters();
@@ -218,7 +221,7 @@ public class OptionsActivity extends Activity {
 	 * 
 	 */
 	private void populateCharacters() {
-		mDbAdapter.open();
+		//mDbAdapter.open();
 		mCursor = mDbAdapter.fetchAllLines();
 
 		// First get the data from "character" column and filter out unwanted
@@ -287,7 +290,7 @@ public class OptionsActivity extends Activity {
 	 */
 	private void populateActs(boolean filter) {
 		acts = new ArrayList<String>();
-		mDbAdapter.open();
+		//mDbAdapter.open();
 		if (filter) {
 			mCursor = mDbAdapter.fetchActs(mChar.getSelectedItem().toString());
 		} else {
@@ -326,7 +329,7 @@ public class OptionsActivity extends Activity {
 	// TODO: Convert act numbers to roman numerals maybe
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
-		mDbAdapter.open();
+		//mDbAdapter.open();
 
 		if (mChar.isEnabled()) {
 			mCursor = mDbAdapter.fetchFilteredPages(act, mChar
@@ -434,13 +437,13 @@ public class OptionsActivity extends Activity {
 	 * Close adapter when we are finished.
 	 * 
 	 */
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mDbAdapter != null) {
-			mDbAdapter.close();
-		}
-	}
+//	@Override
+//	protected void onDestroy() {
+//		super.onDestroy();
+//		if (mDbAdapter != null) {
+//			mDbAdapter.close();
+//		}
+//	}
 
 	/**
 	 * This class updates the available configurations depending on the

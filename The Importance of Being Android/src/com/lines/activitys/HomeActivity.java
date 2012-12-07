@@ -39,6 +39,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.android.R;
+import com.lines.classes.LinesApp;
 import com.lines.database.play.PlayDbAdapter;
 
 /**
@@ -202,9 +203,12 @@ public class HomeActivity extends Activity {
 		int lineNo = -1;
 		int actNo = 0;
 		int pageNo = 1;
+		
+		LinesApp app = (LinesApp) this.getApplication();
+		mDbAdapter = app.getPlayAdapter();
 
-		mDbAdapter = new PlayDbAdapter(this);
-		mDbAdapter.open();
+		//mDbAdapter = new PlayDbAdapter(this);
+		//mDbAdapter.open();
 
 		// Try to open the file, and alert the user if file doesn't exist
 		try {
@@ -362,13 +366,13 @@ public class HomeActivity extends Activity {
 	 * Close adapter when we are finished.
 	 * 
 	 */
-	@Override
-	protected void onDestroy() {
-		super.onDestroy();
-		if (mDbAdapter != null) {
-			mDbAdapter.close();
-		}
-	}
+//	@Override
+//	protected void onDestroy() {
+//		super.onDestroy();
+//		if (mDbAdapter != null) {
+//			mDbAdapter.close();
+//		}
+//	}
 
 	/**
 	 * This method checks if a Database exists.
