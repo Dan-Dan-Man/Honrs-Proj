@@ -58,7 +58,7 @@ public class NotesActivity extends ListActivity {
 	private Cursor mCursor;
 	private String[] mFrom;
 	private int[] mTo;
-	String lineNum;
+	String lineNum = null;
 	private static final int DELETE_ID = Menu.FIRST;
 
 	@Override
@@ -72,7 +72,7 @@ public class NotesActivity extends ListActivity {
 		mNDbAdapter = app.getNoteAdapter();
 
 		Bundle extras = getIntent().getExtras();
-		
+
 		if (extras != null) {
 			lineNum = extras.getString("EXTRA_NUM");
 			mCursor = mNDbAdapter.fetchNotes(lineNum);
@@ -133,12 +133,15 @@ public class NotesActivity extends ListActivity {
 	private void deleteNote(long id) {
 		mCursor = mNDbAdapter.fetchNote(id);
 		int lineNo = mCursor.getInt(mCursor.getColumnIndex("number"));
+		Log.d(TAG, "Deleting with lineNo: " + lineNo);
 		mNDbAdapter.deleteNote(id);
 		updatePlayDb(lineNo);
-		mCursor = mNDbAdapter.fetchAllNotes();
-		// startManagingCursor(mCursor);
+		if (lineNum != null) {
+			mCursor = mNDbAdapter.fetchNotes(lineNum);
+		} else {
+			mCursor = mNDbAdapter.fetchAllNotes();
+		}
 		fillData();
-		// TODO: Update play database if there are no notes left for a line.
 	}
 
 	/**

@@ -58,6 +58,8 @@ import com.lines.database.play.PlayDbAdapter;
  */
 
 // TODO: Bottom of list is hidden behind buttons - Temporarily fixed
+// TODO: When user returns from performance notes page, notes that have been
+// deleted still there until we move page.
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -285,6 +287,7 @@ public class MainActivity extends ListActivity {
 		Log.d(TAG, currentLine);
 		String words[] = currentLine.split("\\s+");
 		boolean note;
+		int number;
 
 		// Only obtain next word if there are any left
 		if (visibleWords <= words.length) {
@@ -293,12 +296,13 @@ public class MainActivity extends ListActivity {
 			for (int i = 0; i < visibleWords; i++) {
 				line += words[i] + " ";
 			}
-			// When we create a new line, we want to keep the note value the
-			// same
+			// When we create a new line, we want to keep the note value and the
+			// line number the same
 			note = lines.get(lines.size() - 1).getNote();
+			number = lines.get(lines.size() - 1).getNumber();
 			// Update the line we are working with
 			lines.remove(lines.size() - 1);
-			Line newLine = new Line(character, line, note);
+			Line newLine = new Line(number, character, line, note);
 			lines.add(newLine);
 
 			// Update the Listview
@@ -341,6 +345,7 @@ public class MainActivity extends ListActivity {
 	private ArrayList<Line> filterStage(ArrayList<Line> lines) {
 		ArrayList<Character> lineArray;
 		boolean note;
+		int number;
 		// If the character's name is "STAGE." then we remove the whole line
 		for (int i = 0; i < lines.size(); i++) {
 			if (lines.get(i).getCharacter().equals("STAGE.")) {
@@ -373,8 +378,9 @@ public class MainActivity extends ListActivity {
 				// filtered one
 				String character = lines.get(i).getCharacter();
 				note = lines.get(i).getNote();
+				number = lines.get(i).getNumber();
 				lines.remove(i);
-				Line newLine = new Line(character, sb.toString(), note);
+				Line newLine = new Line(number, character, sb.toString(), note);
 				lines.add(i, newLine);
 			}
 		}
@@ -439,6 +445,7 @@ public class MainActivity extends ListActivity {
 		String newLine;
 		String getNote;
 		boolean note;
+		int number;
 		int visibleLines = 0;
 
 		Log.d(TAG, "No. of lines: " + Integer.toString(mCursor.getCount()));
@@ -464,6 +471,7 @@ public class MainActivity extends ListActivity {
 				// Get the current value of whether there is a performance note
 				// or not
 				getNote = mCursor.getString(mCursor.getColumnIndex("note"));
+				number = mCursor.getInt(mCursor.getColumnIndex("number"));
 				if (getNote.equals("Y")) {
 					note = true;
 				} else {
@@ -507,7 +515,7 @@ public class MainActivity extends ListActivity {
 					newLine = mCursor.getString(mCursor.getColumnIndex("line"));
 				}
 				// Create new line and add it to ArrayList
-				line = new Line(currentChar, newLine, note);
+				line = new Line(number, currentChar, newLine, note);
 				lines.add(line);
 			} while (mCursor.moveToNext());
 		}
@@ -619,17 +627,12 @@ public class MainActivity extends ListActivity {
 	 * @return - the line number
 	 */
 	private long getLineNumber(long id) {
-		int page = Integer.parseInt(mPage.getText().toString());
-		// We need to de-increment the page number so we can obtain the correct
-		// lineNumber
-		page--;
+		long lineNo;
+		
+		lineNo = lines.get((int) id).getNumber();
+		lineNo++;
 
-		// Obtain the line number
-		// TODO: If we change so that Acts start on a new page, then this will
-		// need to change
-		// TODO: THIS WILL NOT WORK WHEN USER REMOVES STAGE DIRECTIONS OR SELECT
-		// OWN LINES!
-		return (((page * 23) + id) + 1);
+		return lineNo;
 	}
 
 	/**
@@ -735,6 +738,8 @@ public class MainActivity extends ListActivity {
 	private void saveNote(long number, String title, String note) {
 		long id = mNDbAdapter.createNote((int) number, title, note);
 		Log.d(TAG, "Insert at row: " + Long.toString(id));
+		// number++;
+		Log.d(TAG, "Saving at line: " + number);
 		mDbAdapter.updateNotes(number, "Y");
 		Toast.makeText(getApplicationContext(), "New performance note saved!",
 				Toast.LENGTH_LONG).show();

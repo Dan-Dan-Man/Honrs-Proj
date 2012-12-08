@@ -70,6 +70,19 @@ public class HomeActivity extends Activity {
 		// database for the play exists
 		app = (LinesApp) this.getApplication();
 
+		// TODO: We can get the list of scripts the user has uploaded this way.
+		// If DB does not exist, prompt user with spinner containing scripts.
+		// String[] files = null;
+		// AssetManager am = getAssets();
+		// try {
+		// files = am.list("scripts");
+		// } catch (IOException e1) {
+		// // TODO Auto-generated catch block
+		// e1.printStackTrace();
+		// }
+		//
+		// Log.d(TAG, "List of files: " + files[0]);
+
 		// If database does not exist, then read default textfile ("earnest")
 		// TODO: If we press the back button at the home screen, and then reload
 		// the app, the database is re-populated.
@@ -208,7 +221,7 @@ public class HomeActivity extends Activity {
 
 		// Try to open the file, and alert the user if file doesn't exist
 		try {
-			is = am.open("earnest.txt");
+			is = am.open("scripts/earnest.txt");
 			bis = new BufferedInputStream(is);
 			dis = new DataInputStream(bis);
 		} catch (IOException e) {

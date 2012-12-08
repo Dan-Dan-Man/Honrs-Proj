@@ -10,14 +10,20 @@ package com.lines.classes;
 // when we need it. Could solve a lot of problems. GET THIS DONE TOMORROW!
 public class Line {
 
+	private int number;
 	private String character;
 	private String line;
 	private boolean note;
 
-	public Line(String character, String line, boolean note) {
+	public Line(int number, String character, String line, boolean note) {
+		this.number = number;
 		this.character = character;
 		this.line = line;
 		this.note = note;
+	}
+	
+	public int getNumber() {
+		return number;
 	}
 
 	public String getCharacter() {
