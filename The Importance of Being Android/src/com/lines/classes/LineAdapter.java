@@ -70,6 +70,7 @@ public class LineAdapter extends ArrayAdapter<Line> {
 	}
 
 	private void test() {
+		// TODO: Need to somehow to the same functionality as found in 
 		Toast.makeText(getContext(), "Hello", Toast.LENGTH_SHORT).show();
 	}
 }

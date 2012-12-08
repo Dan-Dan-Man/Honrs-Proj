@@ -21,8 +21,6 @@
 
 package com.lines.activitys;
 
-import java.util.ArrayList;
-
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
@@ -38,11 +36,11 @@ import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
 import com.lines.R;
 import com.lines.classes.LinesApp;
-import com.lines.classes.NoteAdapter;
 import com.lines.database.notes.NoteDbAdapter;
 import com.lines.database.play.PlayDbAdapter;
 
@@ -52,14 +50,15 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-// TODO: Order of notes is messed up if we delete a note then create a new one.
 public class NotesActivity extends ListActivity {
 
 	private static final String TAG = "NotesActivity";
 	private NoteDbAdapter mNDbAdapter;
 	private PlayDbAdapter mDbAdapter;
 	private Cursor mCursor;
-	private ArrayList<String> notes;
+	private String[] mFrom;
+	private int[] mTo;
+	String lineNum;
 	private static final int DELETE_ID = Menu.FIRST;
 
 	@Override
@@ -72,7 +71,14 @@ public class NotesActivity extends ListActivity {
 		mDbAdapter = app.getPlayAdapter();
 		mNDbAdapter = app.getNoteAdapter();
 
-		mCursor = mNDbAdapter.fetchAllNotes();
+		Bundle extras = getIntent().getExtras();
+		
+		if (extras != null) {
+			lineNum = extras.getString("EXTRA_NUM");
+			mCursor = mNDbAdapter.fetchNotes(lineNum);
+		} else {
+			mCursor = mNDbAdapter.fetchAllNotes();
+		}
 
 		Log.d(TAG, "No. of notes: " + mCursor.getCount());
 
@@ -89,6 +95,7 @@ public class NotesActivity extends ListActivity {
 	public void onCreateContextMenu(ContextMenu menu, View v,
 			ContextMenuInfo menuInfo) {
 		super.onCreateContextMenu(menu, v, menuInfo);
+		menu.setHeaderTitle("Option");
 		menu.add(0, DELETE_ID, 0, "Delete");
 	}
 
@@ -101,8 +108,7 @@ public class NotesActivity extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case DELETE_ID:
-			deleteNote(info);
-			fillData();
+			deleteNote(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -124,33 +130,83 @@ public class NotesActivity extends ListActivity {
 	 * @param info
 	 *            - use this to delete the correct row
 	 */
-	// TODO: Not working correctly
-	private void deleteNote(AdapterContextMenuInfo info) {
-		long id = info.id + 1;
+	private void deleteNote(long id) {
+		mCursor = mNDbAdapter.fetchNote(id);
+		int lineNo = mCursor.getInt(mCursor.getColumnIndex("number"));
 		mNDbAdapter.deleteNote(id);
+		updatePlayDb(lineNo);
+		mCursor = mNDbAdapter.fetchAllNotes();
+		// startManagingCursor(mCursor);
+		fillData();
 		// TODO: Update play database if there are no notes left for a line.
+	}
+
+	/**
+	 * This method checks if we deleted the last note for the current line
+	 * number. If we have, then we need to update the Play DB to tell it there
+	 * are no notes left for the current line.
+	 * 
+	 * @param lineNo
+	 *            - Used to check if this line has any notes.
+	 */
+	private void updatePlayDb(int lineNo) {
+		boolean numberFound = false;
+		int current;
+
+		mCursor = mNDbAdapter.fetchAllNotes();
+
+		// Loop through all notes after deletion and check if there are any left
+		// for the current line
+		if (mCursor.moveToFirst()) {
+			do {
+				current = mCursor.getInt(mCursor.getColumnIndex("number"));
+				// If one has been found then we don't need to do anymore
+				// checking.
+				if (lineNo == current) {
+					numberFound = true;
+					mCursor.moveToLast();
+				}
+			} while (mCursor.moveToNext());
+		}
+
+		// If no notes exist for the current line, then update the Play DB
+		if (!numberFound) {
+			mDbAdapter.updateNotes(lineNo, "N");
+		}
 	}
 
 	/**
 	 * Fill the list with the items in the Note database.
 	 * 
 	 */
+	// private void fillData() {
+	// String note;
+	// notes = new ArrayList<String>();
+	//
+	// // Populate arraylist with database data
+	// if (mCursor.moveToFirst()) {
+	// do {
+	// // Get current row's character and line
+	// note = mCursor.getString(mCursor.getColumnIndex("title"));
+	// Log.d(TAG, "Adding note: " + note);
+	// notes.add(note);
+	// } while (mCursor.moveToNext());
+	// }
+	//
+	// // Fill list with our custom adapter
+	// NoteAdapter adapter = new NoteAdapter(this, R.layout.note_row_layout,
+	// notes);
+	// setListAdapter(adapter);
+	// }
+
 	private void fillData() {
-		String note;
-		notes = new ArrayList<String>();
+		mFrom = new String[] { NoteDbAdapter.KEY_TITLE };
+		mTo = new int[] { R.id.textNote };
 
-		// Populate arraylist with database data
-		if (mCursor.moveToFirst()) {
-			do {
-				// Get current row's character and line
-				note = mCursor.getString(mCursor.getColumnIndex("title"));
-				notes.add(note);
-			} while (mCursor.moveToNext());
-		}
+		// Now create an array adapter and set it to display using our row
+		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
+				R.layout.note_row_layout, mCursor, mFrom, mTo);
 
-		// Fill list with our custom adapter
-		NoteAdapter adapter = new NoteAdapter(this, R.layout.note_row_layout,
-				notes);
 		setListAdapter(adapter);
 	}
 
@@ -178,13 +234,11 @@ public class NotesActivity extends ListActivity {
 		String title;
 		String note;
 
-		id++;
-
 		final long newId = id;
 
-		Log.d(TAG, Long.toString(newId));
+		Log.d(TAG, "Returning row: " + id);
 
-		mCursor = mNDbAdapter.fetchNote(newId);
+		mCursor = mNDbAdapter.fetchNote(id);
 
 		lineNumber = (mCursor.getInt(mCursor.getColumnIndex("number")));
 		title = (mCursor.getString(mCursor.getColumnIndex("title")));
@@ -237,8 +291,7 @@ public class NotesActivity extends ListActivity {
 											"Invalid Note! Both fields must contain some text!",
 											Toast.LENGTH_LONG).show();
 									dialog.cancel();
-									long oldId = newId - 1;
-									viewNote(oldId, textTitle, noteTitle, false);
+									viewNote(newId, textTitle, noteTitle, false);
 									// Otherwise save to Note database
 								} else {
 									// saveNote(lineNumber, textTitle,

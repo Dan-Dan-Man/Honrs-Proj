@@ -20,6 +20,7 @@ import com.lines.R;
  * @author Dan
  * 
  */
+// TODO: This is not needed anymore. Keep it just incase
 public class NoteAdapter extends ArrayAdapter<String> {
 
 	private ArrayList<String> notes;
@@ -41,9 +42,9 @@ public class NoteAdapter extends ArrayAdapter<String> {
 		String note = notes.get(position);
 		if (note != null) {
 			TextView mNote = (TextView) v.findViewById(R.id.textNote);
-			CheckBox mCheck = (CheckBox) v.findViewById(R.id.checkNote);
+			//CheckBox mCheck = (CheckBox) v.findViewById(R.id.checkNote);
 
-			mCheck.setFocusable(false);
+			//mCheck.setFocusable(false);
 			if (mNote != null) {
 				mNote.setText(note);
 			}

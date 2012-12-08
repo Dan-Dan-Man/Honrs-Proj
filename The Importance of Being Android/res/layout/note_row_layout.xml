@@ -8,16 +8,16 @@
         android:id="@+id/checkNote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
         android:layout_centerVertical="true"
-        android:textColor="#FFFFFF" />
+        android:layout_marginLeft="15dp"
+        android:focusable="false"
+        android:text="" />
 
     <TextView
         android:id="@+id/textNote"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/checkNote"
-        android:layout_alignBottom="@+id/checkNote"
+        android:layout_centerVertical="true"
         android:layout_marginLeft="20dp"
         android:layout_toRightOf="@+id/checkNote"
         android:text="Page 1 - Line 2"

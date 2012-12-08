@@ -85,6 +85,13 @@ public class NoteDbAdapter {
 		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
 				KEY_TITLE, KEY_NOTE }, null, null, null, null, null);
 	}
+	
+	public Cursor fetchNotes(String number) {
+		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
+				KEY_TITLE, KEY_NOTE }, KEY_NUMBER + "= ?", new String[] { number },
+				null, null, null);
+	}
+	
 
 	public Cursor fetchNote(long rowId) throws SQLException {
 		Cursor mCursor = mDb.query(true, DB_TABLE, new String[] { KEY_ROWID,

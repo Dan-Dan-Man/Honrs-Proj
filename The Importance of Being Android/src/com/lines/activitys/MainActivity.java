@@ -221,7 +221,7 @@ public class MainActivity extends ListActivity {
 			i.putExtra("EXTRA_PAGE", mPage.getText());
 			i.putExtra("EXTRA_CHARACTER", character);
 			MainActivity.this.startActivity(i);
-			mCursor.close();
+			// mCursor.close();
 			break;
 		case (QUICK_SEARCH):
 			break;
@@ -257,6 +257,7 @@ public class MainActivity extends ListActivity {
 			newNote(info.id, "", "", true);
 			return true;
 		case VIEW_NOTES:
+			showNotes(info.id);
 			return true;
 		case RECORD:
 			return true;
@@ -590,6 +591,48 @@ public class MainActivity extends ListActivity {
 	}
 
 	/**
+	 * This method goes to the NotesActivity and shows only the notes for the
+	 * selected line.
+	 * 
+	 * @param id
+	 *            - the selected item in the list
+	 */
+	private void showNotes(long id) {
+		// First check if there are notes to view. If not then tell user they
+		// must add note for current line first.
+		Cursor notes = mNDbAdapter.fetchNotes(Long.toString(getLineNumber(id)));
+		if (notes.getCount() > 0) {
+			Intent i = new Intent(MainActivity.this, NotesActivity.class);
+			i.putExtra("EXTRA_NUM", Long.toString(getLineNumber(id)));
+			MainActivity.this.startActivity(i);
+		} else {
+			Toast.makeText(getApplicationContext(),
+					"No saved notes for this line.", Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	/**
+	 * Get the line number of the current selected item in the list
+	 * 
+	 * @param id
+	 *            - the list item the user selects
+	 * @return - the line number
+	 */
+	private long getLineNumber(long id) {
+		int page = Integer.parseInt(mPage.getText().toString());
+		// We need to de-increment the page number so we can obtain the correct
+		// lineNumber
+		page--;
+
+		// Obtain the line number
+		// TODO: If we change so that Acts start on a new page, then this will
+		// need to change
+		// TODO: THIS WILL NOT WORK WHEN USER REMOVES STAGE DIRECTIONS OR SELECT
+		// OWN LINES!
+		return (((page * 23) + id) + 1);
+	}
+
+	/**
 	 * This method creates and shows a popup to the user when they are creating
 	 * a new performance note.
 	 * 
@@ -621,20 +664,7 @@ public class MainActivity extends ListActivity {
 
 		final EditText note = (EditText) notesView.findViewById(R.id.editNote);
 
-		int page = Integer.parseInt(mPage.getText().toString());
-		// We need to de-increment the page number so we can obtain the correct
-		// lineNumber
-		page--;
-
-		// Obtain the line number
-		// TODO: If we change so that Acts start on a new page, then this will
-		// need to change
-		final long lineNumber = ((page * 23) + id) + 1;
-
-		Log.d(TAG, Long.toString(lineNumber));
-
-		// Display the correct line number
-		id++;
+		// Log.d(TAG, Long.toString(lineNumber));
 
 		final long newId = id;
 
@@ -642,7 +672,7 @@ public class MainActivity extends ListActivity {
 		// default title
 		if (fresh) {
 			defaultTitle = "Page " + mPage.getText();
-			defaultTitle += " - Line " + Long.toString(newId);
+			defaultTitle += " - Line " + Long.toString(id + 1);
 			// Otherwise set the text the user has already entered
 		} else {
 			note.setText(defaultNote);
@@ -670,11 +700,11 @@ public class MainActivity extends ListActivity {
 											"Invalid Note! Both fields must contain some text!",
 											Toast.LENGTH_LONG).show();
 									dialog.cancel();
-									long oldId = newId - 1;
-									newNote(oldId, textTitle, noteTitle, false);
+									newNote(newId, textTitle, noteTitle, false);
 									// Otherwise save to Note database
 								} else {
-									saveNote(lineNumber, textTitle, noteTitle);
+									saveNote(getLineNumber(newId), textTitle,
+											noteTitle);
 								}
 
 							}
@@ -702,9 +732,6 @@ public class MainActivity extends ListActivity {
 	 * @param note
 	 * 
 	 */
-	// TODO: We are creating the note in the wrong place in the database. When a
-	// note is deleted, it acts as if it hasn't been and adds new notes after
-	// it, thus getting null pointers.
 	private void saveNote(long number, String title, String note) {
 		long id = mNDbAdapter.createNote((int) number, title, note);
 		Log.d(TAG, "Insert at row: " + Long.toString(id));

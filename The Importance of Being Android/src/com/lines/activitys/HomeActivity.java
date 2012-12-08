@@ -65,11 +65,14 @@ public class HomeActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.home_layout);
-		
-		// Create an object of the application class so we can check if a database for the play exists
+
+		// Create an object of the application class so we can check if a
+		// database for the play exists
 		app = (LinesApp) this.getApplication();
-		
+
 		// If database does not exist, then read default textfile ("earnest")
+		// TODO: If we press the back button at the home screen, and then reload
+		// the app, the database is re-populated.
 		if (!app.dbExists()) {
 			try {
 				readFile();
@@ -179,7 +182,7 @@ public class HomeActivity extends Activity {
 			mBottom.setText("Statistics");
 		}
 	}
-	
+
 	/**
 	 * Here we read the file, extracting the character name speaking the line.
 	 * 
@@ -199,7 +202,7 @@ public class HomeActivity extends Activity {
 		int lineNo = -1;
 		int actNo = 0;
 		int pageNo = 1;
-		
+
 		// Get adapter
 		mDbAdapter = app.getPlayAdapter();
 
@@ -297,8 +300,8 @@ public class HomeActivity extends Activity {
 			// file, create a new row in the database. Filter out text we don't
 			// want in our database.
 			if (!isAllUpperCase(words[0])) {
-				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo, "N",
-						"N", "N", 0, 0, 0);
+				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
+						"N", "N", "N", 0, 0, 0);
 				// If we're not adding to the database, then we need to reduce
 				// the line count.
 			} else {
@@ -323,7 +326,8 @@ public class HomeActivity extends Activity {
 	 * Method for checking if the first word of the current line is a character
 	 * name.
 	 * 
-	 * @param word - check to see if this String is a character in the play
+	 * @param word
+	 *            - check to see if this String is a character in the play
 	 * @return - true of false based on the result
 	 */
 	private boolean isCharacter(String word) {
@@ -338,7 +342,8 @@ public class HomeActivity extends Activity {
 	/**
 	 * Method for checking if the current word is entirely capitals.
 	 * 
-	 * @param word - check to see if this String is entirely uppercase
+	 * @param word
+	 *            - check to see if this String is entirely uppercase
 	 * @return allCaps - true or false based on the result of the method
 	 */
 	private boolean isAllUpperCase(String word) {
