@@ -37,7 +37,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AbsListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -57,8 +56,6 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-// TODO: If we're in Rehearsal mode, then we need to remember which lines we
-// should be showing when in onResume().
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -140,13 +137,12 @@ public class MainActivity extends ListActivity {
 		fillData("");
 		registerForContextMenu(getListView());
 
-		// TODO: Whenever we press next or prev, see if we can manually and
-		// slowly scroll down. Confusing when instant.
 		// When Next button is pressed, play jumps until user's next line.
 		mNext.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (rehearsal) {
 					visibleWords = 1;
+					setListViewPos();
 					fillData("forward");
 				}
 			}
@@ -170,6 +166,7 @@ public class MainActivity extends ListActivity {
 		mPrev.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				visibleWords = 1;
+				setListViewPos();
 				fillData("back");
 			}
 		});
@@ -206,12 +203,17 @@ public class MainActivity extends ListActivity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		// if (ownLines) {
-		// mCursor = mDbAdapter.fetchCharacter(character, pageNo);
-		// } else {
-		// mCursor = mDbAdapter.fetchPage(pageNo);
-		// }
-		fillData("");
+		if (ownLines) {
+			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
+		} else {
+			mCursor = mDbAdapter.fetchPage(pageNo);
+		}
+		if (rehearsal) {
+			fillData("forward");
+			fillData("back");
+		} else {
+			fillData("");
+		}
 	}
 
 	/**
@@ -284,12 +286,6 @@ public class MainActivity extends ListActivity {
 		case ADD_RECORD:
 			return true;
 		case STRIKE:
-			// TODO: Doesn't work
-			View listItem = getListView().getAdapter().getView(info.position,
-					null, null);
-			TextView textLine = (TextView) listItem.findViewById(R.id.textLine);
-			textLine.setPaintFlags(textLine.getPaintFlags()
-					| Paint.STRIKE_THRU_TEXT_FLAG);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -299,7 +295,6 @@ public class MainActivity extends ListActivity {
 	 * Here we reveal the appropriate word from the current line to the user.
 	 * 
 	 */
-	// TODO: If line starts with a stage direction and stage directions are
 	// filtered out, then user has to press prompt twice to reveal first word.
 	private void revealWord() {
 		Log.d(TAG, currentLine);
@@ -405,7 +400,6 @@ public class MainActivity extends ListActivity {
 		return lines;
 	}
 
-	// TODO: Find out exactly what this does. Don't think I need it
 	// // Called with the result of the other activity
 	// // requestCode was the origin request code send to the activity
 	// // resultCode is the return code, 0 is everything is ok
@@ -436,6 +430,7 @@ public class MainActivity extends ListActivity {
 				do {
 					lineArray.remove(j);
 				} while (lineArray.get(j) != ']');
+				lineArray.remove(j);
 				lineArray.remove(j);
 			}
 		}
@@ -551,12 +546,10 @@ public class MainActivity extends ListActivity {
 
 		// If we're in rehearsal mode, then we want to position the listview at
 		// the bottem.
-		if (rehearsal) {
-			// TODO: Always scrolls from top. Need to scroll from current
-			// position
-			getListView().smoothScrollToPosition(adapter.getCount());
-			setListViewPos();
-
+		if (rehearsal && command.equals("forward")) {
+			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
+		} else if (rehearsal && command.equals("back")) {
+			getListView().smoothScrollBy(-1, 1000);
 		}
 	}
 
@@ -567,7 +560,7 @@ public class MainActivity extends ListActivity {
 	 *            - Tells us if are going to the next or previous page.
 	 */
 	private void switchPage(boolean pgUp) {
-		boolean valid = true;
+		boolean validPage = true;
 		pgNum = Integer.parseInt(pageNo);
 
 		// Decide if we want to increment or decrement pages
@@ -580,10 +573,8 @@ public class MainActivity extends ListActivity {
 		pageNo = Integer.toString(pgNum);
 
 		// Here we handle if the user has selected to display own lines
-		// TODO: It needs two clicks because it finds the page its
-		// currently on and treats it as a valid page.
-		if (ownLines) {
-			valid = true;
+		if (ownLines || rehearsal) {
+			validPage = true;
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
 			// Here we make sure to filter out any empty pages (where the
 			// character doesn't appear)
@@ -597,13 +588,16 @@ public class MainActivity extends ListActivity {
 				mCursor = mDbAdapter.fetchCharacter(character, pageNo);
 			}
 			if (mCursor.getCount() == 0 || pgNum >= lastPage || pgNum <= 1) {
-				valid = false;
+				validPage = false;
 			}
 		} else {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
 		// Only display the page if we are on a valid page
-		if (valid) {
+		if (validPage) {
+			if (rehearsal) {
+				mCursor = mDbAdapter.fetchPage(pageNo);
+			}
 			String act = "";
 			if (mCursor.moveToFirst()) {
 				act = "Act "
@@ -616,11 +610,17 @@ public class MainActivity extends ListActivity {
 			topOffset = 0;
 			startManagingCursor(mCursor);
 			lines = new ArrayList<Line>();
-			fillData("");
+			if (rehearsal) {
+				fillData("forward");
+				fillData("back");
+			} else {
+				fillData("");
+			}
 		} else {
 			Toast.makeText(MainActivity.this,
 					"No more pages where this character appears.",
 					Toast.LENGTH_SHORT).show();
+			pageNo = (String) mPage.getText();
 		}
 	}
 
@@ -656,6 +656,8 @@ public class MainActivity extends ListActivity {
 		// get offset
 		View v = this.getListView().getChildAt(0);
 		topOffset = (v == null) ? 0 : v.getTop();
+		Log.d(TAG, "lastViewedPos after = " + lastViewedPos);
+		Log.d(TAG, "topOffset after = " + topOffset);
 	}
 
 	/**
@@ -783,6 +785,11 @@ public class MainActivity extends ListActivity {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
 		setListViewPos();
-		fillData("");
+		if (rehearsal) {
+			fillData("forward");
+			fillData("back");
+		} else {
+			fillData("");
+		}
 	}
 }
