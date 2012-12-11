@@ -57,60 +57,52 @@
         android:layout_below="@+id/imageAudio"
         android:layout_marginTop="5dp"
         android:background="#000000" >
-
+
         <ListView
             android:id="@id/android:list"
             android:layout_width="match_parent"
             android:layout_height="390dp"
+            android:layout_above="@+id/buttonPrompt"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true" >
+
         </ListView>
 
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="45dp"
+        <Button
+            android:id="@+id/buttonPrompt"
+            android:layout_width="120dp"
+            android:layout_height="50dp"
+            android:layout_centerHorizontal="true"
+            android:layout_alignParentBottom="true"
+            android:background="#365812"
+            android:gravity="center"
+            android:text="@string/line"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#FFFFFF" />
+
+        <Button
+            android:id="@+id/buttonNext"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_toRightOf="@+id/buttonPrompt"
+            android:background="#500000"
+            android:text="@string/next"
+            android:textColor="#FFFFFF"
+            android:textSize="22dp" />
+
+        <Button
+            android:id="@+id/buttonPrev"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
             android:layout_alignParentBottom="true"
             android:layout_alignParentLeft="true"
-            android:layout_marginTop="5dp"
-            android:background="#500000" >
-
-            <Button
-                android:id="@+id/buttonPrompt"
-                android:layout_width="120dp"
-                android:layout_height="fill_parent"
-                android:layout_centerHorizontal="true"
-                android:background="#365812"
-                android:gravity="center"
-                android:text="@string/line"
-                android:textAppearance="?android:attr/textAppearanceLarge"
-                android:textColor="#FFFFFF" />
-
-            <Button
-                android:id="@+id/buttonNext"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentTop="true"
-                android:layout_toRightOf="@+id/buttonPrompt"
-                android:background="@null"
-                android:text="@string/next"
-                android:textColor="#FFFFFF"
-                android:textSize="22dp" />
-
-            <Button
-                android:id="@+id/buttonPrev"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentTop="true"
-                android:layout_toLeftOf="@+id/buttonPrompt"
-                android:background="@null"
-                android:text="@string/prev"
-                android:textColor="#FFFFFF"
-                android:textSize="22dp" />
-        </RelativeLayout>
+            android:layout_toLeftOf="@+id/buttonPrompt"
+            android:background="#500000"
+            android:text="@string/prev"
+            android:textColor="#FFFFFF"
+            android:textSize="22dp" />
     </RelativeLayout>
 
 </RelativeLayout>

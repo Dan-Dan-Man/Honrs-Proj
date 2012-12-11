@@ -252,7 +252,6 @@ public class StatsActivity extends Activity {
 	 * Here we get the number of pages in the database
 	 * 
 	 */
-	// TODO: Convert act numbers to roman numerals maybe
 	private void populatePages(String act) {
 		pages = new ArrayList<String>();
 		// If both spinners are "All"

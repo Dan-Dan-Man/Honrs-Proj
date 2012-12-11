@@ -37,6 +37,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.EditText;
@@ -56,10 +57,8 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-
-// TODO: Bottom of list is hidden behind buttons - Temporarily fixed
-// TODO: When user returns from performance notes page, notes that have been
-// deleted still there until we move page.
+// TODO: If we're in Rehearsal mode, then we need to remember which lines we
+// should be showing when in onResume().
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -83,6 +82,8 @@ public class MainActivity extends ListActivity {
 	private int pgNum;
 	private int lastPage;
 	private int visibleWords = 1;
+	private int lastViewedPos;
+	private int topOffset;
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private static final int OPTIONS = 0;
 	private static final int STATS = 1;
@@ -139,6 +140,8 @@ public class MainActivity extends ListActivity {
 		fillData("");
 		registerForContextMenu(getListView());
 
+		// TODO: Whenever we press next or prev, see if we can manually and
+		// slowly scroll down. Confusing when instant.
 		// When Next button is pressed, play jumps until user's next line.
 		mNext.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -184,7 +187,6 @@ public class MainActivity extends ListActivity {
 		// Reveal word from current line if prompt button is pressed.
 		mPrompt.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				if (rehearsal) {
 					revealWord();
 				} else {
@@ -194,6 +196,22 @@ public class MainActivity extends ListActivity {
 				}
 			}
 		});
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		// if (ownLines) {
+		// mCursor = mDbAdapter.fetchCharacter(character, pageNo);
+		// } else {
+		// mCursor = mDbAdapter.fetchPage(pageNo);
+		// }
+		fillData("");
 	}
 
 	/**
@@ -218,12 +236,12 @@ public class MainActivity extends ListActivity {
 			finish();
 			break;
 		case (STATS):
+			setListViewPos();
 			Intent i = new Intent(MainActivity.this, StatsActivity.class);
 			i.putExtra("EXTRA_ACT", mAct.getText());
 			i.putExtra("EXTRA_PAGE", mPage.getText());
 			i.putExtra("EXTRA_CHARACTER", character);
 			MainActivity.this.startActivity(i);
-			// mCursor.close();
 			break;
 		case (QUICK_SEARCH):
 			break;
@@ -467,7 +485,7 @@ public class MainActivity extends ListActivity {
 				// Get current row's character and line
 				currentChar = mCursor.getString(mCursor
 						.getColumnIndex("character"));
-				newLine = "\n";
+				newLine = " ";
 				// Get the current value of whether there is a performance note
 				// or not
 				getNote = mCursor.getString(mCursor.getColumnIndex("note"));
@@ -529,10 +547,16 @@ public class MainActivity extends ListActivity {
 				lines);
 		setListAdapter(adapter);
 
+		this.getListView().setSelectionFromTop(lastViewedPos, topOffset);
+
 		// If we're in rehearsal mode, then we want to position the listview at
 		// the bottem.
 		if (rehearsal) {
-			this.setSelection(adapter.getCount());
+			// TODO: Always scrolls from top. Need to scroll from current
+			// position
+			getListView().smoothScrollToPosition(adapter.getCount());
+			setListViewPos();
+
 		}
 	}
 
@@ -588,6 +612,8 @@ public class MainActivity extends ListActivity {
 			mPage.setText(pageNo);
 			mAct.setText(act);
 			visibleWords = 1;
+			lastViewedPos = 0;
+			topOffset = 0;
 			startManagingCursor(mCursor);
 			lines = new ArrayList<Line>();
 			fillData("");
@@ -610,6 +636,7 @@ public class MainActivity extends ListActivity {
 		// must add note for current line first.
 		Cursor notes = mNDbAdapter.fetchNotes(Long.toString(getLineNumber(id)));
 		if (notes.getCount() > 0) {
+			setListViewPos();
 			Intent i = new Intent(MainActivity.this, NotesActivity.class);
 			i.putExtra("EXTRA_NUM", Long.toString(getLineNumber(id)));
 			MainActivity.this.startActivity(i);
@@ -617,6 +644,18 @@ public class MainActivity extends ListActivity {
 			Toast.makeText(getApplicationContext(),
 					"No saved notes for this line.", Toast.LENGTH_SHORT).show();
 		}
+	}
+
+	/**
+	 * Store the current scroll y value in listview.
+	 * 
+	 */
+	private void setListViewPos() {
+		// get scroll position
+		lastViewedPos = this.getListView().getFirstVisiblePosition();
+		// get offset
+		View v = this.getListView().getChildAt(0);
+		topOffset = (v == null) ? 0 : v.getTop();
 	}
 
 	/**
@@ -628,7 +667,7 @@ public class MainActivity extends ListActivity {
 	 */
 	private long getLineNumber(long id) {
 		long lineNo;
-		
+
 		lineNo = lines.get((int) id).getNumber();
 		lineNo++;
 
@@ -666,8 +705,6 @@ public class MainActivity extends ListActivity {
 				.findViewById(R.id.editTitle);
 
 		final EditText note = (EditText) notesView.findViewById(R.id.editNote);
-
-		// Log.d(TAG, Long.toString(lineNumber));
 
 		final long newId = id;
 
@@ -736,10 +773,7 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void saveNote(long number, String title, String note) {
-		long id = mNDbAdapter.createNote((int) number, title, note);
-		Log.d(TAG, "Insert at row: " + Long.toString(id));
-		// number++;
-		Log.d(TAG, "Saving at line: " + number);
+		mNDbAdapter.createNote((int) number, title, note);
 		mDbAdapter.updateNotes(number, "Y");
 		Toast.makeText(getApplicationContext(), "New performance note saved!",
 				Toast.LENGTH_LONG).show();
@@ -748,7 +782,7 @@ public class MainActivity extends ListActivity {
 		} else {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
+		setListViewPos();
 		fillData("");
 	}
-
 }

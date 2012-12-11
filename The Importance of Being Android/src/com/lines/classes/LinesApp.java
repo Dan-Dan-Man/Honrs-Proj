@@ -64,7 +64,7 @@ public class LinesApp extends Application {
 	/**
 	 * Return adapter to Note database.
 	 * 
-	 * @return
+	 * @return nDb
 	 */
 	public NoteDbAdapter getNoteAdapter() {
 		return nDb;
@@ -73,7 +73,7 @@ public class LinesApp extends Application {
 	/**
 	 * Return adapter to Play database.
 	 * 
-	 * @return
+	 * @return pDb
 	 */
 	public PlayDbAdapter getPlayAdapter() {
 		return pDb;

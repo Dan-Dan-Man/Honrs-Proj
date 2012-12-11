@@ -34,6 +34,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -50,9 +52,13 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
+// TODO: Maybe have a "GoTo" option where we can go to the current point in the
+// play where this note is saved.
 public class NotesActivity extends ListActivity {
 
 	private static final String TAG = "NotesActivity";
+	private Button mDelete;
+	private Button mBack;
 	private NoteDbAdapter mNDbAdapter;
 	private PlayDbAdapter mDbAdapter;
 	private Cursor mCursor;
@@ -66,6 +72,9 @@ public class NotesActivity extends ListActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.view_notes_layout);
 		this.getListView().setDividerHeight(0);
+
+		mDelete = (Button) findViewById(R.id.buttonDelete);
+		mBack = (Button) findViewById(R.id.buttonBack);
 
 		LinesApp app = (LinesApp) this.getApplication();
 		mDbAdapter = app.getPlayAdapter();
@@ -85,6 +94,18 @@ public class NotesActivity extends ListActivity {
 		startManagingCursor(mCursor);
 		fillData();
 		registerForContextMenu(getListView());
+
+		mDelete.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				getUserConfirm(true, 0);
+			}
+		});
+
+		mBack.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				finish();
+			}
+		});
 	}
 
 	/**
@@ -108,7 +129,8 @@ public class NotesActivity extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case DELETE_ID:
-			deleteNote(info.id);
+			getUserConfirm(false, info.id);
+			// deleteNote(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -136,6 +158,38 @@ public class NotesActivity extends ListActivity {
 		Log.d(TAG, "Deleting with lineNo: " + lineNo);
 		mNDbAdapter.deleteNote(id);
 		updatePlayDb(lineNo);
+		if (lineNum != null) {
+			mCursor = mNDbAdapter.fetchNotes(lineNum);
+		} else {
+			mCursor = mNDbAdapter.fetchAllNotes();
+		}
+		fillData();
+	}
+
+	/**
+	 * When the user presses Delete, we loop through all the saved notes, check
+	 * which have been selected and delete from the database.
+	 * 
+	 */
+	private void deleteMultiple() {
+
+		int length = this.getListView().getChildCount();
+
+		// Loop through each row, check if an item has been checked and
+		// delete the note from the database
+		for (int i = 0; i < length; i++) {
+			CheckBox currentCheck = (CheckBox) this.getListView().getChildAt(i)
+					.findViewById(R.id.checkNote);
+			if (currentCheck.isChecked()) {
+				long id = this.getListView().getAdapter().getItemId(i);
+				mCursor = mNDbAdapter.fetchNote(id);
+				int lineNo = mCursor.getInt(mCursor.getColumnIndex("number"));
+				mNDbAdapter.deleteNote(id);
+				updatePlayDb(lineNo);
+			}
+		}
+
+		// Finally update our Cursor and fill the list
 		if (lineNum != null) {
 			mCursor = mNDbAdapter.fetchNotes(lineNum);
 		} else {
@@ -179,29 +233,39 @@ public class NotesActivity extends ListActivity {
 	}
 
 	/**
+	 * Check if no CheckBoxes have been checked, and inform user at least must
+	 * be before deletion
+	 * 
+	 * @return - true or false. True if none are checked
+	 */
+	private boolean checkSelection() {
+		int length = this.getListView().getChildCount();
+		boolean noneChecked = true;
+
+		// First we want to check if none have been selected, and inform the
+		// user they must first select one
+		for (int i = 0; i < length; i++) {
+			CheckBox currentCheck = (CheckBox) this.getListView().getChildAt(i)
+					.findViewById(R.id.checkNote);
+			if (currentCheck.isChecked()) {
+				noneChecked = false;
+				break;
+			}
+		}
+
+		// Inform user if none are checked
+		if (noneChecked) {
+			Toast.makeText(getApplicationContext(),
+					"At least one item must be selected before deleting.",
+					Toast.LENGTH_SHORT).show();
+		}
+		return noneChecked;
+	}
+
+	/**
 	 * Fill the list with the items in the Note database.
 	 * 
 	 */
-	// private void fillData() {
-	// String note;
-	// notes = new ArrayList<String>();
-	//
-	// // Populate arraylist with database data
-	// if (mCursor.moveToFirst()) {
-	// do {
-	// // Get current row's character and line
-	// note = mCursor.getString(mCursor.getColumnIndex("title"));
-	// Log.d(TAG, "Adding note: " + note);
-	// notes.add(note);
-	// } while (mCursor.moveToNext());
-	// }
-	//
-	// // Fill list with our custom adapter
-	// NoteAdapter adapter = new NoteAdapter(this, R.layout.note_row_layout,
-	// notes);
-	// setListAdapter(adapter);
-	// }
-
 	private void fillData() {
 		mFrom = new String[] { NoteDbAdapter.KEY_TITLE };
 		mTo = new int[] { R.id.textNote };
@@ -291,14 +355,14 @@ public class NotesActivity extends ListActivity {
 										|| noteTitle.equals("")) {
 									Toast.makeText(
 											getApplicationContext(),
-											"Invalid Note! Both fields must contain some text!",
+											"Both fields must contain some text before changes can be saved.",
 											Toast.LENGTH_LONG).show();
-									dialog.cancel();
 									viewNote(newId, textTitle, noteTitle, false);
+									dialog.cancel();
 									// Otherwise save to Note database
 								} else {
-									// saveNote(lineNumber, textTitle,
-									// noteTitle);
+									saveNote(newId, lineNumber, textTitle,
+											noteTitle);
 								}
 
 							}
@@ -318,18 +382,72 @@ public class NotesActivity extends ListActivity {
 	}
 
 	/**
-	 * When the user decides to save their note, save to a new database.
+	 * When the user decides to save their changes, update the selected note.
 	 * 
+	 * @param id
+	 *            - the position of the note in the DB
 	 * @param number
+	 *            - the line number that the note is associated with
 	 * @param title
+	 *            - the title of the note
 	 * @param note
+	 *            - the note itself
 	 * 
 	 */
-	private void saveNote(long number, String title, String note) {
-		mNDbAdapter.createNote((int) number, title, note);
-		mDbAdapter.updateNotes(number, "Y");
-		Toast.makeText(getApplicationContext(), "New performance note saved!",
+	private void saveNote(long id, long number, String title, String note) {
+		mNDbAdapter.updateNote(id, (int) number, title, note);
+		Toast.makeText(getApplicationContext(), "Performance Note updated!",
 				Toast.LENGTH_LONG).show();
+		if (lineNum != null) {
+			mCursor = mNDbAdapter.fetchNotes(lineNum);
+		} else {
+			mCursor = mNDbAdapter.fetchAllNotes();
+		}
+		fillData();
+	}
+
+	/**
+	 * Before we delete items from the database, first get the user's
+	 * confirmation.
+	 * 
+	 * @param multiple
+	 *            - Checks if we are deleting one or more items
+	 * @param id
+	 *            - Get the rowId of the selected item
+	 */
+	private void getUserConfirm(final boolean multiple, long id) {
+
+		// First check if no checkboxes have been checked. If none have then we
+		// end it right here
+		if (multiple) {
+			if (checkSelection()) {
+				return;
+			}
+		}
+
+		final long newId = id;
+
+		// Create Dialog to get user's confirmation
+		new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("Delete")
+				.setMessage("The selected item(s) will be deleted")
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						if (multiple) {
+							deleteMultiple();
+						} else {
+							deleteNote(newId);
+						}
+					}
+
+				})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						}).show();
 	}
 
 }
