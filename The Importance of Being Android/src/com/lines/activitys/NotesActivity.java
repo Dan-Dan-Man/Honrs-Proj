@@ -130,7 +130,6 @@ public class NotesActivity extends ListActivity {
 		switch (item.getItemId()) {
 		case DELETE_ID:
 			getUserConfirm(false, info.id);
-			// deleteNote(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
@@ -233,8 +232,8 @@ public class NotesActivity extends ListActivity {
 	}
 
 	/**
-	 * Check if no CheckBoxes have been checked, and inform user at least must
-	 * be before deletion
+	 * Check if no CheckBoxes have been checked, and inform user at least one
+	 * must be before deletion
 	 * 
 	 * @return - true or false. True if none are checked
 	 */
@@ -267,8 +266,8 @@ public class NotesActivity extends ListActivity {
 	 * 
 	 */
 	private void fillData() {
-		mFrom = new String[] { NoteDbAdapter.KEY_TITLE };
-		mTo = new int[] { R.id.textNote };
+		mFrom = new String[] { NoteDbAdapter.KEY_TITLE, NoteDbAdapter.KEY_NOTE };
+		mTo = new int[] { R.id.textTitle, R.id.textNote };
 
 		// Now create an array adapter and set it to display using our row
 		SimpleCursorAdapter adapter = new SimpleCursorAdapter(this,
@@ -294,6 +293,7 @@ public class NotesActivity extends ListActivity {
 	 *            the current note.
 	 * 
 	 */
+	// TODO: Maybe only allow text to be edited when user selects an edit option
 	private void viewNote(long id, String defaultTitle, String defaultNote,
 			boolean fresh) {
 
@@ -431,7 +431,7 @@ public class NotesActivity extends ListActivity {
 		new AlertDialog.Builder(this)
 				.setIcon(android.R.drawable.ic_dialog_alert)
 				.setTitle("Delete")
-				.setMessage("The selected item(s) will be deleted")
+				.setMessage("The selected note(s) will be deleted")
 				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						if (multiple) {

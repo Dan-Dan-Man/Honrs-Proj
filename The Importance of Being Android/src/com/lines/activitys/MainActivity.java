@@ -21,6 +21,7 @@
 
 package com.lines.activitys;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import android.app.AlertDialog;
@@ -28,18 +29,27 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
-import android.graphics.Paint;
+import android.media.MediaPlayer;
+import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Environment;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.Chronometer.OnChronometerTickListener;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,6 +66,7 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
+// TODO: This class is rather large. Need to refactor a bit
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -64,6 +75,7 @@ public class MainActivity extends ListActivity {
 	private Button mNext;
 	private Button mPrev;
 	private Button mPrompt;
+	private ImageButton mAudio;
 	private Cursor mCursor;
 	private PlayDbAdapter mDbAdapter;
 	private NoteDbAdapter mNDbAdapter;
@@ -90,6 +102,9 @@ public class MainActivity extends ListActivity {
 	private static final int RECORD = 2;
 	private static final int ADD_RECORD = 3;
 	private static final int STRIKE = 4;
+	private MediaPlayer player;
+	private MediaRecorder recorder;
+	private String OUTPUT_FILE;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -100,6 +115,7 @@ public class MainActivity extends ListActivity {
 		mNext = (Button) findViewById(R.id.buttonNext);
 		mPrev = (Button) findViewById(R.id.buttonPrev);
 		mPrompt = (Button) findViewById(R.id.buttonPrompt);
+		mAudio = (ImageButton) findViewById(R.id.imageAudio);
 		mAct = (TextView) findViewById(R.id.textAct);
 		mPage = (TextView) findViewById(R.id.textPage);
 
@@ -193,6 +209,12 @@ public class MainActivity extends ListActivity {
 				}
 			}
 		});
+
+		mAudio.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				showRecordingDialog();
+			}
+		});
 	}
 
 	@Override
@@ -211,6 +233,7 @@ public class MainActivity extends ListActivity {
 		if (rehearsal) {
 			fillData("forward");
 			fillData("back");
+			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
 		} else {
 			fillData("");
 		}
@@ -295,7 +318,6 @@ public class MainActivity extends ListActivity {
 	 * Here we reveal the appropriate word from the current line to the user.
 	 * 
 	 */
-	// filtered out, then user has to press prompt twice to reveal first word.
 	private void revealWord() {
 		Log.d(TAG, currentLine);
 		String words[] = currentLine.split("\\s+");
@@ -613,6 +635,7 @@ public class MainActivity extends ListActivity {
 			if (rehearsal) {
 				fillData("forward");
 				fillData("back");
+				getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
 			} else {
 				fillData("");
 			}
@@ -790,6 +813,271 @@ public class MainActivity extends ListActivity {
 			fillData("back");
 		} else {
 			fillData("");
+		}
+	}
+
+	// //////////// RECORDING METHODS //////////////////
+
+	/**
+	 * Before we start the recording, we ask the user if they are ready.
+	 * 
+	 */
+	private void showRecordingDialog() {
+		new AlertDialog.Builder(this)
+				// TODO: Maybe set a different icon here
+				.setIcon(android.R.drawable.radiobutton_on_background)
+				.setTitle("Record")
+				.setMessage("When ready, press Ok to begin recording")
+				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						try {
+							beginRecording();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+					}
+
+				})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						}).show();
+	}
+
+	/**
+	 * Here we record the user rehearsing their line(s) and display to them a
+	 * timer showing time elapsed.
+	 * 
+	 * @throws Exception
+	 */
+	private void beginRecording() throws Exception {
+		LayoutInflater li = LayoutInflater.from(this);
+		View recordView = li.inflate(R.layout.record_layout, null);
+
+		// Create temporary file to store audio recording
+		// TODO: If user saves their file as "temp" then it will be overwritten.
+		OUTPUT_FILE = Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/audio/temp.3gpp";
+		ditchRecorder();
+		final File temp = new File(OUTPUT_FILE);
+
+		if (temp.exists()) {
+			temp.delete();
+		}
+
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+		alertDialogBuilder.setView(recordView);
+
+		alertDialogBuilder.setCancelable(false).setPositiveButton(
+				"Stop Recording", new DialogInterface.OnClickListener() {
+					// Stop recording and move to next popup to name the audio
+					// file
+					public void onClick(DialogInterface dialog, int id) {
+						recorder.stop();
+						nameRecording(temp);
+					}
+				});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		// show it
+		alertDialog.show();
+
+		// Setup and start recording
+		recorder = new MediaRecorder();
+		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+		recorder.setOutputFile(OUTPUT_FILE);
+		recorder.prepare();
+		recorder.start();
+
+		Chronometer timer = (Chronometer) recordView.findViewById(R.id.chrono);
+		final TextView text = (TextView) recordView.findViewById(R.id.textTime);
+
+		// Update our textview displaying the timer elapsed each second
+		timer.setOnChronometerTickListener(new OnChronometerTickListener() {
+			public void onChronometerTick(Chronometer chrono) {
+				String asText = chrono.getText().toString();
+				text.setText(asText);
+			}
+		});
+		timer.start();
+	}
+
+	/**
+	 * Here the user can preview and save their recording
+	 * 
+	 * @param temp
+	 *            - The newly created audio file
+	 */
+	private void nameRecording(final File temp) {
+		LayoutInflater li = LayoutInflater.from(this);
+		View recordView = li.inflate(R.layout.save_recording_layout, null);
+
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+		alertDialogBuilder.setView(recordView);
+
+		final EditText title = (EditText) recordView
+				.findViewById(R.id.editTitle);
+
+		final ImageButton preview = (ImageButton) recordView
+				.findViewById(R.id.imagePreview);
+
+		final ImageButton stop = (ImageButton) recordView
+				.findViewById(R.id.imageStop);
+
+		final SeekBar seekBar = (SeekBar) recordView
+				.findViewById(R.id.seekBarAudio);
+
+		// Disable SeekBar from being touched
+		seekBar.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				return true;
+			}
+		});
+
+		// Play recording
+		preview.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					preview.setVisibility(View.INVISIBLE);
+					stop.setVisibility(View.VISIBLE);
+					preview.setEnabled(false);
+					stop.setEnabled(true);
+					playRecording(seekBar, preview, stop);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		// Stop recording
+		// TODO: Need to find out how to stop CountDownTimer when this button is
+		// pressed
+		stop.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				preview.setVisibility(View.VISIBLE);
+				stop.setVisibility(View.INVISIBLE);
+				preview.setEnabled(true);
+				stop.setEnabled(false);
+				player.stop();
+				seekBar.setProgress(0);
+			}
+		});
+
+		alertDialogBuilder
+				.setCancelable(false)
+				.setPositiveButton("Save",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								String textTitle = title.getText().toString();
+								// If textbox is blank, then recall
+								// method and close the current one
+								// TODO: Need to make sure there are valid
+								// filenames being created! Maybe theres some
+								// library to handle this.
+								// TODO: Also check filename doesn't already
+								// exist
+								if (textTitle.equals("")) {
+									Toast.makeText(
+											getApplicationContext(),
+											"You must name the recording before saving!",
+											Toast.LENGTH_LONG).show();
+									dialog.cancel();
+									nameRecording(temp);
+									// Otherwise save to Note database
+								} else {
+									saveRecording(temp, textTitle);
+								}
+							}
+						})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								dialog.cancel();
+							}
+						});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		// show it
+		alertDialog.show();
+	}
+
+	/**
+	 * Playback the recording
+	 * 
+	 * @throws Exception
+	 */
+	private void playRecording(final SeekBar seekBar,
+			final ImageButton preview, final ImageButton stop) throws Exception {
+		ditchPlayer();
+		player = new MediaPlayer();
+		player.setDataSource(OUTPUT_FILE);
+		player.prepare();
+		player.start();
+
+		seekBar.setMax(player.getDuration());
+
+		// Increment the progress bar each second
+		new CountDownTimer(player.getDuration(), 250) {
+			public void onTick(long millisUntilFinished) {
+				seekBar.setProgress(seekBar.getProgress() + 250);
+			}
+
+			public void onFinish() {
+				preview.setVisibility(View.VISIBLE);
+				stop.setVisibility(View.INVISIBLE);
+				preview.setEnabled(true);
+				stop.setEnabled(false);
+				seekBar.setProgress(0);
+			}
+		}.start();
+	}
+
+	/**
+	 * Finally rename the temporary audio file with the user's own filename
+	 * 
+	 * @param temp
+	 *            - the audio file
+	 * @param filename
+	 *            - user's filename choice
+	 */
+	private void saveRecording(File temp, String filename) {
+		String directory = Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/audio/";
+
+		File newFile = new File(directory + filename + ".3gpp");
+		temp.renameTo(newFile);
+
+		Toast.makeText(getApplicationContext(), "New recording saved!",
+				Toast.LENGTH_LONG).show();
+	}
+
+	/**
+	 * Handle our MediaRecorder
+	 * 
+	 */
+	private void ditchRecorder() {
+		if (recorder != null) {
+			recorder.release();
+		}
+	}
+
+	/**
+	 * Handle our MediaPlayer
+	 * 
+	 */
+	private void ditchPlayer() {
+		if (player != null) {
+			player.release();
 		}
 	}
 }

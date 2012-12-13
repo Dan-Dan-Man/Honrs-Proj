@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000" >
+
+    <TextView
+        android:id="@+id/textTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text="Name"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp" />
+
+    <EditText
+        android:id="@+id/editTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textTitle"
+        android:layout_centerHorizontal="true"
+        android:ems="10"
+        android:hint="Enter a name..." />
+
+    <TextView
+        android:id="@+id/textPreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/editTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:text="Preview"
+        android:textColor="#FFFFFF"
+        android:textSize="20dp" />
+
+    <ImageButton
+        android:id="@+id/imagePreview"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textPreview"
+        android:layout_centerHorizontal="true"
+        android:background="@null"
+        android:src="@android:drawable/ic_media_play" />
+
+    <SeekBar
+        android:id="@+id/seekBarAudio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/editTitle"
+        android:layout_alignRight="@+id/editTitle"
+        android:layout_below="@+id/imagePreview"
+        android:layout_marginTop="5dp" />
+
+    <ImageButton
+        android:id="@+id/imageStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textPreview"
+        android:layout_centerHorizontal="true"
+        android:background="@null"
+        android:src="@android:drawable/ic_media_pause"
+        android:visibility="invisible" />
+
+</RelativeLayout>

@@ -137,7 +137,8 @@ public class HomeActivity extends Activity {
 			Intent i = new Intent(this, NotesActivity.class);
 			startActivityForResult(i, 0);
 		} else if (mMiddle.getText().toString().equals("Recordings")) {
-			// TODO: Create recordings screen
+			Intent i = new Intent(this, RecordingsActivity.class);
+			startActivityForResult(i, 0);
 		} else if (mMiddle.getText().toString().equals("Help")) {
 			Intent i = new Intent(this, HelpActivity.class);
 			startActivityForResult(i, 0);

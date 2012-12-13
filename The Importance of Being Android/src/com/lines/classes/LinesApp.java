@@ -21,9 +21,12 @@
 
 package com.lines.classes;
 
+import java.io.File;
+
 import android.app.Application;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
+import android.os.Environment;
 import android.util.Log;
 
 import com.lines.database.notes.NoteDbAdapter;
@@ -59,6 +62,14 @@ public class LinesApp extends Application {
 		Log.d(TAG, "Opening Databases");
 		nDb.open();
 		pDb.open();
+		
+		// Create folder to save audio files
+		File audio = new File(Environment.getExternalStorageDirectory() + "/learnyourlines/audio");
+		
+		if (!audio.exists()) {
+			Log.i(TAG, "Creating audio directory");
+			audio.mkdirs();
+		}
 	}
 
 	/**
