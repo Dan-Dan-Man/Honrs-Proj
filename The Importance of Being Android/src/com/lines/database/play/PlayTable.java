@@ -38,9 +38,9 @@ public class PlayTable {
 			+ "number integer not null, " + "character text not null, "
 			+ "line text not null, " + "act integer not null, "
 			+ "page integer not null, " + "note text not null, "
-			+ "striked text not null, " + "highlight text not null, "
-			+ "views integer not null, " + "prompts integer not null, "
-			+ "completions integer not null);";
+			+ "audio text not null, " + "striked text not null, "
+			+ "highlight text not null, " + "views integer not null, "
+			+ "prompts integer not null, " + "completions integer not null);";
 
 	public static void onCreate(SQLiteDatabase database) {
 		database.execSQL(DATABASE_CREATE);

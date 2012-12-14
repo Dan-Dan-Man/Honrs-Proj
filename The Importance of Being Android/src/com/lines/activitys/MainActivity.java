@@ -34,6 +34,7 @@ import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -67,6 +68,8 @@ import com.lines.database.play.PlayDbAdapter;
  * 
  */
 // TODO: This class is rather large. Need to refactor a bit
+// TODO: If in rehearsal mode, we cannot allow the user to play recordings for
+// the hidden line!
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -99,12 +102,15 @@ public class MainActivity extends ListActivity {
 	private static final int QUICK_SEARCH = 2;
 	private static final int ADD_NOTE = 0;
 	private static final int VIEW_NOTES = 1;
-	private static final int RECORD = 2;
+	private static final int PLAY_RECORD = 2;
 	private static final int ADD_RECORD = 3;
-	private static final int STRIKE = 4;
+	private static final int REMOVE_RECORD = 4;
+	private static final int STRIKE = 5;
 	private MediaPlayer player;
 	private MediaRecorder recorder;
-	private String OUTPUT_FILE;
+	// TODO: If user saves their file as "temp" then it will be overwritten.
+	private static final String OUTPUT_FILE = Environment
+			.getExternalStorageDirectory() + "/learnyourlines/audio/temp.3gpp";;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -212,7 +218,12 @@ public class MainActivity extends ListActivity {
 
 		mAudio.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				showRecordingDialog();
+				try {
+					showRecordingDialog();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		});
 	}
@@ -269,6 +280,7 @@ public class MainActivity extends ListActivity {
 			MainActivity.this.startActivity(i);
 			break;
 		case (QUICK_SEARCH):
+			// TODO: Allow user to jump to any page in script
 			break;
 		}
 		return false;
@@ -285,9 +297,10 @@ public class MainActivity extends ListActivity {
 		menu.setHeaderTitle("Option");
 		menu.add(0, ADD_NOTE, 0, "Add new note");
 		menu.add(0, VIEW_NOTES, 1, "View available notes");
-		menu.add(0, RECORD, 2, "Begin recording");
+		menu.add(0, PLAY_RECORD, 2, "Play recording");
 		menu.add(0, ADD_RECORD, 3, "Apply recording");
-		menu.add(0, STRIKE, 4, "Strikeout text");
+		menu.add(0, REMOVE_RECORD, 4, "Remove recording");
+		menu.add(0, STRIKE, 5, "Strikeout text");
 	}
 
 	/**
@@ -304,14 +317,100 @@ public class MainActivity extends ListActivity {
 		case VIEW_NOTES:
 			showNotes(info.id);
 			return true;
-		case RECORD:
+		case PLAY_RECORD:
+			try {
+				playSelectedRecording(info.id);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return true;
 		case ADD_RECORD:
+			setListViewPos();
+			Intent i = new Intent(MainActivity.this, RecordingsActivity.class);
+			Log.d(TAG,
+					"LineNo being passed through: "
+							+ Long.toString(getLineNumber(info.id)));
+			i.putExtra("EXTRA_NUM", Long.toString(getLineNumber(info.id)));
+			MainActivity.this.startActivity(i);
+			return true;
+		case REMOVE_RECORD:
+			removeRecording(info.id);
 			return true;
 		case STRIKE:
 			return true;
 		}
 		return super.onContextItemSelected(item);
+	}
+
+	/**
+	 * Get the file associated with the selected line and play it.
+	 * 
+	 * @param id - the position of the selected item in the list
+	 * @throws Exception
+	 */
+	private void playSelectedRecording(long id) throws Exception {
+		if (audioApplied(id)) {
+			Cursor line = mDbAdapter.fetchLine(getLineNumber(id));
+			String filename = line.getString(line.getColumnIndex("audio"));
+
+			ditchPlayer();
+			player = new MediaPlayer();
+			player.setDataSource(filename);
+			player.prepare();
+			player.start();
+		}
+	}
+
+	/**
+	 * Update the Play Db to remove the filename of the audio file that is
+	 * associated with this Line.
+	 * 
+	 * @param id
+	 *            - the position of the selected line in the list
+	 */
+	private void removeRecording(long id) {
+		if (audioApplied(id)) {
+			mDbAdapter.updateAudio(getLineNumber(id), "N");
+			if (ownLines) {
+				mCursor = mDbAdapter.fetchCharacter(character, pageNo);
+			} else {
+				mCursor = mDbAdapter.fetchPage(pageNo);
+			}
+			setListViewPos();
+			if (rehearsal) {
+				fillData("forward");
+				fillData("back");
+				getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
+			} else {
+				fillData("");
+			}
+		}
+	}
+
+	/**
+	 * Checks if there is an audio file that has been applied to the selected
+	 * line
+	 * 
+	 * @param id
+	 *            - the position of the selected line in the list
+	 * @return - true if file found, false if not
+	 */
+	private boolean audioApplied(long id) {
+		// Check database
+		Cursor line = mDbAdapter.fetchLine(getLineNumber(id));
+
+		String audio = line.getString(line.getColumnIndex("audio"));
+
+		if (audio.equals("N")) {
+			Toast.makeText(
+					getApplicationContext(),
+					"No audio file found! You must first record and apply an audio file.",
+					Toast.LENGTH_LONG).show();
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -322,6 +421,7 @@ public class MainActivity extends ListActivity {
 		Log.d(TAG, currentLine);
 		String words[] = currentLine.split("\\s+");
 		boolean note;
+		boolean audio;
 		int number;
 
 		// Only obtain next word if there are any left
@@ -331,13 +431,14 @@ public class MainActivity extends ListActivity {
 			for (int i = 0; i < visibleWords; i++) {
 				line += words[i] + " ";
 			}
-			// When we create a new line, we want to keep the note value and the
-			// line number the same
+			// When we create a new line, we want to keep the note value, audio
+			// value and the line number the same
 			note = lines.get(lines.size() - 1).getNote();
+			audio = lines.get(lines.size() - 1).getAudio();
 			number = lines.get(lines.size() - 1).getNumber();
 			// Update the line we are working with
 			lines.remove(lines.size() - 1);
-			Line newLine = new Line(number, character, line, note);
+			Line newLine = new Line(number, character, line, note, audio);
 			lines.add(newLine);
 
 			// Update the Listview
@@ -381,6 +482,8 @@ public class MainActivity extends ListActivity {
 		ArrayList<Character> lineArray;
 		boolean note;
 		int number;
+		boolean audio;
+
 		// If the character's name is "STAGE." then we remove the whole line
 		for (int i = 0; i < lines.size(); i++) {
 			if (lines.get(i).getCharacter().equals("STAGE.")) {
@@ -413,9 +516,11 @@ public class MainActivity extends ListActivity {
 				// filtered one
 				String character = lines.get(i).getCharacter();
 				note = lines.get(i).getNote();
+				audio = lines.get(i).getAudio();
 				number = lines.get(i).getNumber();
 				lines.remove(i);
-				Line newLine = new Line(number, character, sb.toString(), note);
+				Line newLine = new Line(number, character, sb.toString(), note,
+						audio);
 				lines.add(i, newLine);
 			}
 		}
@@ -479,11 +584,11 @@ public class MainActivity extends ListActivity {
 		String currentChar;
 		String newLine;
 		String getNote;
+		String getAudio;
 		boolean note;
+		boolean audio;
 		int number;
 		int visibleLines = 0;
-
-		Log.d(TAG, "No. of lines: " + Integer.toString(mCursor.getCount()));
 
 		// Get the number of visible lines
 		for (Line l : lines) {
@@ -496,9 +601,6 @@ public class MainActivity extends ListActivity {
 		// Loop through each row in the Cursor
 		if (mCursor.moveToFirst()) {
 			do {
-				// int lineNo =
-				// mCursor.getInt(mCursor.getColumnIndex("number"));
-				// Log.d(TAG, "Current line No.: " + Integer.toString(lineNo));
 				// Get current row's character and line
 				currentChar = mCursor.getString(mCursor
 						.getColumnIndex("character"));
@@ -506,11 +608,18 @@ public class MainActivity extends ListActivity {
 				// Get the current value of whether there is a performance note
 				// or not
 				getNote = mCursor.getString(mCursor.getColumnIndex("note"));
+				getAudio = mCursor.getString(mCursor.getColumnIndex("audio"));
 				number = mCursor.getInt(mCursor.getColumnIndex("number"));
 				if (getNote.equals("Y")) {
 					note = true;
 				} else {
 					note = false;
+				}
+
+				if (getAudio.equals("N")) {
+					audio = false;
+				} else {
+					audio = true;
 				}
 
 				// If we're in rehearsal mode then we need to check which lines
@@ -550,7 +659,7 @@ public class MainActivity extends ListActivity {
 					newLine = mCursor.getString(mCursor.getColumnIndex("line"));
 				}
 				// Create new line and add it to ArrayList
-				line = new Line(number, currentChar, newLine, note);
+				line = new Line(number, currentChar, newLine, note, audio);
 				lines.add(line);
 			} while (mCursor.moveToNext());
 		}
@@ -819,85 +928,74 @@ public class MainActivity extends ListActivity {
 	// //////////// RECORDING METHODS //////////////////
 
 	/**
-	 * Before we start the recording, we ask the user if they are ready.
-	 * 
-	 */
-	private void showRecordingDialog() {
-		new AlertDialog.Builder(this)
-				// TODO: Maybe set a different icon here
-				.setIcon(android.R.drawable.radiobutton_on_background)
-				.setTitle("Record")
-				.setMessage("When ready, press Ok to begin recording")
-				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						try {
-							beginRecording();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-					}
-
-				})
-				.setNegativeButton("Cancel",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								dialog.cancel();
-							}
-						}).show();
-	}
-
-	/**
 	 * Here we record the user rehearsing their line(s) and display to them a
 	 * timer showing time elapsed.
 	 * 
 	 * @throws Exception
 	 */
-	private void beginRecording() throws Exception {
-		LayoutInflater li = LayoutInflater.from(this);
-		View recordView = li.inflate(R.layout.record_layout, null);
-
+	private void showRecordingDialog() throws Exception {
 		// Create temporary file to store audio recording
-		// TODO: If user saves their file as "temp" then it will be overwritten.
-		OUTPUT_FILE = Environment.getExternalStorageDirectory()
-				+ "/learnyourlines/audio/temp.3gpp";
-		ditchRecorder();
 		final File temp = new File(OUTPUT_FILE);
 
+		// Delete temporary file if it already exists
 		if (temp.exists()) {
 			temp.delete();
 		}
+
+		LayoutInflater li = LayoutInflater.from(this);
+		View recordView = li.inflate(R.layout.record_layout, null);
 
 		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
 
 		alertDialogBuilder.setView(recordView);
 
-		alertDialogBuilder.setCancelable(false).setPositiveButton(
-				"Stop Recording", new DialogInterface.OnClickListener() {
-					// Stop recording and move to next popup to name the audio
-					// file
-					public void onClick(DialogInterface dialog, int id) {
-						recorder.stop();
-						nameRecording(temp);
-					}
-				});
-
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		// show it
-		alertDialog.show();
-
-		// Setup and start recording
-		recorder = new MediaRecorder();
-		recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-		recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-		recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-		recorder.setOutputFile(OUTPUT_FILE);
-		recorder.prepare();
-		recorder.start();
-
-		Chronometer timer = (Chronometer) recordView.findViewById(R.id.chrono);
+		final Chronometer timer = (Chronometer) recordView
+				.findViewById(R.id.chrono);
 		final TextView text = (TextView) recordView.findViewById(R.id.textTime);
+		final ImageButton startRecord = (ImageButton) recordView
+				.findViewById(R.id.imageButtonRecordStart);
+		final ImageButton stopRecord = (ImageButton) recordView
+				.findViewById(R.id.imageButtonRecordStop);
+
+		startRecord.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					// Update buttons
+					startRecord.setEnabled(false);
+					startRecord.setVisibility(View.INVISIBLE);
+					stopRecord.setEnabled(true);
+					stopRecord.setVisibility(View.VISIBLE);
+
+					ditchRecorder();
+
+					// Setup and start recording
+					recorder = new MediaRecorder();
+					recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+					recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+					recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+					recorder.setOutputFile(OUTPUT_FILE);
+					recorder.prepare();
+					recorder.start();
+					timer.setBase(SystemClock.elapsedRealtime());
+					timer.start();
+				} catch (Exception e) {
+					// TODO: Handle exception
+				}
+			}
+		});
+
+		stopRecord.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				// Update buttons
+				stopRecord.setEnabled(false);
+				stopRecord.setVisibility(View.INVISIBLE);
+				startRecord.setEnabled(true);
+				startRecord.setVisibility(View.VISIBLE);
+
+				recorder.stop();
+				timer.stop();
+			}
+		});
 
 		// Update our textview displaying the timer elapsed each second
 		timer.setOnChronometerTickListener(new OnChronometerTickListener() {
@@ -906,7 +1004,57 @@ public class MainActivity extends ListActivity {
 				text.setText(asText);
 			}
 		});
-		timer.start();
+
+		alertDialogBuilder
+				.setCancelable(false)
+				.setPositiveButton("Save Recording",
+						new DialogInterface.OnClickListener() {
+							// Stop recording and move to next popup to name the
+							// audio file
+							public void onClick(DialogInterface dialog, int id) {
+								// If the user hasn't created a temporary file,
+								// then don't let them try and save
+								if (!temp.exists()) {
+									try {
+										showRecordingDialog();
+										Toast.makeText(
+												getApplicationContext(),
+												"You must create recording before saving!",
+												Toast.LENGTH_LONG).show();
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								} else {
+									if (stopRecord.isEnabled()) {
+										recorder.stop();
+									}
+									try {
+										saveRecordingDialog(temp);
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							}
+						})
+				.setNegativeButton("Cancel",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								// Delete temporary file if user cancels
+								temp.delete();
+								if (stopRecord.isEnabled()) {
+									recorder.stop();
+								}
+								dialog.cancel();
+							}
+						});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		// show it
+		alertDialog.show();
 	}
 
 	/**
@@ -915,7 +1063,7 @@ public class MainActivity extends ListActivity {
 	 * @param temp
 	 *            - The newly created audio file
 	 */
-	private void nameRecording(final File temp) {
+	private void saveRecordingDialog(final File temp) throws Exception {
 		LayoutInflater li = LayoutInflater.from(this);
 		View recordView = li.inflate(R.layout.save_recording_layout, null);
 
@@ -935,6 +1083,30 @@ public class MainActivity extends ListActivity {
 		final SeekBar seekBar = (SeekBar) recordView
 				.findViewById(R.id.seekBarAudio);
 
+		// Setup and prepare MediaPlayer
+		ditchPlayer();
+		player = new MediaPlayer();
+		player.setDataSource(OUTPUT_FILE);
+		player.prepare();
+
+		seekBar.setMax(player.getDuration());
+
+		// Increment the progress bar each second
+		final CountDownTimer timer = new CountDownTimer(player.getDuration(),
+				55) {
+			public void onTick(long millisUntilFinished) {
+				seekBar.setProgress(seekBar.getProgress() + 100);
+			}
+
+			public void onFinish() {
+				preview.setVisibility(View.VISIBLE);
+				stop.setVisibility(View.INVISIBLE);
+				preview.setEnabled(true);
+				stop.setEnabled(false);
+				seekBar.setProgress(0);
+			}
+		};
+
 		// Disable SeekBar from being touched
 		seekBar.setOnTouchListener(new OnTouchListener() {
 			public boolean onTouch(View v, MotionEvent event) {
@@ -950,7 +1122,12 @@ public class MainActivity extends ListActivity {
 					stop.setVisibility(View.VISIBLE);
 					preview.setEnabled(false);
 					stop.setEnabled(true);
-					playRecording(seekBar, preview, stop);
+					player.release();
+					player = new MediaPlayer();
+					player.setDataSource(OUTPUT_FILE);
+					player.prepare();
+					player.start();
+					timer.start();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -958,8 +1135,6 @@ public class MainActivity extends ListActivity {
 		});
 
 		// Stop recording
-		// TODO: Need to find out how to stop CountDownTimer when this button is
-		// pressed
 		stop.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				preview.setVisibility(View.VISIBLE);
@@ -967,6 +1142,7 @@ public class MainActivity extends ListActivity {
 				preview.setEnabled(true);
 				stop.setEnabled(false);
 				player.stop();
+				timer.cancel();
 				seekBar.setProgress(0);
 			}
 		});
@@ -990,9 +1166,19 @@ public class MainActivity extends ListActivity {
 											"You must name the recording before saving!",
 											Toast.LENGTH_LONG).show();
 									dialog.cancel();
-									nameRecording(temp);
+									if (stop.isEnabled()) {
+										player.stop();
+									}
+									try {
+										saveRecordingDialog(temp);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 									// Otherwise save to Note database
 								} else {
+									if (stop.isEnabled()) {
+										player.stop();
+									}
 									saveRecording(temp, textTitle);
 								}
 							}
@@ -1000,6 +1186,11 @@ public class MainActivity extends ListActivity {
 				.setNegativeButton("Cancel",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
+								// Delete temporary file if user cancels
+								temp.delete();
+								if (stop.isEnabled()) {
+									player.stop();
+								}
 								dialog.cancel();
 							}
 						});
@@ -1009,37 +1200,6 @@ public class MainActivity extends ListActivity {
 
 		// show it
 		alertDialog.show();
-	}
-
-	/**
-	 * Playback the recording
-	 * 
-	 * @throws Exception
-	 */
-	private void playRecording(final SeekBar seekBar,
-			final ImageButton preview, final ImageButton stop) throws Exception {
-		ditchPlayer();
-		player = new MediaPlayer();
-		player.setDataSource(OUTPUT_FILE);
-		player.prepare();
-		player.start();
-
-		seekBar.setMax(player.getDuration());
-
-		// Increment the progress bar each second
-		new CountDownTimer(player.getDuration(), 250) {
-			public void onTick(long millisUntilFinished) {
-				seekBar.setProgress(seekBar.getProgress() + 250);
-			}
-
-			public void onFinish() {
-				preview.setVisibility(View.VISIBLE);
-				stop.setVisibility(View.INVISIBLE);
-				preview.setEnabled(true);
-				stop.setEnabled(false);
-				seekBar.setProgress(0);
-			}
-		}.start();
 	}
 
 	/**

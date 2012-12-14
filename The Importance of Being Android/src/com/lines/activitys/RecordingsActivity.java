@@ -27,25 +27,37 @@ import java.util.ArrayList;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
+import android.database.Cursor;
+import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Environment;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lines.R;
+import com.lines.classes.LinesApp;
+import com.lines.classes.Recording;
 import com.lines.classes.RecordingAdapter;
+import com.lines.database.play.PlayDbAdapter;
 
 /**
  * This class displays the list of recordings the user has created
@@ -56,10 +68,13 @@ import com.lines.classes.RecordingAdapter;
 public class RecordingsActivity extends ListActivity {
 
 	private Button mDelete;
+	private Button mSelect;
 	private Button mBack;
-	ArrayList<String> audioFiles;
-	private static final String DIRECTORY = Environment
-			.getExternalStorageDirectory() + "/learnyourlines/audio/";
+	private ArrayList<Recording> audioFiles;
+	private String lineNo;
+	private MediaPlayer player;
+	private static String DIRECTORY;
+	private PlayDbAdapter mDbAdapter;
 	private static final String TAG = "RecordingsActivity";
 	private static final int PLAY_ID = Menu.FIRST;
 	private static final int RENAME_ID = Menu.FIRST + 1;
@@ -68,19 +83,44 @@ public class RecordingsActivity extends ListActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		// TODO: Could use notes layout, wait and see
 		setContentView(R.layout.view_recordings_layout);
 		this.getListView().setDividerHeight(0);
 
+		LinesApp app = (LinesApp) this.getApplication();
+		mDbAdapter = app.getPlayAdapter();
+
 		mDelete = (Button) findViewById(R.id.buttonDelete);
+		mSelect = (Button) findViewById(R.id.buttonSelect);
 		mBack = (Button) findViewById(R.id.buttonBack);
 
-		populateList();
+		// Retrieve User choice from previous Activity
+		Bundle extras = getIntent().getExtras();
+		if (extras != null) {
+			lineNo = extras.getString("EXTRA_NUM");
+			Log.d(TAG, "Value passed: " + lineNo);
+			mSelect.setEnabled(true);
+			mSelect.setText("Select");
+		}
+
+		DIRECTORY = Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/audio/";
+
+		try {
+			populateList();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		registerForContextMenu(getListView());
 
 		mDelete.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				getUserConfirm(true, 0);
+			}
+		});
+
+		mSelect.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				applyRecording();
 			}
 		});
 
@@ -115,6 +155,12 @@ public class RecordingsActivity extends ListActivity {
 				.getMenuInfo();
 		switch (item.getItemId()) {
 		case PLAY_ID:
+			try {
+				playRecording(info.id);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			return true;
 		case RENAME_ID:
 			renameFile(info.id, "", true);
@@ -127,15 +173,30 @@ public class RecordingsActivity extends ListActivity {
 	}
 
 	/**
-	 * Populate the listview with the arraylist of saved audio files
+	 * When an item in the list is clicked on, play the audio file.
 	 * 
 	 */
-	// TODO: Also populate list with the duration of each audio file (maybe)
-	private void populateList() {
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		super.onListItemClick(l, v, position, id);
+		try {
+			playRecording(id);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Populate the listview with the arraylist of saved audio files
+	 * 
+	 * @throws Exception
+	 * 
+	 */
+	private void populateList() throws Exception {
 		audioFiles = getAudioFiles();
 
 		RecordingAdapter adapter = new RecordingAdapter(this,
-				R.layout.recording_row_layout, audioFiles);
+				R.layout.note_row_layout, audioFiles);
 
 		setListAdapter(adapter);
 	}
@@ -144,9 +205,14 @@ public class RecordingsActivity extends ListActivity {
 	 * Populate an ArrayList of all the audio files saved by the user
 	 * 
 	 * @return - the list of audio files
+	 * @throws Exception
 	 */
-	private ArrayList<String> getAudioFiles() {
-		audioFiles = new ArrayList<String>();
+	private ArrayList<Recording> getAudioFiles() throws Exception {
+		audioFiles = new ArrayList<Recording>();
+		Recording record;
+		int duration;
+		String file;
+
 		File fDirectory = new File(DIRECTORY);
 
 		// If the directory doesn't exist then we can just return
@@ -161,19 +227,161 @@ public class RecordingsActivity extends ListActivity {
 			return audioFiles;
 		}
 
+		player = new MediaPlayer();
+
 		// Populate arraylist
 		for (int i = 0; i < files.length; i++) {
+			// Get the duration of the current audio file
+			file = files[i].getName();
+			player.reset();
+			player.setDataSource(DIRECTORY + file);
+			player.prepare();
+			duration = player.getDuration();
 			// Before we add to the list, remove the file extension
-			String file = files[i].getName();
 			file = file.replace(".3gpp", "");
-			audioFiles.add(file);
+			record = new Recording(file, duration);
+			audioFiles.add(record);
 		}
+
+		ditchPlayer();
 
 		return audioFiles;
 	}
 
+	/**
+	 * Create dialog where the user can listen to their selected audio file
+	 * 
+	 * @param id
+	 *            - the position of the selected item in the list
+	 * @throws Exception
+	 */
+	private void playRecording(long id) throws Exception {
+
+		final String dir = DIRECTORY + audioFiles.get((int) id).getName()
+				+ ".3gpp";
+
+		LayoutInflater li = LayoutInflater.from(this);
+		View recordView = li.inflate(R.layout.save_recording_layout, null);
+
+		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+
+		alertDialogBuilder.setView(recordView);
+
+		final EditText title = (EditText) recordView
+				.findViewById(R.id.editTitle);
+
+		final ImageButton preview = (ImageButton) recordView
+				.findViewById(R.id.imagePreview);
+
+		final ImageButton stop = (ImageButton) recordView
+				.findViewById(R.id.imageStop);
+
+		final SeekBar seekBar = (SeekBar) recordView
+				.findViewById(R.id.seekBarAudio);
+
+		// Make our Edittext appear like a textview
+		title.setFocusable(false);
+		title.setGravity(Gravity.CENTER);
+		title.setKeyListener(null);
+		title.setBackgroundColor(getResources().getColor(
+				android.R.color.transparent));
+		title.setTextColor(Color.WHITE);
+		title.setText(audioFiles.get((int) id).getName());
+
+		// Setup and prepare MediaPlayer
+		ditchPlayer();
+		player = new MediaPlayer();
+		player.setDataSource(dir);
+		player.prepare();
+
+		seekBar.setMax(player.getDuration());
+
+		// Increment the progress bar each second
+		final CountDownTimer timer = new CountDownTimer(player.getDuration(),
+				55) {
+			public void onTick(long millisUntilFinished) {
+				seekBar.setProgress(seekBar.getProgress() + 100);
+			}
+
+			public void onFinish() {
+				preview.setVisibility(View.VISIBLE);
+				stop.setVisibility(View.INVISIBLE);
+				preview.setEnabled(true);
+				stop.setEnabled(false);
+				seekBar.setProgress(0);
+			}
+		};
+
+		// Disable SeekBar from being touched
+		seekBar.setOnTouchListener(new OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				return true;
+			}
+		});
+
+		// Play recording
+		preview.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					preview.setVisibility(View.INVISIBLE);
+					stop.setVisibility(View.VISIBLE);
+					preview.setEnabled(false);
+					stop.setEnabled(true);
+					player.release();
+					player = new MediaPlayer();
+					player.setDataSource(dir);
+					player.prepare();
+					player.start();
+					timer.start();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		// Stop recording
+		stop.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				preview.setVisibility(View.VISIBLE);
+				stop.setVisibility(View.INVISIBLE);
+				preview.setEnabled(true);
+				stop.setEnabled(false);
+				player.stop();
+				timer.cancel();
+				seekBar.setProgress(0);
+			}
+		});
+
+		alertDialogBuilder.setCancelable(false).setPositiveButton("Close",
+				new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						if (stop.isEnabled()) {
+							player.stop();
+						}
+						dialog.cancel();
+					}
+				});
+
+		// create alert dialog
+		AlertDialog alertDialog = alertDialogBuilder.create();
+
+		// show it
+		alertDialog.show();
+	}
+
+	/**
+	 * Provide dialog for the user to rename their selected file
+	 * 
+	 * @param id
+	 *            - position of the file in the listview
+	 * @param title
+	 *            - title of the selected file
+	 * @param fresh
+	 *            - true if dialog is created for first time. False when user
+	 *            enters invalid filename and dialog reappears
+	 */
 	private void renameFile(long id, String title, boolean fresh) {
-		final String oldFilename = audioFiles.get((int) id);
+		final String oldFilename = audioFiles.get((int) id).getName();
 		LayoutInflater li = LayoutInflater.from(this);
 		View recordView = li.inflate(R.layout.save_recording_layout, null);
 
@@ -187,9 +395,6 @@ public class RecordingsActivity extends ListActivity {
 		final ImageButton preview = (ImageButton) recordView
 				.findViewById(R.id.imagePreview);
 
-		// final ImageButton stop = (ImageButton) recordView
-		// .findViewById(R.id.imageStop);
-
 		final SeekBar seekBar = (SeekBar) recordView
 				.findViewById(R.id.seekBarAudio);
 
@@ -199,10 +404,9 @@ public class RecordingsActivity extends ListActivity {
 		preview.setVisibility(View.GONE);
 		seekBar.setVisibility(View.GONE);
 		text.setVisibility(View.GONE);
-		// stop.setVisibility(View.GONE);
 
 		if (fresh) {
-			name.setText(audioFiles.get((int) id));
+			name.setText(audioFiles.get((int) id).getName());
 		} else {
 			name.setText(title);
 		}
@@ -233,7 +437,11 @@ public class RecordingsActivity extends ListActivity {
 									renameFile(newId, textTitle, false);
 									// Otherwise save to Note database
 								} else {
-									saveRecording(textTitle, oldFilename);
+									try {
+										saveRecording(textTitle, oldFilename);
+									} catch (Exception e) {
+										e.printStackTrace();
+									}
 								}
 							}
 						})
@@ -251,7 +459,17 @@ public class RecordingsActivity extends ListActivity {
 		alertDialog.show();
 	}
 
-	private void saveRecording(String filename, String oldFilename) {
+	/**
+	 * Rename the selected file with the new filename
+	 * 
+	 * @param filename
+	 *            - new filename we are renaming to
+	 * @param oldFilename
+	 *            - the oldfilename
+	 * @throws Exception
+	 */
+	private void saveRecording(String filename, String oldFilename)
+			throws Exception {
 
 		File newFile = new File(DIRECTORY + filename + ".3gpp");
 		File oldFile = new File(DIRECTORY + oldFilename + ".3gpp");
@@ -268,9 +486,10 @@ public class RecordingsActivity extends ListActivity {
 	 * 
 	 * @param id
 	 *            - the audio file to delete
+	 * @throws Exception
 	 */
-	private void deleteRecording(boolean multiple, long id) {
-		String filename = audioFiles.get((int) id);
+	private void deleteRecording(boolean multiple, long id) throws Exception {
+		String filename = audioFiles.get((int) id).getName();
 		// Add the file extension back on
 		filename = filename + ".3gpp";
 
@@ -279,6 +498,24 @@ public class RecordingsActivity extends ListActivity {
 		// Delete the file
 		if (file.exists()) {
 			file.delete();
+		}
+
+		// After we delete the file, check if it had been associated with any
+		// lines and update as necessary
+		Cursor lines = mDbAdapter.fetchAllLines();
+		// Move through every line
+		if (lines.moveToFirst()) {
+			do {
+				// Get the value from the audio column
+				String audio = lines.getString(lines.getColumnIndex("audio"));
+				// If the value is equal to the selected file then update the
+				// database
+				if (audio.equals(DIRECTORY + filename)) {
+					int num = lines.getInt(lines.getColumnIndex("number"));
+					num++;
+					mDbAdapter.updateAudio(num, "N");
+				}
+			} while (lines.moveToNext());
 		}
 
 		// If we are doing multiple deletions, then we don't want to re-populate
@@ -292,15 +529,17 @@ public class RecordingsActivity extends ListActivity {
 	 * When the user presses Delete, we loop through all the files, check which
 	 * have been selected and delete the file.
 	 * 
+	 * @throws Exception
+	 * 
 	 */
-	private void deleteRecordings() {
+	private void deleteRecordings() throws Exception {
 		int length = this.getListView().getChildCount();
 
 		// Loop through each row, check if an item has been checked and
 		// delete the note from the database
 		for (int i = 0; i < length; i++) {
 			CheckBox currentCheck = (CheckBox) this.getListView().getChildAt(i)
-					.findViewById(R.id.checkRecord);
+					.findViewById(R.id.checkNote);
 			if (currentCheck.isChecked()) {
 				long id = this.getListView().getAdapter().getItemId(i);
 				deleteRecording(true, id);
@@ -309,6 +548,57 @@ public class RecordingsActivity extends ListActivity {
 		populateList();
 	}
 
+	/**
+	 * First check that exactly one item in the list has been selected and then
+	 * update the play Db with the path of the selected file.
+	 * 
+	 */
+	private void applyRecording() {
+		int length = this.getListView().getChildCount();
+		int numChecked = 0;
+		int row = -1;
+
+		// Obtain which of the files has been selected
+		for (int i = 0; i < length; i++) {
+			CheckBox currentCheck = (CheckBox) this.getListView().getChildAt(i)
+					.findViewById(R.id.checkNote);
+			if (currentCheck.isChecked()) {
+				row = i;
+				numChecked++;
+			}
+		}
+
+		// Inform user if not exactly one is checked
+		if (numChecked != 1) {
+			Toast.makeText(getApplicationContext(),
+					"You must select only one recording!", Toast.LENGTH_SHORT)
+					.show();
+			return;
+		}
+
+		// Get the filename of the selected file
+		String filename = audioFiles.get(row).getName();
+		// Add the file extension back on
+		filename = filename + ".3gpp";
+
+		// Update the Play Db
+		mDbAdapter.updateAudio(Long.valueOf(lineNo), DIRECTORY + filename);
+
+		Toast.makeText(getApplicationContext(), "Recording set!",
+				Toast.LENGTH_LONG).show();
+
+		// Finally close the Activity
+		finish();
+	}
+
+	/**
+	 * Before we perform any deletions, get the user's confirmation
+	 * 
+	 * @param multiple
+	 *            - Checks whether we are deleting multiple files, or just one
+	 * @param id
+	 *            - the position in the listview of the selected audio file
+	 */
 	private void getUserConfirm(final boolean multiple, long id) {
 
 		// First check if no checkboxes have been checked. If none have then we
@@ -329,9 +619,17 @@ public class RecordingsActivity extends ListActivity {
 				.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
 						if (multiple) {
-							deleteRecordings();
+							try {
+								deleteRecordings();
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						} else {
-							deleteRecording(false, newId);
+							try {
+								deleteRecording(false, newId);
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
 						}
 					}
 
@@ -358,10 +656,10 @@ public class RecordingsActivity extends ListActivity {
 		// user they must first select one
 		for (int i = 0; i < length; i++) {
 			CheckBox currentCheck = (CheckBox) this.getListView().getChildAt(i)
-					.findViewById(R.id.checkRecord);
+					.findViewById(R.id.checkNote);
 			if (currentCheck.isChecked()) {
 				noneChecked = false;
-				break;
+				return noneChecked;
 			}
 		}
 
@@ -372,5 +670,15 @@ public class RecordingsActivity extends ListActivity {
 					Toast.LENGTH_SHORT).show();
 		}
 		return noneChecked;
+	}
+
+	/**
+	 * Handle our MediaPlayer
+	 * 
+	 */
+	private void ditchPlayer() {
+		if (player != null) {
+			player.release();
+		}
 	}
 }

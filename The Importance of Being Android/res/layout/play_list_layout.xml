@@ -36,4 +36,14 @@
         android:background="@null"
         android:src="@drawable/sym_action_chat" />
 
+    <ImageButton
+        android:id="@+id/imageButtonAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/textCharacter"
+        android:layout_marginLeft="15dp"
+        android:background="@null"
+        android:src="@drawable/ic_btn_speak_now" />
+
 </RelativeLayout>

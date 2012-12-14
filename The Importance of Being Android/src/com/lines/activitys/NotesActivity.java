@@ -142,7 +142,6 @@ public class NotesActivity extends ListActivity {
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 		super.onListItemClick(l, v, position, id);
 		viewNote(id, "", "", true);
-
 	}
 
 	/**

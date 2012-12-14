@@ -23,13 +23,36 @@
         android:layout_height="wrap_content"
         android:visibility="gone" />
 
+    <ImageButton
+        android:id="@+id/imageButtonRecordStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:background="@null"
+        android:padding="10dp"
+        android:src="@android:drawable/presence_busy" />
+
+    <ImageButton
+        android:id="@+id/imageButtonRecordStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/imageButtonRecordStart"
+        android:layout_alignTop="@+id/imageButtonRecordStart"
+        android:background="@null"
+        android:padding="10dp"
+        android:visibility="invisible"
+        android:src="@android:drawable/presence_online" />
+
     <TextView
         android:id="@+id/textTime"
         android:layout_width="match_parent"
-        android:layout_height="70dp"
+        android:layout_height="50dp"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/textTitle"
+        android:layout_below="@+id/imageButtonRecordStart"
         android:gravity="center"
+        android:text="00:00"
         android:textColor="#FFFFFF"
         android:textSize="22dp" />
 

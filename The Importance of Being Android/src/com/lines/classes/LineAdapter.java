@@ -46,9 +46,13 @@ public class LineAdapter extends ArrayAdapter<Line> {
 			TextView mLine = (TextView) v.findViewById(R.id.textLine);
 			ImageButton mNote = (ImageButton) v
 					.findViewById(R.id.imageButtonNotes);
+			ImageButton mAudio = (ImageButton) v
+					.findViewById(R.id.imageButtonAudio);
 			boolean note;
+			boolean audio;
 
 			mNote.setFocusable(false);
+			mAudio.setFocusable(false);
 			if (mCharacter != null) {
 				mCharacter.setText(line.getCharacter());
 			}
@@ -61,6 +65,13 @@ public class LineAdapter extends ArrayAdapter<Line> {
 				mNote.setVisibility(View.GONE);
 			} else {
 				mNote.setVisibility(View.VISIBLE);
+			}
+			
+			audio = line.getAudio();
+			if (!audio) {
+				mAudio.setVisibility(View.GONE);
+			} else {
+				mAudio.setVisibility(View.VISIBLE);
 			}
 
 			mNote.setOnClickListener(new View.OnClickListener() {

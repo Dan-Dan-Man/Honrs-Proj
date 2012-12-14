@@ -315,7 +315,7 @@ public class HomeActivity extends Activity {
 			// want in our database.
 			if (!isAllUpperCase(words[0])) {
 				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
-						"N", "N", "N", 0, 0, 0);
+						"N", "N", "N", "N", 0, 0, 0);
 				// If we're not adding to the database, then we need to reduce
 				// the line count.
 			} else {

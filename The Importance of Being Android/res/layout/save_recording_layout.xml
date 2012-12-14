@@ -52,15 +52,17 @@
         android:layout_alignRight="@+id/editTitle"
         android:layout_below="@+id/imagePreview"
         android:layout_marginTop="5dp" />
-
+
     <ImageButton
         android:id="@+id/imageStop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/imagePreview"
+        android:layout_alignLeft="@+id/imagePreview"
+        android:layout_alignRight="@+id/imagePreview"
         android:layout_below="@+id/textPreview"
-        android:layout_centerHorizontal="true"
         android:background="@null"
-        android:src="@android:drawable/ic_media_pause"
+        android:src="@android:drawable/checkbox_off_background"
         android:visibility="invisible" />
 
 </RelativeLayout>

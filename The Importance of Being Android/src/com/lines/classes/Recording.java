@@ -22,52 +22,27 @@
 package com.lines.classes;
 
 /**
- * Class for handling each line of the play.
+ * Class to store name and duration of each audio file
  * 
  * @author Dan
- * 
+ *
  */
-public class Line {
-
-	private int number;
-	private String character;
-	private String line;
-	private boolean note;
-	private boolean audio;
-
-	public Line(int number, String character, String line, boolean note, boolean audio) {
-		this.number = number;
-		this.character = character;
-		this.line = line;
-		this.note = note;
-		this.audio = audio;
+public class Recording {
+	
+	private String name;
+	private int time;
+	
+	public Recording(String name, int time) {
+		this.name = name;
+		this.time = time;
 	}
 	
-	public int getNumber() {
-		return number;
-	}
-
-	public String getCharacter() {
-		return character;
-	}
-
-	public String getLine() {
-		return line;
-	}
-
-	public boolean getNote() {
-		return note;
-	}
-
-	public void setNote(boolean note) {
-		this.note = note;
+	public String getName() {
+		return name;
 	}
 	
-	public boolean getAudio() {
-		return audio;
+	public int getTime() {
+		return time;
 	}
 
-	public void setAudio(boolean audio) {
-		this.audio = audio;
-	}
 }
