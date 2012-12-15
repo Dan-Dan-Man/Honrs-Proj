@@ -23,6 +23,7 @@ package com.lines.activitys;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -96,6 +97,7 @@ public class MainActivity extends ListActivity {
 	private int visibleWords = 1;
 	private int lastViewedPos;
 	private int topOffset;
+	private int hiddenLineNo;
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private static final int OPTIONS = 0;
 	private static final int STATS = 1;
@@ -108,9 +110,9 @@ public class MainActivity extends ListActivity {
 	private static final int STRIKE = 5;
 	private MediaPlayer player;
 	private MediaRecorder recorder;
-	// TODO: If user saves their file as "temp" then it will be overwritten.
-	private static final String OUTPUT_FILE = Environment
-			.getExternalStorageDirectory() + "/learnyourlines/audio/temp.3gpp";;
+	private static final String TEMP_FILE = Environment
+			.getExternalStorageDirectory() + "/learnyourlines/audio/-.3gpp";
+	private static final Pattern VALID_CHARS = Pattern.compile("[^a-zA-Z0-9]");
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -346,19 +348,30 @@ public class MainActivity extends ListActivity {
 	/**
 	 * Get the file associated with the selected line and play it.
 	 * 
-	 * @param id - the position of the selected item in the list
+	 * @param id
+	 *            - the position of the selected item in the list
 	 * @throws Exception
 	 */
 	private void playSelectedRecording(long id) throws Exception {
 		if (audioApplied(id)) {
-			Cursor line = mDbAdapter.fetchLine(getLineNumber(id));
-			String filename = line.getString(line.getColumnIndex("audio"));
+			// If the selected line is hidden, then we don't want to
+			Log.d(TAG, "HiddenLineNo: " + hiddenLineNo);
+			Log.d(TAG, "getLineNo: " + getLineNumber(id));
+			if (rehearsal && (hiddenLineNo == getLineNumber(id))) {
+				Toast.makeText(
+						getApplicationContext(),
+						"Cannot play recording while line is hidden. No cheating!",
+						Toast.LENGTH_LONG).show();
+			} else {
+				Cursor line = mDbAdapter.fetchLine(getLineNumber(id));
+				String filename = line.getString(line.getColumnIndex("audio"));
 
-			ditchPlayer();
-			player = new MediaPlayer();
-			player.setDataSource(filename);
-			player.prepare();
-			player.start();
+				ditchPlayer();
+				player = new MediaPlayer();
+				player.setDataSource(filename);
+				player.prepare();
+				player.start();
+			}
 		}
 	}
 
@@ -639,7 +652,11 @@ public class MainActivity extends ListActivity {
 									.getColumnIndex("line"));
 							visibleLines--;
 						} else {
+							// TODO:
 							// Before we exit, store the current line
+							hiddenLineNo = mCursor.getInt(mCursor
+									.getColumnIndex("number"));
+							hiddenLineNo++;
 							currentLine = mCursor.getString(mCursor
 									.getColumnIndex("line"));
 							if (!stage) {
@@ -682,6 +699,10 @@ public class MainActivity extends ListActivity {
 		} else if (rehearsal && command.equals("back")) {
 			getListView().smoothScrollBy(-1, 1000);
 		}
+
+		// TODO: Bringing up the context menu takes two clicks. Its because we
+		// finish with a smoothScrollBy, and we lose focus. Need to find out
+		// what we are losing focus on
 	}
 
 	/**
@@ -935,12 +956,7 @@ public class MainActivity extends ListActivity {
 	 */
 	private void showRecordingDialog() throws Exception {
 		// Create temporary file to store audio recording
-		final File temp = new File(OUTPUT_FILE);
-
-		// Delete temporary file if it already exists
-		if (temp.exists()) {
-			temp.delete();
-		}
+		final File temp = new File(TEMP_FILE);
 
 		LayoutInflater li = LayoutInflater.from(this);
 		View recordView = li.inflate(R.layout.record_layout, null);
@@ -973,7 +989,7 @@ public class MainActivity extends ListActivity {
 					recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
 					recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 					recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-					recorder.setOutputFile(OUTPUT_FILE);
+					recorder.setOutputFile(TEMP_FILE);
 					recorder.prepare();
 					recorder.start();
 					timer.setBase(SystemClock.elapsedRealtime());
@@ -1086,7 +1102,7 @@ public class MainActivity extends ListActivity {
 		// Setup and prepare MediaPlayer
 		ditchPlayer();
 		player = new MediaPlayer();
-		player.setDataSource(OUTPUT_FILE);
+		player.setDataSource(TEMP_FILE);
 		player.prepare();
 
 		seekBar.setMax(player.getDuration());
@@ -1124,7 +1140,7 @@ public class MainActivity extends ListActivity {
 					stop.setEnabled(true);
 					player.release();
 					player = new MediaPlayer();
-					player.setDataSource(OUTPUT_FILE);
+					player.setDataSource(TEMP_FILE);
 					player.prepare();
 					player.start();
 					timer.start();
@@ -1155,15 +1171,10 @@ public class MainActivity extends ListActivity {
 								String textTitle = title.getText().toString();
 								// If textbox is blank, then recall
 								// method and close the current one
-								// TODO: Need to make sure there are valid
-								// filenames being created! Maybe theres some
-								// library to handle this.
-								// TODO: Also check filename doesn't already
-								// exist
-								if (textTitle.equals("")) {
+								if (invalidFilename(textTitle)) {
 									Toast.makeText(
 											getApplicationContext(),
-											"You must name the recording before saving!",
+											"Invalid filename! Only letters and numbers are allowed!",
 											Toast.LENGTH_LONG).show();
 									dialog.cancel();
 									if (stop.isEnabled()) {
@@ -1215,10 +1226,75 @@ public class MainActivity extends ListActivity {
 				+ "/learnyourlines/audio/";
 
 		File newFile = new File(directory + filename + ".3gpp");
-		temp.renameTo(newFile);
 
-		Toast.makeText(getApplicationContext(), "New recording saved!",
-				Toast.LENGTH_LONG).show();
+		if (newFile.exists()) {
+			overwriteFile(filename, newFile, temp);
+		} else {
+			temp.renameTo(newFile);
+			Toast.makeText(getApplicationContext(), "New recording saved!",
+					Toast.LENGTH_LONG).show();
+		}
+	}
+
+	/**
+	 * Checks the String for any invalid characters. Only alphanumeric
+	 * characters are valid
+	 * 
+	 * @param filename
+	 *            - the String we are checking
+	 * @return - true if the String contains only alphanumeric chars. False
+	 *         otherwise
+	 */
+	private boolean invalidFilename(String filename) {
+		Log.d(TAG, "Valid: " + VALID_CHARS.matcher(filename).find());
+		if (filename.equals("") || VALID_CHARS.matcher(filename).find()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * If the desired filename already exists, ask user if they wish to
+	 * overwrite it.
+	 * 
+	 * @param filename
+	 *            - the filename the user wishes to save
+	 * @param newFile
+	 *            - the File object of the user's filename
+	 * @param temp
+	 *            - the temporary file of the recording
+	 */
+	private void overwriteFile(String filename, final File newFile,
+			final File temp) {
+
+		new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("Overwrite file?")
+				.setMessage(
+						"The file \""
+								+ filename
+								+ "\" already exists. Do you want to overwrite it?")
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								temp.renameTo(newFile);
+								Toast.makeText(getApplicationContext(),
+										"New recording saved!",
+										Toast.LENGTH_LONG).show();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						try {
+							saveRecordingDialog(temp);
+							dialog.cancel();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}).show();
 	}
 
 	/**

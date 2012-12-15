@@ -23,6 +23,7 @@ package com.lines.activitys;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -79,6 +80,7 @@ public class RecordingsActivity extends ListActivity {
 	private static final int PLAY_ID = Menu.FIRST;
 	private static final int RENAME_ID = Menu.FIRST + 1;
 	private static final int DELETE_ID = Menu.FIRST + 2;
+	private static final Pattern VALID_CHARS = Pattern.compile("[^a-zA-Z0-9]");
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -421,24 +423,18 @@ public class RecordingsActivity extends ListActivity {
 								String textTitle = name.getText().toString();
 								// If textbox is blank, then recall
 								// method and close the current one
-								// TODO: Need to make sure there are valid
-								// filenames being created! Maybe theres some
-								// library to handle this.
-								// TODO: Also check filename doesn't already
-								// exist
-								if (textTitle.equals("")) {
+								if (invalidFilename(textTitle)) {
 									Toast.makeText(
 											getApplicationContext(),
-											"You must name the recording before saving!",
+											"Invalid filename! Only letters and numbers are allowed!",
 											Toast.LENGTH_LONG).show();
 									dialog.cancel();
-									// TODO: We delete what user entered. Do we
-									// want this?
 									renameFile(newId, textTitle, false);
 									// Otherwise save to Note database
 								} else {
 									try {
-										saveRecording(textTitle, oldFilename);
+										saveRecording(newId, textTitle,
+												oldFilename);
 									} catch (Exception e) {
 										e.printStackTrace();
 									}
@@ -460,6 +456,24 @@ public class RecordingsActivity extends ListActivity {
 	}
 
 	/**
+	 * Checks the String for any invalid characters. Only alphanumeric
+	 * characters are valid
+	 * 
+	 * @param filename
+	 *            - the String we are checking
+	 * @return - true if the String contains only alphanumeric chars. False
+	 *         otherwise
+	 */
+	private boolean invalidFilename(String filename) {
+		Log.d(TAG, "Valid: " + VALID_CHARS.matcher(filename).find());
+		if (filename.equals("") || VALID_CHARS.matcher(filename).find()) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
 	 * Rename the selected file with the new filename
 	 * 
 	 * @param filename
@@ -468,17 +482,71 @@ public class RecordingsActivity extends ListActivity {
 	 *            - the oldfilename
 	 * @throws Exception
 	 */
-	private void saveRecording(String filename, String oldFilename)
+	private void saveRecording(long id, String filename, String oldFilename)
 			throws Exception {
 
 		File newFile = new File(DIRECTORY + filename + ".3gpp");
 		File oldFile = new File(DIRECTORY + oldFilename + ".3gpp");
-		oldFile.renameTo(newFile);
 
-		Toast.makeText(getApplicationContext(), "Recording name changed!",
-				Toast.LENGTH_LONG).show();
+		if (newFile.exists()) {
+			overwriteFile(id, filename, newFile, oldFile);
+		} else {
+			oldFile.renameTo(newFile);
+			Toast.makeText(getApplicationContext(), "Recording renamed!",
+					Toast.LENGTH_LONG).show();
+			populateList();
+		}
+	}
 
-		populateList();
+	/**
+	 * If the desired filename already exists, ask user if they wish to
+	 * overwrite it.
+	 * 
+	 * @param filename
+	 *            - the filename the user wishes to save
+	 * @param newFile
+	 *            - the File object of the user's filename
+	 * @param temp
+	 *            - the temporary file of the recording
+	 */
+	private void overwriteFile(long id, final String filename,
+			final File newFile, final File temp) {
+
+		final long newId = id;
+
+		new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("Overwrite file?")
+				.setMessage(
+						"The file \""
+								+ filename
+								+ "\" already exists. Do you want to overwrite it?")
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								try {
+									temp.renameTo(newFile);
+									Toast.makeText(getApplicationContext(),
+											"New recording saved!",
+											Toast.LENGTH_LONG).show();
+									populateList();
+								} catch (Exception e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						try {
+							renameFile(newId, filename, false);
+							dialog.cancel();
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}).show();
 	}
 
 	/**

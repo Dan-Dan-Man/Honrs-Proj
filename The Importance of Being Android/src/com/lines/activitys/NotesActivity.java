@@ -292,7 +292,6 @@ public class NotesActivity extends ListActivity {
 	 *            the current note.
 	 * 
 	 */
-	// TODO: Maybe only allow text to be edited when user selects an edit option
 	private void viewNote(long id, String defaultTitle, String defaultNote,
 			boolean fresh) {
 

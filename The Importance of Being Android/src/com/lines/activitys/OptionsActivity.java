@@ -59,6 +59,7 @@ import com.lines.database.play.PlayDbAdapter;
  * 
  */
 
+// TODO: Refactor this class so it runs faster. Very slow to load up
 public class OptionsActivity extends Activity {
 
 	private Button mContinue;
@@ -152,13 +153,13 @@ public class OptionsActivity extends Activity {
 
 				pageNo = mPage.getSelectedItem().toString();
 				actNo = mAct.getSelectedItem().toString();
-				
+
 				if (mChar.isEnabled()) {
 					character = mChar.getSelectedItem().toString();
 				} else {
 					character = "All";
 				}
-				
+
 				if (mMode.getSelectedItem().toString().equals("Rehearsal")) {
 					rehearsal = true;
 				} else {
@@ -267,8 +268,10 @@ public class OptionsActivity extends Activity {
 	/**
 	 * Get the key of the HashMap based on the value.
 	 * 
-	 * @param map - the map we want to search through
-	 * @param value - the element we are looking for in the map
+	 * @param map
+	 *            - the map we want to search through
+	 * @param value
+	 *            - the element we are looking for in the map
 	 * @return - the key in the map associated with value
 	 * 
 	 */
@@ -369,11 +372,12 @@ public class OptionsActivity extends Activity {
 
 		mCursor.close();
 	}
-	
+
 	/**
 	 * Find minimum value in ArrayList
 	 * 
-	 * @param pages - arraylist to search
+	 * @param pages
+	 *            - arraylist to search
 	 * @return - minimum value in list
 	 * 
 	 */
@@ -391,7 +395,8 @@ public class OptionsActivity extends Activity {
 	 * This method creates and shows a popup to the user, displaying a relevent
 	 * help message.
 	 * 
-	 * @param msg - decides which message we are displaying to the user
+	 * @param msg
+	 *            - decides which message we are displaying to the user
 	 * 
 	 */
 	private void showPopup(String msg) {
