@@ -30,17 +30,16 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager.LayoutParams;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.PopupWindow;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -79,6 +78,9 @@ public class StatsActivity extends Activity {
 	private String currentPage = "All";
 	private String currentAct = "All";
 	private String character = "All";
+	private float totalViews = 0;
+	private float totalPrompts = 0;
+	private float totalCompletions = 0;
 	private static final String TAG = "StatsActivity";
 
 	@Override
@@ -123,6 +125,20 @@ public class StatsActivity extends Activity {
 			}
 		}
 
+		// Get the total value of all stats
+		mCursor = mDbAdapter.fetchAllLines();
+
+		if (mCursor.moveToFirst()) {
+			do {
+				totalViews += mCursor.getInt(mCursor.getColumnIndex("views"));
+				totalPrompts += mCursor.getInt(mCursor
+						.getColumnIndex("prompts"));
+				totalCompletions += mCursor.getInt(mCursor
+						.getColumnIndex("completions"));
+			} while (mCursor.moveToNext());
+		}
+
+		mPage.setOnItemSelectedListener(new PageOnItemSelectedListener());
 		mAct.setOnItemSelectedListener(new ActOnItemSelectedListener());
 		mChar.setOnItemSelectedListener(new CharOnItemSelectedListener());
 
@@ -186,8 +202,10 @@ public class StatsActivity extends Activity {
 	/**
 	 * Get the key of the HashMap based on the value.
 	 * 
-	 * @param map - the map we want to search through
-	 * @param value - the element we are looking for in the map
+	 * @param map
+	 *            - the map we want to search through
+	 * @param value
+	 *            - the element we are looking for in the map
 	 * @return - the key in the map associated with value
 	 * 
 	 */
@@ -206,7 +224,7 @@ public class StatsActivity extends Activity {
 	 */
 	private void populateActs() {
 		acts = new ArrayList<String>();
-		//mDbAdapter.open();
+		// mDbAdapter.open();
 		if (mChar.getSelectedItem().toString().equals("All")) {
 			mCursor = mDbAdapter.fetchAllLines();
 		} else {
@@ -321,7 +339,8 @@ public class StatsActivity extends Activity {
 	/**
 	 * Find minimum value in ArrayList
 	 * 
-	 * @param pages - arraylist to search
+	 * @param pages
+	 *            - arraylist to search
 	 * @return - minimum value in list
 	 * 
 	 */
@@ -336,43 +355,189 @@ public class StatsActivity extends Activity {
 	}
 
 	/**
+	 * This method searches the database and finds the stats based on the user's
+	 * selections and then formats and displays them
+	 * 
+	 */
+	private void showStats() {
+		String character = mChar.getSelectedItem().toString();
+		String act = mAct.getSelectedItem().toString();
+		String page = mPage.getSelectedItem().toString();
+		float views = 0;
+		float prompts = 0;
+		float completions = 0;
+
+		mCursor = mDbAdapter.fetchCharacter(character, page);
+		String words[] = act.split("\\s+");
+
+		// If all spinners have a specific item selected
+		if (!character.equals("All") && !act.equals("All")
+				&& !page.equals("All")) {
+			mCursor = mDbAdapter.fetchCharacter(character, page);
+			// If only the character spinner is selected as "All"
+		} else if (character.equals("All") && !act.equals("All")
+				&& !page.equals("All")) {
+			mCursor = mDbAdapter.fetchPage(page);
+			// If only the page spinner is selected as "All"
+		} else if (!character.equals("All") && !act.equals("All")
+				&& page.equals("All")) {
+			mCursor = mDbAdapter.fetchFilteredPages(words[1], character);
+			// If both the act and page spinner is selected as "All"
+		} else if (!character.equals("All") && act.equals("All")
+				&& page.equals("All")) {
+			mCursor = mDbAdapter.fetchAllFilteredPages(character);
+			// If both the character and page spinner is selected as "All"
+		} else if (character.equals("All") && !act.equals("All")
+				&& page.equals("All")) {
+			mCursor = mDbAdapter.fetchAllPages(words[1]);
+		}
+
+		// Get the stats for the current selection
+		if (mCursor.moveToFirst()) {
+			do {
+				views += mCursor.getInt(mCursor.getColumnIndex("views"));
+				prompts += mCursor.getInt(mCursor.getColumnIndex("prompts"));
+				completions += mCursor.getInt(mCursor
+						.getColumnIndex("completions"));
+			} while (mCursor.moveToNext());
+		}
+
+		// Finally, if all spinners are selected as "All"
+		if (character.equals("All") && act.equals("All") && page.equals("All")) {
+			views = totalViews;
+			prompts = totalPrompts;
+			completions = totalCompletions;
+		}
+
+		// Avoid divide by zero error
+		if (totalViews == 0) {
+			totalViews++;
+		}
+		if (totalPrompts == 0) {
+			totalPrompts++;
+		}
+		if (totalCompletions == 0) {
+			totalCompletions++;
+		}
+
+		// Calculate percentages for each statistic
+		float viewsPercent = (views / totalViews) * 100;
+		float promptsPercent = (prompts / totalPrompts) * 100;
+		float completionsPercent = (completions / totalCompletions) * 100;
+
+		// Format percentages
+		String viewsFormat = String.format("%.0f", views);
+		String promptsFormat = String.format("%.0f", prompts);
+		String completionsFormat = String.format("%.0f", completions);
+		String viewsPercentFormat = String.format("%.1f", viewsPercent) + "%";
+		String promptsPercentFormat = String.format("%.1f", promptsPercent)
+				+ "%";
+		String completionsPercentFormat = String.format("%.1f",
+				completionsPercent) + "%";
+
+		mViewsNum.setText(viewsFormat);
+		mViewsPercent.setText(viewsPercentFormat);
+		mPromptsNum.setText(promptsFormat);
+		mPromptsPercent.setText(promptsPercentFormat);
+		mCompleteNum.setText(completionsFormat);
+		mCompletePercent.setText(completionsPercentFormat);
+
+	}
+
+	/**
+	 * This method searches the database and finds the stats based on the user's
+	 * selections and resets all the values to zero
+	 * 
+	 */
+	private void deleteStats() {
+		String character = mChar.getSelectedItem().toString();
+		String act = mAct.getSelectedItem().toString();
+		String page = mPage.getSelectedItem().toString();
+
+		mCursor = mDbAdapter.fetchCharacter(character, page);
+		String words[] = act.split("\\s+");
+
+		// If all spinners have a specific item selected
+		if (!character.equals("All") && !act.equals("All")
+				&& !page.equals("All")) {
+			mCursor = mDbAdapter.fetchCharacter(character, page);
+			// If only the character spinner is selected as "All"
+		} else if (character.equals("All") && !act.equals("All")
+				&& !page.equals("All")) {
+			mCursor = mDbAdapter.fetchPage(page);
+			// If only the page spinner is selected as "All"
+		} else if (!character.equals("All") && !act.equals("All")
+				&& page.equals("All")) {
+			mCursor = mDbAdapter.fetchFilteredPages(words[1], character);
+			// If both the act and page spinner is selected as "All"
+		} else if (!character.equals("All") && act.equals("All")
+				&& page.equals("All")) {
+			mCursor = mDbAdapter.fetchAllFilteredPages(character);
+			// If both the character and page spinner is selected as "All"
+		} else if (character.equals("All") && !act.equals("All")
+				&& page.equals("All")) {
+			mCursor = mDbAdapter.fetchAllPages(words[1]);
+			// Finally, if all spinners are selected as "All"
+		} else if (character.equals("All") && act.equals("All")
+				&& page.equals("All")) {
+			mCursor = mDbAdapter.fetchAllLines();
+		}
+
+		// Reset all the stats for the selected items in the database
+		if (mCursor.moveToFirst()) {
+			do {
+				int line = mCursor.getInt(mCursor.getColumnIndex("number"));
+				line++;
+				mDbAdapter.updateViews(line, 0);
+				mDbAdapter.updatePrompts(line, 0);
+				mDbAdapter.updateCompletions(line, 0);
+			} while (mCursor.moveToNext());
+		}
+
+		// Finally update our total count of all stats
+		mCursor = mDbAdapter.fetchAllLines();
+
+		totalViews = 0;
+		totalPrompts = 0;
+		totalCompletions = 0;
+
+		if (mCursor.moveToFirst()) {
+			do {
+				totalViews += mCursor.getInt(mCursor.getColumnIndex("views"));
+				totalPrompts += mCursor.getInt(mCursor
+						.getColumnIndex("prompts"));
+				totalCompletions += mCursor.getInt(mCursor
+						.getColumnIndex("completions"));
+			} while (mCursor.moveToNext());
+		}
+
+		// Re-display the stats
+		showStats();
+	}
+
+	/**
 	 * This method creates and shows a popup to the user, displaying a relevent
 	 * help message.
 	 * 
 	 */
 	public void showPopup() {
-		// TODO: Change to use alert dialog like for performance notes
-		LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
-				.getSystemService(LAYOUT_INFLATER_SERVICE);
-		View popupView = layoutInflater.inflate(R.layout.confirm_popup_layout,
-				null);
-		final PopupWindow popupWindow = new PopupWindow(popupView,
-				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
 
-		Button yes = (Button) popupView.findViewById(R.id.yes);
-		Button no = (Button) popupView.findViewById(R.id.no);
-
-		yes.setOnClickListener(new Button.OnClickListener() {
-
-			public void onClick(View v) {
-				mViewsNum.setText("-");
-				mViewsPercent.setText("-");
-				mPromptsNum.setText("-");
-				mPromptsPercent.setText("-");
-				mCompleteNum.setText("-");
-				mCompletePercent.setText("-");
-				popupWindow.dismiss();
-			}
-		});
-
-		no.setOnClickListener(new Button.OnClickListener() {
-
-			public void onClick(View v) {
-				popupWindow.dismiss();
-			}
-		});
-
-		popupWindow.showAsDropDown(mChar, 0, 0);
+		new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("Clear Stats?")
+				.setMessage(
+						"Statistics for the current selection will be permanently deleted. Are you sure you wish to continue?")
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								deleteStats();
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int id) {
+						dialog.cancel();
+					}
+				}).show();
 	}
 
 	/**
@@ -395,12 +560,12 @@ public class StatsActivity extends Activity {
 			}
 
 			populatePages(act);
+			// showStats();
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
 			// Do nothing
 		}
-
 	}
 
 	@Override
@@ -419,11 +584,22 @@ public class StatsActivity extends Activity {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {
 			populateActs();
+			// showStats();
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
 			// Do nothing
 		}
+	}
 
+	public class PageOnItemSelectedListener implements OnItemSelectedListener {
+		public void onItemSelected(AdapterView<?> parent, View v, int pos,
+				long id) {
+			showStats();
+		}
+
+		public void onNothingSelected(AdapterView<?> arg0) {
+			// Do nothing
+		}
 	}
 }

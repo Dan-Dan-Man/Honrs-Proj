@@ -117,6 +117,24 @@ public class PlayDbAdapter {
 		return mDb.update(DB_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
 	}
 
+	public boolean updateViews(long rowId, int views) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_VIEWS, views);
+		return mDb.update(DB_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+	}
+
+	public boolean updatePrompts(long rowId, int prompts) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_PROMPTS, prompts);
+		return mDb.update(DB_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+	}
+
+	public boolean updateCompletions(long rowId, int completions) {
+		ContentValues args = new ContentValues();
+		args.put(KEY_COMPLETIONS, completions);
+		return mDb.update(DB_TABLE, args, KEY_ROWID + "=" + rowId, null) > 0;
+	}
+
 	// Probably don't need this, but keep it incase.
 
 	// /** * Deletes Food */
@@ -152,17 +170,17 @@ public class PlayDbAdapter {
 		return mCursor;
 	}
 
-//	public Cursor checkAudio(String audio) throws SQLException {
-//		Cursor mCursor = mDb.query(true, DB_TABLE, new String[] { KEY_ROWID,
-//				KEY_NUMBER, KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE,
-//				KEY_NOTE, KEY_AUDIO, KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS,
-//				KEY_PROMPTS, KEY_COMPLETIONS }, KEY_AUDIO + "=" + audio, null,
-//				null, null, null, null);
-//		if (mCursor != null) {
-//			mCursor.moveToFirst();
-//		}
-//		return mCursor;
-//	}
+	// public Cursor checkAudio(String audio) throws SQLException {
+	// Cursor mCursor = mDb.query(true, DB_TABLE, new String[] { KEY_ROWID,
+	// KEY_NUMBER, KEY_CHARACTER, KEY_LINE, KEY_ACT, KEY_PAGE,
+	// KEY_NOTE, KEY_AUDIO, KEY_STRIKED, KEY_HIGHLIGHT, KEY_VIEWS,
+	// KEY_PROMPTS, KEY_COMPLETIONS }, KEY_AUDIO + "=" + audio, null,
+	// null, null, null, null);
+	// if (mCursor != null) {
+	// mCursor.moveToFirst();
+	// }
+	// return mCursor;
+	// }
 
 	public Cursor fetchPage(String page) {
 		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,

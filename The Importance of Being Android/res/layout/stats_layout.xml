@@ -138,7 +138,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textPrompts"
         android:layout_centerHorizontal="true"
-        android:text="12"
+        android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -148,7 +148,7 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textComplete"
         android:layout_centerHorizontal="true"
-        android:text="9"
+        android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -159,7 +159,7 @@
         android:layout_alignBottom="@+id/textComplete"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
-        android:text="3"
+        android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -174,24 +174,24 @@
         android:textColor="#FFFFFF" />
 
     <TextView
-        android:id="@+id/textPromptsPercent"
+        android:id="@+id/textViewsPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textViewsNum"
         android:layout_alignBottom="@+id/textViewsNum"
         android:layout_alignRight="@+id/textPercent"
-        android:text="26%"
+        android:text="0.0%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
     <TextView
-        android:id="@+id/textViewsPercent"
+        android:id="@+id/textPromptsPercent"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textPromptsNum"
         android:layout_alignBottom="@+id/textPromptsNum"
-        android:layout_alignLeft="@+id/textPromptsPercent"
-        android:text="63%"
+        android:layout_alignLeft="@+id/textViewsPercent"
+        android:text="0.0%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -202,7 +202,7 @@
         android:layout_alignBaseline="@+id/textCompleteNum"
         android:layout_alignBottom="@+id/textCompleteNum"
         android:layout_alignLeft="@+id/textViewsPercent"
-        android:text="25%"
+        android:text="0.0%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 

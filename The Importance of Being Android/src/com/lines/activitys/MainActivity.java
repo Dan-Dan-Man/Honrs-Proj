@@ -69,8 +69,10 @@ import com.lines.database.play.PlayDbAdapter;
  * 
  */
 // TODO: This class is rather large. Need to refactor a bit
-// TODO: If in rehearsal mode, we cannot allow the user to play recordings for
-// the hidden line!
+
+// TODO: Add statistics. We are only gonna store stats for the first line of
+// each page as that is as refined a search we can use. REMEMBER WE ONLY UPDATE
+// STATS IF WE ARE IN REHERSAL MODE!!
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -92,6 +94,7 @@ public class MainActivity extends ListActivity {
 	private boolean breakUp;
 	private boolean ownLines;
 	private boolean stage;
+	private boolean promptUsed = false;
 	private int pgNum;
 	private int lastPage;
 	private int visibleWords = 1;
@@ -160,6 +163,21 @@ public class MainActivity extends ListActivity {
 		startManagingCursor(mCursor);
 		fillData("");
 		registerForContextMenu(getListView());
+
+		// Update view count for the selected character
+		if (rehearsal) {
+			for (int i = 0; i < lines.size(); i++) {
+				if (lines.get(i).getCharacter().equals(character)) {
+					Cursor line = mDbAdapter
+							.fetchLine(lines.get(i).getNumber() + 1);
+					int viewCount = line.getInt(line.getColumnIndex("views"));
+					viewCount++;
+					mDbAdapter.updateViews(lines.get(i).getNumber() + 1,
+							viewCount);
+					break;
+				}
+			}
+		}
 
 		// When Next button is pressed, play jumps until user's next line.
 		mNext.setOnClickListener(new View.OnClickListener() {
@@ -237,6 +255,8 @@ public class MainActivity extends ListActivity {
 
 	@Override
 	protected void onResume() {
+		// TODO: If we have revealed some words for the hidden line, then then
+		// are not visible when we resume
 		super.onResume();
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
@@ -354,9 +374,8 @@ public class MainActivity extends ListActivity {
 	 */
 	private void playSelectedRecording(long id) throws Exception {
 		if (audioApplied(id)) {
-			// If the selected line is hidden, then we don't want to
-			Log.d(TAG, "HiddenLineNo: " + hiddenLineNo);
-			Log.d(TAG, "getLineNo: " + getLineNumber(id));
+			// If the selected line is hidden, then we don't want to play the
+			// audio until the line is revealed
 			if (rehearsal && (hiddenLineNo == getLineNumber(id))) {
 				Toast.makeText(
 						getApplicationContext(),
@@ -431,11 +450,12 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void revealWord() {
-		Log.d(TAG, currentLine);
+
 		String words[] = currentLine.split("\\s+");
 		boolean note;
 		boolean audio;
 		int number;
+		promptUsed = true;
 
 		// Only obtain next word if there are any left
 		if (visibleWords <= words.length) {
@@ -462,6 +482,13 @@ public class MainActivity extends ListActivity {
 			this.setSelection(adapter.getCount());
 
 			visibleWords++;
+
+			// Increment the number of prompts used for the current page
+			Cursor promptLine = mDbAdapter.fetchLine(number + 1);
+			int promptsCount = promptLine.getInt(promptLine
+					.getColumnIndex("prompts"));
+			promptsCount++;
+			mDbAdapter.updatePrompts(number + 1, promptsCount);
 		} else {
 			Toast.makeText(MainActivity.this,
 					"No more hidden words for current line!",
@@ -652,7 +679,6 @@ public class MainActivity extends ListActivity {
 									.getColumnIndex("line"));
 							visibleLines--;
 						} else {
-							// TODO:
 							// Before we exit, store the current line
 							hiddenLineNo = mCursor.getInt(mCursor
 									.getColumnIndex("number"));
@@ -760,12 +786,43 @@ public class MainActivity extends ListActivity {
 			visibleWords = 1;
 			lastViewedPos = 0;
 			topOffset = 0;
+			// Update completions count
+			// TODO: If a page has less than 23 lines, then the stats won't be
+			// recorded. This is just a temp fix
+			if (rehearsal && !promptUsed && lines.size() == 23) {
+				// TODO: Only update if all lines for page have been revealed
+				for (int i = 0; i < lines.size(); i++) {
+					if (lines.get(i).getCharacter().equals(character)) {
+						Cursor line = mDbAdapter.fetchLine(lines.get(i)
+								.getNumber() + 1);
+						int completionsCount = line.getInt(line
+								.getColumnIndex("completions"));
+						completionsCount++;
+						mDbAdapter.updateCompletions(
+								lines.get(i).getNumber() + 1, completionsCount);
+						break;
+					}
+				}
+			}
 			startManagingCursor(mCursor);
-			lines = new ArrayList<Line>();
 			if (rehearsal) {
+				lines = new ArrayList<Line>();
 				fillData("forward");
 				fillData("back");
 				getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
+				promptUsed = false;
+				for (int i = 0; i < lines.size(); i++) {
+					if (lines.get(i).getCharacter().equals(character)) {
+						Cursor line = mDbAdapter.fetchLine(lines.get(i)
+								.getNumber() + 1);
+						int viewCount = line.getInt(line
+								.getColumnIndex("views"));
+						viewCount++;
+						mDbAdapter.updateViews(lines.get(i).getNumber() + 1,
+								viewCount);
+						break;
+					}
+				}
 			} else {
 				fillData("");
 			}
