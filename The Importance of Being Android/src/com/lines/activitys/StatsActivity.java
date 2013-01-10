@@ -375,8 +375,7 @@ public class StatsActivity extends Activity {
 				&& !page.equals("All")) {
 			mCursor = mDbAdapter.fetchCharacter(character, page);
 			// If only the character spinner is selected as "All"
-		} else if (character.equals("All") && !act.equals("All")
-				&& !page.equals("All")) {
+		} else if (character.equals("All") && !page.equals("All")) {
 			mCursor = mDbAdapter.fetchPage(page);
 			// If only the page spinner is selected as "All"
 		} else if (!character.equals("All") && !act.equals("All")

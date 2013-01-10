@@ -35,14 +35,15 @@ public class Line {
 	private boolean note;
 	private boolean audio;
 
-	public Line(int number, String character, String line, boolean note, boolean audio) {
+	public Line(int number, String character, String line, boolean note,
+			boolean audio) {
 		this.number = number;
 		this.character = character;
 		this.line = line;
 		this.note = note;
 		this.audio = audio;
 	}
-	
+
 	public int getNumber() {
 		return number;
 	}
@@ -55,6 +56,10 @@ public class Line {
 		return line;
 	}
 
+	public void setLine(String newLine) {
+		this.line = newLine;
+	}
+
 	public boolean getNote() {
 		return note;
 	}
@@ -62,7 +67,7 @@ public class Line {
 	public void setNote(boolean note) {
 		this.note = note;
 	}
-	
+
 	public boolean getAudio() {
 		return audio;
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -57,7 +58,7 @@ public class LineAdapter extends ArrayAdapter<Line> {
 				mCharacter.setText(line.getCharacter());
 			}
 			if (mLine != null) {
-				mLine.setText(line.getLine());
+				mLine.setText(Html.fromHtml(line.getLine()));
 			}
 
 			note = line.getNote();
@@ -66,7 +67,7 @@ public class LineAdapter extends ArrayAdapter<Line> {
 			} else {
 				mNote.setVisibility(View.VISIBLE);
 			}
-			
+
 			audio = line.getAudio();
 			if (!audio) {
 				mAudio.setVisibility(View.GONE);

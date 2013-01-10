@@ -60,6 +60,8 @@ import com.lines.database.play.PlayDbAdapter;
  */
 
 // TODO: Refactor this class so it runs faster. Very slow to load up
+// TODO: Cannot allow both cueWords and ownLines to both be toggled on
+// TODO: Replace "Breakup Text" with "Randomise"
 public class OptionsActivity extends Activity {
 
 	private Button mContinue;

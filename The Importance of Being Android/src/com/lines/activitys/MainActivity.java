@@ -23,6 +23,8 @@ package com.lines.activitys;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
@@ -69,10 +71,6 @@ import com.lines.database.play.PlayDbAdapter;
  * 
  */
 // TODO: This class is rather large. Need to refactor a bit
-
-// TODO: Add statistics. We are only gonna store stats for the first line of
-// each page as that is as refined a search we can use. REMEMBER WE ONLY UPDATE
-// STATS IF WE ARE IN REHERSAL MODE!!
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -154,14 +152,8 @@ public class MainActivity extends ListActivity {
 
 		getLastPage();
 
-		if (ownLines) {
-			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
-		} else {
-			mCursor = mDbAdapter.fetchPage(pageNo);
-		}
-
 		startManagingCursor(mCursor);
-		fillData("");
+
 		registerForContextMenu(getListView());
 
 		// Update view count for the selected character
@@ -255,8 +247,6 @@ public class MainActivity extends ListActivity {
 
 	@Override
 	protected void onResume() {
-		// TODO: If we have revealed some words for the hidden line, then then
-		// are not visible when we resume
 		super.onResume();
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
@@ -267,6 +257,10 @@ public class MainActivity extends ListActivity {
 			fillData("forward");
 			fillData("back");
 			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
+			if (visibleWords > 1) {
+				visibleWords--;
+				revealWord();
+			}
 		} else {
 			fillData("");
 		}
@@ -513,6 +507,93 @@ public class MainActivity extends ListActivity {
 	}
 
 	/**
+	 * Before displaying the script, this method identifys the cue words and
+	 * colours them to highlight to the user.
+	 * 
+	 */
+	private void identifyCueWords() {
+		if (lines.size() > 1) {
+
+			HashMap<String, String> temp;
+
+			// If we're in rehearsal mode, then we need to identify cue words
+			// only for the hidden line
+			if (rehearsal) {
+				String firstLine[] = (lines.get(lines.size() - 2).getLine()
+						.replaceAll("([a-z]+)[?:!.,;]*", "$1")).split("\\s+");
+				temp = new HashMap<String, String>();
+
+				String hiddenLine[] = (currentLine.replaceAll(
+						"([a-z]+)[?:!.,;]*", "$1")).split("\\s+");
+
+				// Only continue if we aren't at the bottom of the page
+				if (!Arrays.equals(firstLine, hiddenLine)) {
+					for (int j = 0; j < firstLine.length; j++) {
+						temp.put(firstLine[j], firstLine[j]);
+					}
+
+					// Compare the first string with the hidden one to find
+					// duplicate occurences of a word
+					for (int j = 0; j < hiddenLine.length; j++) {
+						if (temp.containsValue(hiddenLine[j])
+								&& hiddenLine[j].length() > 4) {
+							// Update the line to contain HTML to highlight word
+							String newLine = lines
+									.get(lines.size() - 2)
+									.getLine()
+									.replace(
+											hiddenLine[j],
+											"<font color=\"#A50000\"><b>"
+													+ hiddenLine[j]
+													+ "</b></font>");
+							lines.get(lines.size() - 2).setLine(newLine);
+						}
+					}
+				}
+				// If we're in Normal mode, the we want to show cue words for
+				// all lines shown on page
+			} else {
+				for (int i = 0; i < lines.size() - 2; i++) {
+					// Get the line that is going to contain the cue words.
+					// Remove all punctuation and split into words
+					String firstLine[] = (lines.get(i).getLine().replaceAll(
+							"([a-z]+)[?:!.,;]*", "$1")).split("\\s+");
+					temp = new HashMap<String, String>();
+
+					// Store words of firstLine into Hashmap
+					for (int j = 0; j < firstLine.length; j++) {
+						temp.put(firstLine[j], firstLine[j]);
+					}
+
+					// Again remove punctuation and split into words for the
+					// succeeding line
+					String secondLine[] = (lines.get(i + 1).getLine()
+							.replaceAll("([a-z]+)[?:!.,;]*", "$1"))
+							.split("\\s+");
+
+					// Check all the words of the succeeding line, and find any
+					// that
+					// appear in the previous line
+					for (int j = 0; j < secondLine.length; j++) {
+						if (temp.containsValue(secondLine[j])
+								&& secondLine[j].length() > 4) {
+							String newLine = lines
+									.get(i)
+									.getLine()
+									.replace(
+											secondLine[j],
+											"<font color=\"#A50000\"><b>"
+													+ secondLine[j]
+													+ "</b></font>");
+							lines.get(i).setLine(newLine);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * This method filters out stage directions from the script
 	 * 
 	 * @param lines
@@ -711,6 +792,12 @@ public class MainActivity extends ListActivity {
 			filterStage(lines);
 		}
 
+		// If cuewords are toggled on, then we need to identify and show the
+		// cuewords for each line
+		if (cue) {
+			identifyCueWords();
+		}
+
 		// Finally show data in our custom listview
 		LineAdapter adapter = new LineAdapter(this, R.layout.play_list_layout,
 				lines);
@@ -790,7 +877,6 @@ public class MainActivity extends ListActivity {
 			// TODO: If a page has less than 23 lines, then the stats won't be
 			// recorded. This is just a temp fix
 			if (rehearsal && !promptUsed && lines.size() == 23) {
-				// TODO: Only update if all lines for page have been revealed
 				for (int i = 0; i < lines.size(); i++) {
 					if (lines.get(i).getCharacter().equals(character)) {
 						Cursor line = mDbAdapter.fetchLine(lines.get(i)
@@ -866,8 +952,6 @@ public class MainActivity extends ListActivity {
 		// get offset
 		View v = this.getListView().getChildAt(0);
 		topOffset = (v == null) ? 0 : v.getTop();
-		Log.d(TAG, "lastViewedPos after = " + lastViewedPos);
-		Log.d(TAG, "topOffset after = " + topOffset);
 	}
 
 	/**
@@ -1303,7 +1387,6 @@ public class MainActivity extends ListActivity {
 	 *         otherwise
 	 */
 	private boolean invalidFilename(String filename) {
-		Log.d(TAG, "Valid: " + VALID_CHARS.matcher(filename).find());
 		if (filename.equals("") || VALID_CHARS.matcher(filename).find()) {
 			return true;
 		} else {
