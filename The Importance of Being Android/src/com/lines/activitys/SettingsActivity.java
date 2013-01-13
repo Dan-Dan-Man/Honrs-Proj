@@ -33,180 +33,46 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.ImageButton;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.lines.R;
 import com.lines.classes.LinesApp;
+import com.lines.database.notes.NoteDbAdapter;
 import com.lines.database.play.PlayDbAdapter;
 
 /**
- * The Home Screen where the user will start off.
+ * The Settings screen. Here the user can select which script to load, how many
+ * words to reveal when they require a prompt and if they wish to have audio
+ * auto-play for lines with an assigned file when a new page is loaded
  * 
  * @author Dan
  * 
  */
+public class SettingsActivity extends Activity {
 
-// TODO: Some minor formating bugs in database. Need to examine these and edit
-// textfile.
-
-public class HomeActivity extends Activity {
-
+	private Spinner mScripts;
 	private PlayDbAdapter mDbAdapter;
-	private ImageButton mUpArrow;
-	private ImageButton mDownArrow;
-	private TextView mTop;
-	private TextView mMiddle;
-	private TextView mBottom;
+	private NoteDbAdapter mNDbAdapter;
 	private LinesApp app;
 	private Runnable populateDB;
 	private ProgressDialog m_ProgressDialog = null;
-	private static final String TAG = "HomeActivity";
+	private static final String TAG = "SettingsActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.home_layout);
+		setContentView(R.layout.settings_layout);
 
-		// Create an object of the application class so we can check if a
-		// database for the play exists
+		mScripts = (Spinner) findViewById(R.id.spinnerScripts);
+
 		app = (LinesApp) this.getApplication();
-
-		// TODO: If we press the back button at the home screen, and then reload
-		// the app, the database is re-populated.
-
-		// If a database doesn't exist, then ask the user to select a script to
-		// load
-		if (!app.dbExists()) {
-			selectScript();
-		}
-
-		mTop = (TextView) findViewById(R.id.textTop);
-		mMiddle = (TextView) findViewById(R.id.textMiddle);
-		mBottom = (TextView) findViewById(R.id.textBottom);
-
-		mUpArrow = (ImageButton) findViewById(R.id.imageButtonArrowUp);
-		mDownArrow = (ImageButton) findViewById(R.id.imageButtonArrowDown);
-
-		/**
-		 * Method for scrolling down text
-		 */
-		mUpArrow.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				switchTextDown();
-			}
-		});
-
-		/**
-		 * Method for scrolling up text
-		 */
-		mDownArrow.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				switchTextUp();
-			}
-		});
-	}
-
-	/**
-	 * Switch screen based on user selection.
-	 * 
-	 * @param v
-	 */
-	public void menuClick(View v) {
-		if (mMiddle.getText().toString().equals("Start")) {
-			Intent i = new Intent(this, OptionsActivity.class);
-			startActivityForResult(i, 0);
-		} else if (mMiddle.getText().toString().equals("Statistics")) {
-			Intent i = new Intent(this, StatsActivity.class);
-			startActivityForResult(i, 0);
-		} else if (mMiddle.getText().toString().equals("Performance Notes")) {
-			Intent i = new Intent(this, NotesActivity.class);
-			startActivityForResult(i, 0);
-		} else if (mMiddle.getText().toString().equals("Recordings")) {
-			Intent i = new Intent(this, RecordingsActivity.class);
-			startActivityForResult(i, 0);
-		} else if (mMiddle.getText().toString().equals("Settings")) {
-			Intent i = new Intent(this, SettingsActivity.class);
-			startActivityForResult(i, 0);
-		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
-	}
-
-	/**
-	 * Method for moving text up one
-	 */
-	private void switchTextUp() {
-		if (mMiddle.getText().toString().equals("Start")) {
-			mTop.setText("Start");
-			mMiddle.setText("Statistics");
-			mBottom.setText("Performance Notes");
-		} else if (mMiddle.getText().toString().equals("Statistics")) {
-			mTop.setText("Statistics");
-			mMiddle.setText("Performance Notes");
-			mBottom.setText("Recordings");
-		} else if (mMiddle.getText().toString().equals("Performance Notes")) {
-			mTop.setText("Performance Notes");
-			mMiddle.setText("Recordings");
-			mBottom.setText("Settings");
-		} else if (mMiddle.getText().toString().equals("Recordings")) {
-			mTop.setText("Recordings");
-			mMiddle.setText("Settings");
-			mBottom.setText(" ");
-		}
-	}
-
-	/**
-	 * Method for moving text down one
-	 */
-	private void switchTextDown() {
-		if (mMiddle.getText().toString().equals("Settings")) {
-			mTop.setText("Performance Notes");
-			mMiddle.setText("Recordings");
-			mBottom.setText("Settings");
-		} else if (mMiddle.getText().toString().equals("Recordings")) {
-			mTop.setText("Statistics");
-			mMiddle.setText("Performance Notes");
-			mBottom.setText("Recordings");
-		} else if (mMiddle.getText().toString().equals("Performance Notes")) {
-			mTop.setText("Start");
-			mMiddle.setText("Statistics");
-			mBottom.setText("Performance Notes");
-		} else if (mMiddle.getText().toString().equals("Statistics")) {
-			mTop.setText(" ");
-			mMiddle.setText("Start");
-			mBottom.setText("Statistics");
-		}
-	}
-
-	/**
-	 * Provide the user with a prompt to select a script to load into database
-	 * if one doesn't currently exist
-	 * 
-	 */
-	private void selectScript() {
-		LayoutInflater li = LayoutInflater.from(this);
-		View scriptsView = li.inflate(R.layout.load_script_layout, null);
-
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-
-		alertDialogBuilder.setView(scriptsView);
-
-		final Spinner selection = (Spinner) scriptsView
-				.findViewById(R.id.spinnerScripts);
 
 		ArrayList<String> filesList = new ArrayList<String>();
 
@@ -228,25 +94,37 @@ public class HomeActivity extends Activity {
 		ArrayAdapter<String> aa = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item, filesList);
 
-		selection.setAdapter(aa);
+		mScripts.setAdapter(aa);
 
-		alertDialogBuilder.setCancelable(false).setPositiveButton(
-				"Load Script", new DialogInterface.OnClickListener() {
+		mScripts.setOnItemSelectedListener(new ScriptsOnItemSelectedListener());
+	}
+
+	/**
+	 * Before loading a new script, first get user's confirmation.
+	 * 
+	 * @param script
+	 *            - the selected script the user wants to load
+	 */
+	private void confirmScriptSelection(final String script) {
+
+		new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_dialog_alert)
+				.setTitle("Overwrite script?")
+				.setMessage(
+						"Loading a new script will delete all data "
+								+ "associated with current loaded script"
+								+ " (except recordings). Do you wish to continue?")
+				.setPositiveButton("Yes",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								createThread(script);
+							}
+						})
+				.setNegativeButton("No", new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int id) {
-						final String script = selection.getSelectedItem()
-								.toString();
-						if (script != null) {
-							dialog.dismiss();
-							createThread(script);
-						}
+						dialog.cancel();
 					}
-				});
-
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		// show it
-		alertDialog.show();
+				}).show();
 	}
 
 	/**
@@ -259,7 +137,7 @@ public class HomeActivity extends Activity {
 		populateDB = new Runnable() {
 			public void run() {
 				try {
-					readFile(script);
+					loadScript(script);
 					m_ProgressDialog.dismiss();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
@@ -269,21 +147,29 @@ public class HomeActivity extends Activity {
 		};
 		Thread thread = new Thread(null, populateDB, "MagentoBackground");
 		thread.start();
-		m_ProgressDialog = ProgressDialog.show(HomeActivity.this,
+		m_ProgressDialog = ProgressDialog.show(SettingsActivity.this,
 				"Please wait...", "Loading Script...", true);
 	}
 
 	/**
-	 * Here we read the file, extracting the character name speaking the line.
+	 * Delete the databases that already exist, and populate a new one with the
+	 * user's selected script
 	 * 
-	 * @param file
+	 * @param script
+	 *            - script file we are populating the database with
 	 * @throws IOException
 	 */
-	private void readFile(String script) throws IOException {
-		// TODO: Need to make sure a new act starts on a new page.
+	private void loadScript(String script) throws IOException {
+
+		// Get adapters
+		mDbAdapter = app.getPlayAdapter();
+		mNDbAdapter = app.getNoteAdapter();
+
+		// Reset tables for Script and Notes
+		mDbAdapter.deleteTable();
+		mNDbAdapter.deleteTable();
 
 		String text = "";
-
 		InputStream is;
 		BufferedInputStream bis;
 		DataInputStream dis;
@@ -296,9 +182,6 @@ public class HomeActivity extends Activity {
 		script = script + ".txt";
 		File file = new File(Environment.getExternalStorageDirectory()
 				+ "/learnyourlines/scripts/" + script);
-
-		// Get adapter
-		mDbAdapter = app.getPlayAdapter();
 
 		// Try to open the file, and alert the user if file doesn't exist
 		try {
@@ -450,4 +333,27 @@ public class HomeActivity extends Activity {
 		}
 		return allCaps;
 	}
+
+	/**
+	 * When the item in script spinner changes, ask the user if they wish to
+	 * load the selected script.
+	 * 
+	 * @author Dan
+	 * 
+	 */
+	// TODO: This is called when we create the Activity. Needs to only be
+	// invoked when user selects an item
+	public class ScriptsOnItemSelectedListener implements
+			OnItemSelectedListener {
+		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
+				long arg3) {
+			String script = mScripts.getSelectedItem().toString();
+			confirmScriptSelection(script);
+		}
+
+		public void onNothingSelected(AdapterView<?> arg0) {
+			// TODO Auto-generated method stub
+		}
+	}
+
 }

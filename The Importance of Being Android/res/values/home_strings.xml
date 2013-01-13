@@ -13,5 +13,6 @@
     <string name="notes">Performance Notes</string>
     <string name="recordings">Recordings</string>
     <string name="help">Help</string>
+    <string name="script_prompt">Select Script:</string>
     
 </resources>

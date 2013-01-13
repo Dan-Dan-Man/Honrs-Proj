@@ -283,6 +283,7 @@ public class RecordingsActivity extends ListActivity {
 
 		// Make our Edittext appear like a textview
 		title.setFocusable(false);
+		title.setLongClickable(false);
 		title.setGravity(Gravity.CENTER);
 		title.setKeyListener(null);
 		title.setBackgroundColor(getResources().getColor(

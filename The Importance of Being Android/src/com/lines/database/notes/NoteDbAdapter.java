@@ -53,6 +53,13 @@ public class NoteDbAdapter {
 		mDbHelper.close();
 	}
 
+	public void deleteTable() {
+		mDbHelper = new NoteDatabaseHelper(mContext);
+		SQLiteDatabase db = mDbHelper.getWritableDatabase();
+		db.delete("Note", null, null);
+		db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" + "Note" + "'");
+	}
+
 	/**
 	 * * Create a new line entry into the table. If the entry is successfully
 	 * created return the new * rowId for that note, otherwise return a -1 to
@@ -85,13 +92,12 @@ public class NoteDbAdapter {
 		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
 				KEY_TITLE, KEY_NOTE }, null, null, null, null, null);
 	}
-	
+
 	public Cursor fetchNotes(String number) {
 		return mDb.query(DB_TABLE, new String[] { KEY_ROWID, KEY_NUMBER,
-				KEY_TITLE, KEY_NOTE }, KEY_NUMBER + "= ?", new String[] { number },
-				null, null, null);
+				KEY_TITLE, KEY_NOTE }, KEY_NUMBER + "= ?",
+				new String[] { number }, null, null, null);
 	}
-	
 
 	public Cursor fetchNote(long rowId) throws SQLException {
 		Cursor mCursor = mDb.query(true, DB_TABLE, new String[] { KEY_ROWID,

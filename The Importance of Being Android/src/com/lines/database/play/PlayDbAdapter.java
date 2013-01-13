@@ -62,6 +62,13 @@ public class PlayDbAdapter {
 		mDbHelper.close();
 	}
 
+	public void deleteTable() {
+		mDbHelper = new PlayDatabaseHelper(mContext);
+		SQLiteDatabase db = mDbHelper.getWritableDatabase();
+		db.delete("Play", null, null);
+		db.execSQL("DELETE FROM SQLITE_SEQUENCE WHERE NAME = '" + "Play" + "'");
+	}
+
 	/**
 	 * * Create a new line entry into the table. If the entry is successfully
 	 * created return the new * rowId for that note, otherwise return a -1 to

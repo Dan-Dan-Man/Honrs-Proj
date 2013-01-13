@@ -55,10 +55,12 @@ public class LineAdapter extends ArrayAdapter<Line> {
 			mNote.setFocusable(false);
 			mAudio.setFocusable(false);
 			if (mCharacter != null) {
-				mCharacter.setText(line.getCharacter());
+				mCharacter.setText(line.getCharacter(),
+						TextView.BufferType.SPANNABLE);
 			}
 			if (mLine != null) {
-				mLine.setText(Html.fromHtml(line.getLine()));
+				mLine.setText(Html.fromHtml(line.getLine()),
+						TextView.BufferType.SPANNABLE);
 			}
 
 			note = line.getNote();

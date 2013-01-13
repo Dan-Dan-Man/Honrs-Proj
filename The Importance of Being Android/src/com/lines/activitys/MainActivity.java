@@ -38,6 +38,8 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.text.Spannable;
+import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -108,7 +110,8 @@ public class MainActivity extends ListActivity {
 	private static final int PLAY_RECORD = 2;
 	private static final int ADD_RECORD = 3;
 	private static final int REMOVE_RECORD = 4;
-	private static final int STRIKE = 5;
+	private static final int HIGHLIGHT = 5;
+	private static final int STRIKE = 6;
 	private MediaPlayer player;
 	private MediaRecorder recorder;
 	private static final String TEMP_FILE = Environment
@@ -219,7 +222,7 @@ public class MainActivity extends ListActivity {
 		mPrompt.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (rehearsal) {
-					revealWord();
+					revealWord(true);
 				} else {
 					Toast.makeText(MainActivity.this,
 							"Feature only available in Rehearsal mode!",
@@ -259,7 +262,7 @@ public class MainActivity extends ListActivity {
 			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
 			if (visibleWords > 1) {
 				visibleWords--;
-				revealWord();
+				revealWord(false);
 			}
 		} else {
 			fillData("");
@@ -316,7 +319,8 @@ public class MainActivity extends ListActivity {
 		menu.add(0, PLAY_RECORD, 2, "Play recording");
 		menu.add(0, ADD_RECORD, 3, "Apply recording");
 		menu.add(0, REMOVE_RECORD, 4, "Remove recording");
-		menu.add(0, STRIKE, 5, "Strikeout text");
+		menu.add(0, HIGHLIGHT, 5, "Highlight text");
+		menu.add(0, STRIKE, 6, "Strikeout text");
 	}
 
 	/**
@@ -353,11 +357,53 @@ public class MainActivity extends ListActivity {
 		case REMOVE_RECORD:
 			removeRecording(info.id);
 			return true;
+		case HIGHLIGHT:
+			return true;
 		case STRIKE:
+			//strikeout(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
 	}
+
+//	private void strikeout(long id) {
+//		Log.d(TAG, "ID: " + id);
+//		TextView character = (TextView) getListView().getChildAt((int) id)
+//				.findViewById(R.id.textCharacter);
+//		TextView line = (TextView) getListView().getChildAt((int) id)
+//				.findViewById(R.id.textLine);
+//
+//		Spannable characterStrike = (Spannable) character.getText();
+//		Spannable lineStrike = (Spannable) line.getText();
+//
+//		Log.d(TAG, "Before: " + characterStrike.length());
+//
+//		characterStrike.setSpan(new StrikethroughSpan(), 0, character.getText()
+//				.length() - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//		lineStrike
+//				.setSpan(new StrikethroughSpan(), 0,
+//						line.getText().length() - 1,
+//						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//
+//		// WordtoSpan.removeSpan(new StrikethroughSpan());
+//
+//		character.setText(characterStrike);
+//		line.setText(lineStrike);
+//
+//		Log.d(TAG, "After: " + characterStrike.length());
+//
+//		// mLine.setText("Italic, highlighted, bold.",
+//		// TextView.BufferType.SPANNABLE);
+//		//
+//		// Spannable WordtoSpan = (Spannable) mLine.getText();
+//		//
+//		// WordtoSpan.setSpan(new BackgroundColorSpan(0xFFFFFF00), 8,
+//		// 19, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+//		//
+//		// mLine.setText(WordtoSpan);
+//
+//	}
 
 	/**
 	 * Get the file associated with the selected line and play it.
@@ -443,7 +489,7 @@ public class MainActivity extends ListActivity {
 	 * Here we reveal the appropriate word from the current line to the user.
 	 * 
 	 */
-	private void revealWord() {
+	private void revealWord(boolean stats) {
 
 		String words[] = currentLine.split("\\s+");
 		boolean note;
@@ -477,12 +523,14 @@ public class MainActivity extends ListActivity {
 
 			visibleWords++;
 
-			// Increment the number of prompts used for the current page
-			Cursor promptLine = mDbAdapter.fetchLine(number + 1);
-			int promptsCount = promptLine.getInt(promptLine
-					.getColumnIndex("prompts"));
-			promptsCount++;
-			mDbAdapter.updatePrompts(number + 1, promptsCount);
+			if (stats) {
+				// Increment the number of prompts used for the current page
+				Cursor promptLine = mDbAdapter.fetchLine(number + 1);
+				int promptsCount = promptLine.getInt(promptLine
+						.getColumnIndex("prompts"));
+				promptsCount++;
+				mDbAdapter.updatePrompts(number + 1, promptsCount);
+			}
 		} else {
 			Toast.makeText(MainActivity.this,
 					"No more hidden words for current line!",
