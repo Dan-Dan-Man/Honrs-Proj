@@ -13,26 +13,103 @@
         android:scaleType="fitXY"
         android:src="@drawable/stage_curtains" />
 
-    <Spinner
-        android:id="@+id/spinnerScripts"
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/buttonSave"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginRight="30dp"
-        android:layout_marginTop="50dp"
-        android:prompt="@string/script_prompt" />
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="30dp"
+        android:layout_marginLeft="30dp"
+        android:text="Save Changes"
+        android:textSize="14dp" />
 
     <TextView
         android:id="@+id/textScript"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/spinnerScripts"
-        android:layout_alignBottom="@+id/spinnerScripts"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="30dp"
+        android:layout_alignLeft="@+id/buttonSave"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="30dp"
         android:text="Select Script:"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
+
+    <Spinner
+        android:id="@+id/spinnerScripts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textScript"
+        android:layout_below="@+id/textScript"
+        android:prompt="@string/script_prompt" />
+
+    <TextView
+        android:id="@+id/textPrompts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/spinnerScripts"
+        android:layout_below="@+id/spinnerScripts"
+        android:layout_marginTop="50dp"
+        android:text="No. of reveals for LINE!:"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textAuto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textPrompts"
+        android:layout_below="@+id/textPrompts"
+        android:layout_marginTop="94dp"
+        android:text="Auto-play audio:"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF" />
+
+    <Spinner
+        android:id="@+id/spinnerAuto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textAuto"
+        android:layout_below="@+id/textAuto"
+        android:entries="@array/auto_play_array"
+        android:prompt="@string/select" />
+
+    <Spinner
+        android:id="@+id/spinnerPrompts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/textPrompts"
+        android:layout_below="@+id/textPrompts"
+        android:entries="@array/prompts_array"
+        android:prompt="@string/select" />
+
+    <Button
+        android:id="@+id/buttonReset"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/buttonSave"
+        android:layout_alignBottom="@+id/buttonSave"
+        android:layout_marginLeft="27dp"
+        android:layout_toRightOf="@+id/textAuto"
+        android:text="Restore to Default"
+        android:textSize="14dp" />
+
+    <ImageButton
+        android:id="@+id/imageButtonPrompts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/buttonReset"
+        android:layout_below="@+id/textPrompts"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help" />
+
+    <ImageButton
+        android:id="@+id/imageButtonAuto"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@+id/buttonReset"
+        android:layout_alignTop="@+id/spinnerAuto"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help" />
 
 </RelativeLayout>

@@ -1,5 +1,5 @@
 <resources>
-    
+
     <!-- String resource for Home Screen -->
 
     <string name="app_name">Learn Your Lines</string>
@@ -14,5 +14,19 @@
     <string name="recordings">Recordings</string>
     <string name="help">Help</string>
     <string name="script_prompt">Select Script:</string>
-    
+    <string name="select">Select</string>
+    <string name="prompt_help">Here you can choose how many words you want to reveal for the current hidden line when you press "LINE!"</string>
+    <string name="auto_help">When you start a new page, you can allow all lines that have a recording associated to them to automatically play.</string>
+
+    <string-array name="prompts_array">
+        <item>1</item>
+        <item>3</item>
+        <item>5</item>
+        <item>Whole Sentence</item>
+    </string-array>
+    <string-array name="auto_play_array">
+        <item>Yes</item>
+        <item>No</item>
+    </string-array>
+
 </resources>

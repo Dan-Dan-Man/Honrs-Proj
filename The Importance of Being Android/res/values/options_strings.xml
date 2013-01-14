@@ -14,7 +14,7 @@
 
     <string name="config">Configurations</string>
     <string name="cue">Cue Words</string>
-    <string name="breakup">Break up text</string>
+    <string name="random">Randomise pages</string>
     <string name="own_lines">Display only own lines</string>
     <string name="stage">Stage Directions</string>
     <string name="back">Back</string>
@@ -22,7 +22,7 @@
     <string name="dismiss">Dismiss</string>
     <string name="mode_help">In NORMAL mode, the script is available to read with no hidden text, and stats are not recorded. \n\nIn REHEARSAL mode, the selected character\'s lines will be hidden, and stats will be recorded.</string>
     <string name="cue_help">Cue Words will colour relevent words red from the previous line delivered by another character, to help you remember the context of your current line. \n\n Not available when DISPLAY ONLY OWN LINES is toggled on.</string>
-    <string name="break_help">Breaking up the text will split each line by sentence. When pressing \"Next\", instead of revealing the whole line, you will only reveal the next sentence. \n\n Not available in NORMAL mode.</string>
+    <string name="random_help">Randomising pages will mean that the next or previous page that appears will be completely random.</string>
     <string name="own_line_help">Here you will only display the lines delivered by your selected character. \n\n Not available in REHEARSAL mode or when CUE WORDS is toggled on.</string>
     <string name="stage_help">Toggling this will either hide or show the stage directions.</string>
 

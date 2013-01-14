@@ -10,7 +10,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="20dp"
         android:layout_marginTop="20dp"
         android:gravity="center"
         android:text="No script found! Please select a script to load."
@@ -24,6 +23,7 @@
         android:layout_below="@+id/textInfo"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="30dp"
+        android:paddingBottom="10dp"
         android:prompt="@string/script_prompt" />
 
 </RelativeLayout>

@@ -38,8 +38,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.SystemClock;
-import android.text.Spannable;
-import android.text.style.StrikethroughSpan;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -72,7 +70,7 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-// TODO: This class is rather large. Need to refactor a bit
+// TODO: Read Settings file and store preferences
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -91,7 +89,7 @@ public class MainActivity extends ListActivity {
 	private String currentLine;
 	private boolean rehearsal;
 	private boolean cue;
-	private boolean breakUp;
+	private boolean random;
 	private boolean ownLines;
 	private boolean stage;
 	private boolean promptUsed = false;
@@ -120,6 +118,10 @@ public class MainActivity extends ListActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		// TODO: If Autoplay is set to "Yes" then when we first load up a new
+		// page, or when a new line is revealed, then we we need to play all the
+		// recordings for all assigned audios to lines. Need to make sure the
+		// next one plays one when the previous one finishes
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
 		this.getListView().setDividerHeight(0);
@@ -139,7 +141,7 @@ public class MainActivity extends ListActivity {
 			character = extras.getString("EXTRA_CHAR");
 			rehearsal = extras.getBoolean("EXTRA_MODE");
 			cue = extras.getBoolean("EXTRA_CUE");
-			breakUp = extras.getBoolean("EXTRA_BREAKUP");
+			random = extras.getBoolean("EXTRA_RANDOM");
 			ownLines = extras.getBoolean("EXTRA_OWN");
 			stage = extras.getBoolean("EXTRA_STAGE");
 		} else {
@@ -260,6 +262,8 @@ public class MainActivity extends ListActivity {
 			fillData("forward");
 			fillData("back");
 			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
+			// TODO: Make sure we reveal the correct amount of words depending
+			// on the user's preference
 			if (visibleWords > 1) {
 				visibleWords--;
 				revealWord(false);
@@ -360,50 +364,50 @@ public class MainActivity extends ListActivity {
 		case HIGHLIGHT:
 			return true;
 		case STRIKE:
-			//strikeout(info.id);
+			// strikeout(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
 	}
 
-//	private void strikeout(long id) {
-//		Log.d(TAG, "ID: " + id);
-//		TextView character = (TextView) getListView().getChildAt((int) id)
-//				.findViewById(R.id.textCharacter);
-//		TextView line = (TextView) getListView().getChildAt((int) id)
-//				.findViewById(R.id.textLine);
-//
-//		Spannable characterStrike = (Spannable) character.getText();
-//		Spannable lineStrike = (Spannable) line.getText();
-//
-//		Log.d(TAG, "Before: " + characterStrike.length());
-//
-//		characterStrike.setSpan(new StrikethroughSpan(), 0, character.getText()
-//				.length() - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//
-//		lineStrike
-//				.setSpan(new StrikethroughSpan(), 0,
-//						line.getText().length() - 1,
-//						Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//
-//		// WordtoSpan.removeSpan(new StrikethroughSpan());
-//
-//		character.setText(characterStrike);
-//		line.setText(lineStrike);
-//
-//		Log.d(TAG, "After: " + characterStrike.length());
-//
-//		// mLine.setText("Italic, highlighted, bold.",
-//		// TextView.BufferType.SPANNABLE);
-//		//
-//		// Spannable WordtoSpan = (Spannable) mLine.getText();
-//		//
-//		// WordtoSpan.setSpan(new BackgroundColorSpan(0xFFFFFF00), 8,
-//		// 19, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-//		//
-//		// mLine.setText(WordtoSpan);
-//
-//	}
+	// private void strikeout(long id) {
+	// Log.d(TAG, "ID: " + id);
+	// TextView character = (TextView) getListView().getChildAt((int) id)
+	// .findViewById(R.id.textCharacter);
+	// TextView line = (TextView) getListView().getChildAt((int) id)
+	// .findViewById(R.id.textLine);
+	//
+	// Spannable characterStrike = (Spannable) character.getText();
+	// Spannable lineStrike = (Spannable) line.getText();
+	//
+	// Log.d(TAG, "Before: " + characterStrike.length());
+	//
+	// characterStrike.setSpan(new StrikethroughSpan(), 0, character.getText()
+	// .length() - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+	//
+	// lineStrike
+	// .setSpan(new StrikethroughSpan(), 0,
+	// line.getText().length() - 1,
+	// Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+	//
+	// // WordtoSpan.removeSpan(new StrikethroughSpan());
+	//
+	// character.setText(characterStrike);
+	// line.setText(lineStrike);
+	//
+	// Log.d(TAG, "After: " + characterStrike.length());
+	//
+	// // mLine.setText("Italic, highlighted, bold.",
+	// // TextView.BufferType.SPANNABLE);
+	// //
+	// // Spannable WordtoSpan = (Spannable) mLine.getText();
+	// //
+	// // WordtoSpan.setSpan(new BackgroundColorSpan(0xFFFFFF00), 8,
+	// // 19, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+	// //
+	// // mLine.setText(WordtoSpan);
+	//
+	// }
 
 	/**
 	 * Get the file associated with the selected line and play it.
@@ -490,7 +494,8 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void revealWord(boolean stats) {
-
+		// TODO: Make sure we reveal the correct amount of words, depending on
+		// the user's preference
 		String words[] = currentLine.split("\\s+");
 		boolean note;
 		boolean audio;
@@ -873,6 +878,7 @@ public class MainActivity extends ListActivity {
 	 *            - Tells us if are going to the next or previous page.
 	 */
 	private void switchPage(boolean pgUp) {
+		// TODO: If we are on "randomise" then we need to randomise which page we jump to next
 		boolean validPage = true;
 		pgNum = Integer.parseInt(pageNo);
 

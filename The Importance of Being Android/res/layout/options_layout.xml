@@ -91,14 +91,13 @@
         android:textSize="12sp" />
 
     <CheckBox
-        android:id="@+id/checkBreak"
+        android:id="@+id/checkRandom"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/checkCue"
         android:layout_below="@+id/checkCue"
-        android:text="@string/breakup"
+        android:text="@string/random"
         android:textColor="#FFFFFF"
-        android:enabled="false"
         android:textSize="12sp" />
 
     <CheckBox
@@ -115,7 +114,7 @@
         android:id="@+id/checkStage"
         android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/checkBreak"
+        android:layout_alignBottom="@+id/checkRandom"
         android:layout_alignLeft="@+id/checkOwnLines"
         android:checked="true"
         android:text="@string/stage"
@@ -126,22 +125,22 @@
         android:id="@+id/imageButtonCue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/checkCue"
         android:layout_alignTop="@+id/checkCue"
-        android:background="@null"
-        android:src="@drawable/ic_menu_help"
+        android:layout_marginLeft="10dp"
         android:layout_marginTop="7dp"
-        android:layout_marginLeft="10dp" />
+        android:layout_toRightOf="@+id/checkCue"
+        android:background="@null"
+        android:src="@drawable/ic_menu_help" />
 
     <ImageButton
-        android:id="@+id/imageButtonBreak"
+        android:id="@+id/imageButtonRandom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/imageButtonCue"
         android:layout_alignTop="@+id/checkStage"
+        android:layout_marginTop="7dp"
         android:background="@null"
-        android:src="@drawable/ic_menu_help"
-        android:layout_marginTop="7dp" />
+        android:src="@drawable/ic_menu_help" />
 
     <ImageButton
         android:id="@+id/imageButtonOwnLine"
@@ -157,7 +156,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/imageButtonBreak"
+        android:layout_alignTop="@+id/imageButtonRandom"
         android:background="@null"
         android:src="@drawable/ic_menu_help" />
 
@@ -172,7 +171,7 @@
         android:text="@string/cont"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FFFFFF" />
-
+
     <Spinner
         android:id="@+id/spinnerMode"
         android:layout_width="wrap_content"

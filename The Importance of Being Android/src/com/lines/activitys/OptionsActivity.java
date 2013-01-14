@@ -70,11 +70,11 @@ public class OptionsActivity extends Activity {
 	private Spinner mPage;
 	private Spinner mMode;
 	private CheckBox mCue;
-	private CheckBox mBreak;
+	private CheckBox mRandom;
 	private CheckBox mOwn;
 	private CheckBox mStage;
 	private ImageButton mCueHelp;
-	private ImageButton mBreakHelp;
+	private ImageButton mRandomHelp;
 	private ImageButton mOwnLineHelp;
 	private ImageButton mStageHelp;
 	private ImageButton mModeHelp;
@@ -86,7 +86,7 @@ public class OptionsActivity extends Activity {
 	private String character;
 	private boolean rehearsal;
 	private boolean cue;
-	private boolean breakUp;
+	private boolean random;
 	private boolean ownLines;
 	private boolean stage;
 	private ArrayList<String> characters = new ArrayList<String>();
@@ -107,13 +107,13 @@ public class OptionsActivity extends Activity {
 		mMode = (Spinner) findViewById(R.id.spinnerMode);
 		mContinue = (Button) findViewById(R.id.buttonContinue);
 		mCue = (CheckBox) findViewById(R.id.checkCue);
-		mBreak = (CheckBox) findViewById(R.id.checkBreak);
+		mRandom = (CheckBox) findViewById(R.id.checkRandom);
 		mOwn = (CheckBox) findViewById(R.id.checkOwnLines);
 		mStage = (CheckBox) findViewById(R.id.checkStage);
 
 		mModeHelp = (ImageButton) findViewById(R.id.imageButtonMode);
 		mCueHelp = (ImageButton) findViewById(R.id.imageButtonCue);
-		mBreakHelp = (ImageButton) findViewById(R.id.imageButtonBreak);
+		mRandomHelp = (ImageButton) findViewById(R.id.imageButtonRandom);
 		mOwnLineHelp = (ImageButton) findViewById(R.id.imageButtonOwnLine);
 		mStageHelp = (ImageButton) findViewById(R.id.imageButtonStage);
 
@@ -150,7 +150,7 @@ public class OptionsActivity extends Activity {
 				// Set user's checkbox configurations
 				cue = mCue.isChecked();
 				ownLines = mOwn.isChecked();
-				breakUp = mBreak.isChecked();
+				random = mRandom.isChecked();
 				stage = mStage.isChecked();
 
 				pageNo = mPage.getSelectedItem().toString();
@@ -181,7 +181,7 @@ public class OptionsActivity extends Activity {
 				i.putExtra("EXTRA_MODE", rehearsal);
 				i.putExtra("EXTRA_CUE", cue);
 				i.putExtra("EXTRA_OWN", ownLines);
-				i.putExtra("EXTRA_BREAKUP", breakUp);
+				i.putExtra("EXTRA_RANDOM", random);
 				i.putExtra("EXTRA_STAGE", stage);
 				OptionsActivity.this.startActivity(i);
 			}
@@ -200,9 +200,9 @@ public class OptionsActivity extends Activity {
 			}
 		});
 
-		mBreakHelp.setOnClickListener(new View.OnClickListener() {
+		mRandomHelp.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				showPopup("break");
+				showPopup("random");
 			}
 		});
 
@@ -416,8 +416,8 @@ public class OptionsActivity extends Activity {
 		// Here we decide what help message to display to the user.
 		if (msg.equals("cue")) {
 			text.setText(R.string.cue_help);
-		} else if (msg.equals("break")) {
-			text.setText(R.string.break_help);
+		} else if (msg.equals("random")) {
+			text.setText(R.string.random_help);
 		} else if (msg.equals("own line")) {
 			text.setText(R.string.own_line_help);
 		} else if (msg.equals("stage")) {
@@ -446,15 +446,11 @@ public class OptionsActivity extends Activity {
 	public class ModeOnItemSelectedListener implements OnItemSelectedListener {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {
-
 			if (mMode.getSelectedItem().equals("Normal")) {
-				mBreak.setEnabled(false);
-				mBreak.setChecked(false);
 				mOwn.setEnabled(true);
 				mChar.setEnabled(false);
 				populateActs(false);
 			} else {
-				mBreak.setEnabled(true);
 				mOwn.setEnabled(false);
 				mOwn.setChecked(false);
 				mChar.setEnabled(true);
@@ -465,7 +461,6 @@ public class OptionsActivity extends Activity {
 		public void onNothingSelected(AdapterView<?> arg0) {
 			// Do nothing
 		}
-
 	}
 
 	/**
@@ -508,7 +503,6 @@ public class OptionsActivity extends Activity {
 		public void onNothingSelected(AdapterView<?> arg0) {
 			// Do nothing
 		}
-
 	}
 
 }

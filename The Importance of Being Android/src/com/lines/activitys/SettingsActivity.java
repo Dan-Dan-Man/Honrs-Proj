@@ -22,9 +22,11 @@
 package com.lines.activitys;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -35,12 +37,18 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.view.ViewPager.LayoutParams;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.view.View.OnClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.PopupWindow;
 import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lines.R;
 import com.lines.classes.LinesApp;
@@ -58,11 +66,20 @@ import com.lines.database.play.PlayDbAdapter;
 public class SettingsActivity extends Activity {
 
 	private Spinner mScripts;
+	private Spinner mPrompts;
+	private Spinner mAuto;
+	private Button mSave;
+	private Button mReset;
+	private ImageButton mPromptsHelp;
+	private ImageButton mAutoHelp;
 	private PlayDbAdapter mDbAdapter;
 	private NoteDbAdapter mNDbAdapter;
 	private LinesApp app;
 	private Runnable populateDB;
 	private ProgressDialog m_ProgressDialog = null;
+	private String defaultScript;
+	private String defaultPrompts;
+	private String defaultAuto;
 	private static final String TAG = "SettingsActivity";
 
 	@Override
@@ -71,6 +88,12 @@ public class SettingsActivity extends Activity {
 		setContentView(R.layout.settings_layout);
 
 		mScripts = (Spinner) findViewById(R.id.spinnerScripts);
+		mPrompts = (Spinner) findViewById(R.id.spinnerPrompts);
+		mAuto = (Spinner) findViewById(R.id.spinnerAuto);
+		mSave = (Button) findViewById(R.id.buttonSave);
+		mReset = (Button) findViewById(R.id.buttonReset);
+		mPromptsHelp = (ImageButton) findViewById(R.id.imageButtonPrompts);
+		mAutoHelp = (ImageButton) findViewById(R.id.imageButtonAuto);
 
 		app = (LinesApp) this.getApplication();
 
@@ -94,9 +117,136 @@ public class SettingsActivity extends Activity {
 		ArrayAdapter<String> aa = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item, filesList);
 
+		// TODO: Set the default item in the list to be the current loaded
+		// Script
 		mScripts.setAdapter(aa);
 
-		mScripts.setOnItemSelectedListener(new ScriptsOnItemSelectedListener());
+		try {
+			populateSpinners();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		mSave.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				String script = mScripts.getSelectedItem().toString();
+				if (!defaultScript.equals(script)) {
+					confirmScriptSelection(script);
+				} else {
+					saveSettings();
+					finish();
+				}
+			}
+		});
+
+		mReset.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				// TODO Reset all fields to their default values. Prompts is set
+				// to 1 and Auto-play is set to No
+				try {
+					populateSpinners();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
+
+		mPromptsHelp.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				showPopup("prompts");
+			}
+		});
+
+		mAutoHelp.setOnClickListener(new OnClickListener() {
+			public void onClick(View v) {
+				showPopup("auto");
+			}
+		});
+	}
+
+	/**
+	 * Set the default selection of all spinners to their
+	 * 
+	 * @throws IOException
+	 */
+	private void populateSpinners() throws IOException {
+		File settings = new File(Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/.settings.sav");
+
+		InputStream is;
+		BufferedInputStream bis;
+		DataInputStream dis;
+
+		try {
+			is = new FileInputStream(settings);
+			bis = new BufferedInputStream(is);
+			dis = new DataInputStream(bis);
+		} catch (IOException e) {
+			// TODO: Add proper error handling. Show popup to user informing
+			// them of the missing file (need to create their own/re-install)
+			// and then close the app.
+			Log.e(TAG, "Error");
+			return;
+		}
+
+		defaultScript = dis.readLine();
+		for (int i = 0; i < mScripts.getCount(); i++) {
+			if (mScripts.getItemAtPosition(i).toString().equals(defaultScript)) {
+				mScripts.setSelection(i);
+				break;
+			}
+		}
+
+		defaultPrompts = dis.readLine();
+		for (int i = 0; i < mPrompts.getCount(); i++) {
+			if (mPrompts.getItemAtPosition(i).toString().equals(defaultPrompts)) {
+				mPrompts.setSelection(i);
+				break;
+			}
+		}
+
+		defaultAuto = dis.readLine();
+		for (int i = 0; i < mAuto.getCount(); i++) {
+			if (mAuto.getItemAtPosition(i).toString().equals(defaultAuto)) {
+				mAuto.setSelection(i);
+				break;
+			}
+		}
+	}
+
+	/**
+	 * Update the Settings file with the user's selections
+	 * 
+	 */
+	private void saveSettings() {
+		File settings = new File(Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/.settings.sav");
+		if (settings.exists()) {
+			settings.delete();
+		}
+
+		FileWriter fileWriter;
+		BufferedWriter writer;
+
+		try {
+			fileWriter = new FileWriter(settings);
+			writer = new BufferedWriter(fileWriter);
+
+			writer.write(mScripts.getSelectedItem().toString());
+			writer.newLine();
+			writer.write(mPrompts.getSelectedItem().toString());
+			writer.newLine();
+			writer.write(mAuto.getSelectedItem().toString());
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		Toast.makeText(getApplicationContext(), "Settings saved!",
+				Toast.LENGTH_LONG).show();
 	}
 
 	/**
@@ -118,6 +268,7 @@ public class SettingsActivity extends Activity {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								createThread(script);
+								saveSettings();
 							}
 						})
 				.setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -297,6 +448,8 @@ public class SettingsActivity extends Activity {
 		bis.close();
 		dis.close();
 
+		finish();
+
 	}
 
 	/**
@@ -335,25 +488,39 @@ public class SettingsActivity extends Activity {
 	}
 
 	/**
-	 * When the item in script spinner changes, ask the user if they wish to
-	 * load the selected script.
+	 * This method creates and shows a popup to the user, displaying a relevent
+	 * help message.
 	 * 
-	 * @author Dan
+	 * @param msg
+	 *            - decides which message we are displaying to the user
 	 * 
 	 */
-	// TODO: This is called when we create the Activity. Needs to only be
-	// invoked when user selects an item
-	public class ScriptsOnItemSelectedListener implements
-			OnItemSelectedListener {
-		public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2,
-				long arg3) {
-			String script = mScripts.getSelectedItem().toString();
-			confirmScriptSelection(script);
+	private void showPopup(String msg) {
+		// Create popup
+		LayoutInflater layoutInflater = (LayoutInflater) getBaseContext()
+				.getSystemService(LAYOUT_INFLATER_SERVICE);
+		View popupView = layoutInflater.inflate(R.layout.help_popup_layout,
+				null);
+		final PopupWindow popupWindow = new PopupWindow(popupView,
+				LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+
+		Button btnDismiss = (Button) popupView.findViewById(R.id.dismiss);
+		TextView text = (TextView) popupView.findViewById(R.id.text);
+
+		// Here we decide what help message to display to the user.
+		if (msg.equals("prompts")) {
+			text.setText(R.string.prompt_help);
+		} else {
+			text.setText(R.string.auto_help);
 		}
 
-		public void onNothingSelected(AdapterView<?> arg0) {
-			// TODO Auto-generated method stub
-		}
+		btnDismiss.setOnClickListener(new Button.OnClickListener() {
+
+			public void onClick(View v) {
+				popupWindow.dismiss();
+			}
+		});
+
+		popupWindow.showAsDropDown(mPrompts, 50, -150);
 	}
-
 }

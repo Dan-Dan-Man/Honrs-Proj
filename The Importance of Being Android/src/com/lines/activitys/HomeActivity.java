@@ -22,9 +22,11 @@
 package com.lines.activitys;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -238,6 +240,7 @@ public class HomeActivity extends Activity {
 						if (script != null) {
 							dialog.dismiss();
 							createThread(script);
+							createSettings(script);
 						}
 					}
 				});
@@ -274,6 +277,38 @@ public class HomeActivity extends Activity {
 	}
 
 	/**
+	 * Create a settings file with the user selected script and other default
+	 * settings.
+	 * 
+	 * @param script
+	 */
+	private void createSettings(String script) {
+		File settings = new File(Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/.settings.sav");
+		if (settings.exists()) {
+			settings.delete();
+		}
+		
+		FileWriter fileWriter;
+		BufferedWriter writer;
+		
+		try {
+			fileWriter = new FileWriter(settings);
+			writer = new BufferedWriter(fileWriter);
+			
+			writer.write(script);
+			writer.newLine();
+			writer.write("1");
+			writer.newLine();
+			writer.write("No");
+			writer.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/**
 	 * Here we read the file, extracting the character name speaking the line.
 	 * 
 	 * @param file
@@ -292,10 +327,8 @@ public class HomeActivity extends Activity {
 		int actNo = 0;
 		int pageNo = 1;
 
-		// Add file extension back on
-		script = script + ".txt";
 		File file = new File(Environment.getExternalStorageDirectory()
-				+ "/learnyourlines/scripts/" + script);
+				+ "/learnyourlines/scripts/" + script + ".txt");
 
 		// Get adapter
 		mDbAdapter = app.getPlayAdapter();
