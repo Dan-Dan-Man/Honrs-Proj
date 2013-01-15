@@ -106,6 +106,7 @@
         android:layout_height="wrap_content"
         android:layout_alignRight="@+id/spinnerPage"
         android:layout_alignTop="@+id/checkCue"
+        android:enabled="false"
         android:text="@string/own_lines"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />

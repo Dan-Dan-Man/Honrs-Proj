@@ -160,7 +160,6 @@ public class RecordingsActivity extends ListActivity {
 			try {
 				playRecording(info.id);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return true;
@@ -183,7 +182,6 @@ public class RecordingsActivity extends ListActivity {
 		try {
 			playRecording(id);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -532,7 +530,6 @@ public class RecordingsActivity extends ListActivity {
 											Toast.LENGTH_LONG).show();
 									populateList();
 								} catch (Exception e) {
-									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 							}
@@ -543,7 +540,6 @@ public class RecordingsActivity extends ListActivity {
 							renameFile(newId, filename, false);
 							dialog.cancel();
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}

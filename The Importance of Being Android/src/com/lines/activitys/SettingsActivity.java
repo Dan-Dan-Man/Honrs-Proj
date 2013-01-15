@@ -116,15 +116,11 @@ public class SettingsActivity extends Activity {
 
 		ArrayAdapter<String> aa = new ArrayAdapter<String>(this,
 				android.R.layout.simple_spinner_item, filesList);
-
-		// TODO: Set the default item in the list to be the current loaded
-		// Script
 		mScripts.setAdapter(aa);
 
 		try {
 			populateSpinners();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -142,12 +138,9 @@ public class SettingsActivity extends Activity {
 
 		mReset.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
-				// TODO Reset all fields to their default values. Prompts is set
-				// to 1 and Auto-play is set to No
 				try {
 					populateSpinners();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -184,10 +177,7 @@ public class SettingsActivity extends Activity {
 			bis = new BufferedInputStream(is);
 			dis = new DataInputStream(bis);
 		} catch (IOException e) {
-			// TODO: Add proper error handling. Show popup to user informing
-			// them of the missing file (need to create their own/re-install)
-			// and then close the app.
-			Log.e(TAG, "Error");
+			e.printStackTrace();
 			return;
 		}
 
@@ -241,7 +231,6 @@ public class SettingsActivity extends Activity {
 			writer.write(mAuto.getSelectedItem().toString());
 			writer.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -291,7 +280,6 @@ public class SettingsActivity extends Activity {
 					loadScript(script);
 					m_ProgressDialog.dismiss();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -340,10 +328,7 @@ public class SettingsActivity extends Activity {
 			bis = new BufferedInputStream(is);
 			dis = new DataInputStream(bis);
 		} catch (IOException e) {
-			// TODO: Add proper error handling. Show popup to user informing
-			// them of the missing file (need to create their own/re-install)
-			// and then close the app.
-			Log.e(TAG, "Error");
+			e.printStackTrace();
 			return;
 		}
 
@@ -367,7 +352,6 @@ public class SettingsActivity extends Activity {
 			}
 
 			// Keep count of what page we're on (23 lines/page)
-			// TODO: Subject to change depending on testing
 			if ((lineNo % 23) == 0 && lineNo != 0) {
 				pageNo++;
 			}

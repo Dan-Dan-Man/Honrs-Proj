@@ -21,10 +21,19 @@
 
 package com.lines.activitys;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import android.app.AlertDialog;
@@ -70,7 +79,6 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-// TODO: Read Settings file and store preferences
 public class MainActivity extends ListActivity {
 
 	private static final String TAG = "MainActivity";
@@ -87,22 +95,26 @@ public class MainActivity extends ListActivity {
 	private String actNo;
 	private String character;
 	private String currentLine;
+	private String promptsSettings;
+	private String autoSettings;
 	private boolean rehearsal;
 	private boolean cue;
 	private boolean random;
 	private boolean ownLines;
 	private boolean stage;
 	private boolean promptUsed = false;
-	private int pgNum;
+	private boolean promptLimitReached = false;
 	private int lastPage;
 	private int visibleWords = 1;
+	private int visibleSentences = 1;
 	private int lastViewedPos;
 	private int topOffset;
 	private int hiddenLineNo;
 	private ArrayList<Line> lines = new ArrayList<Line>();
+	private ArrayList<String> availablePages = new ArrayList<String>();
 	private static final int OPTIONS = 0;
 	private static final int STATS = 1;
-	private static final int QUICK_SEARCH = 2;
+	private static final int SETTINGS = 2;
 	private static final int ADD_NOTE = 0;
 	private static final int VIEW_NOTES = 1;
 	private static final int PLAY_RECORD = 2;
@@ -121,7 +133,7 @@ public class MainActivity extends ListActivity {
 		// TODO: If Autoplay is set to "Yes" then when we first load up a new
 		// page, or when a new line is revealed, then we we need to play all the
 		// recordings for all assigned audios to lines. Need to make sure the
-		// next one plays one when the previous one finishes
+		// next one plays when the previous one finishes
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
 		this.getListView().setDividerHeight(0);
@@ -157,8 +169,9 @@ public class MainActivity extends ListActivity {
 
 		getLastPage();
 
-		startManagingCursor(mCursor);
+		getAvailablePages();
 
+		startManagingCursor(mCursor);
 		registerForContextMenu(getListView());
 
 		// Update view count for the selected character
@@ -181,6 +194,8 @@ public class MainActivity extends ListActivity {
 			public void onClick(View v) {
 				if (rehearsal) {
 					visibleWords = 1;
+					visibleSentences = 1;
+					promptLimitReached = false;
 					setListViewPos();
 					fillData("forward");
 				}
@@ -205,6 +220,8 @@ public class MainActivity extends ListActivity {
 		mPrev.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				visibleWords = 1;
+				visibleSentences = 1;
+				promptLimitReached = false;
 				setListViewPos();
 				fillData("back");
 			}
@@ -224,7 +241,22 @@ public class MainActivity extends ListActivity {
 		mPrompt.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				if (rehearsal) {
-					revealWord(true);
+					if (promptsSettings.equals("Whole Sentence")) {
+						revealSentence();
+					} else {
+						int wordsToReveal = Integer.parseInt(promptsSettings);
+						for (int i = 0; i < wordsToReveal; i++) {
+							revealWord();
+						}
+					}
+					// Increment the number of prompts used for the current
+					// page
+					int number = lines.get(lines.size() - 1).getNumber();
+					Cursor promptLine = mDbAdapter.fetchLine(number + 1);
+					int promptsCount = promptLine.getInt(promptLine
+							.getColumnIndex("prompts"));
+					promptsCount++;
+					mDbAdapter.updatePrompts(number + 1, promptsCount);
 				} else {
 					Toast.makeText(MainActivity.this,
 							"Feature only available in Rehearsal mode!",
@@ -238,7 +270,6 @@ public class MainActivity extends ListActivity {
 				try {
 					showRecordingDialog();
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -246,13 +277,14 @@ public class MainActivity extends ListActivity {
 	}
 
 	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-
-	@Override
 	protected void onResume() {
 		super.onResume();
+		String oldSettings = promptsSettings;
+		try {
+			loadSettings();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
 		} else {
@@ -262,11 +294,22 @@ public class MainActivity extends ListActivity {
 			fillData("forward");
 			fillData("back");
 			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
-			// TODO: Make sure we reveal the correct amount of words depending
-			// on the user's preference
-			if (visibleWords > 1) {
-				visibleWords--;
-				revealWord(false);
+			if (!promptsSettings.equals(oldSettings)) {
+				visibleSentences = 1;
+				visibleWords = 1;
+			} else if (promptsSettings.equals("Whole Sentence")) {
+				if (visibleSentences > 1) {
+					visibleSentences--;
+					revealSentence();
+				}
+			} else {
+				int wordsToReveal = Integer.parseInt(promptsSettings);
+				if (visibleWords > wordsToReveal) {
+					visibleWords = visibleWords - wordsToReveal;
+					for (int i = 0; i < wordsToReveal; i++) {
+						revealWord();
+					}
+				}
 			}
 		} else {
 			fillData("");
@@ -281,7 +324,7 @@ public class MainActivity extends ListActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		menu.add(0, OPTIONS, 0, "Options");
 		menu.add(0, STATS, 1, "Statistics");
-		menu.add(0, QUICK_SEARCH, 2, "Quick Search");
+		menu.add(0, SETTINGS, 2, "Settings");
 		return true;
 	}
 
@@ -302,8 +345,10 @@ public class MainActivity extends ListActivity {
 			i.putExtra("EXTRA_CHARACTER", character);
 			MainActivity.this.startActivity(i);
 			break;
-		case (QUICK_SEARCH):
-			// TODO: Allow user to jump to any page in script
+		case (SETTINGS):
+			setListViewPos();
+			Intent j = new Intent(MainActivity.this, SettingsActivity.class);
+			MainActivity.this.startActivity(j);
 			break;
 		}
 		return false;
@@ -345,7 +390,6 @@ public class MainActivity extends ListActivity {
 			try {
 				playSelectedRecording(info.id);
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return true;
@@ -362,12 +406,100 @@ public class MainActivity extends ListActivity {
 			removeRecording(info.id);
 			return true;
 		case HIGHLIGHT:
+			// TODO: Select and highlight text
 			return true;
 		case STRIKE:
+			// TODO: Select and strikethrough text
 			// strikeout(info.id);
 			return true;
 		}
 		return super.onContextItemSelected(item);
+	}
+
+	/**
+	 * Read the Settings file and
+	 * 
+	 * @throws IOException
+	 * 
+	 */
+	private void loadSettings() throws IOException {
+		File settings = new File(Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/.settings.sav");
+
+		InputStream is;
+		BufferedInputStream bis;
+		DataInputStream dis;
+
+		try {
+			is = new FileInputStream(settings);
+			bis = new BufferedInputStream(is);
+			dis = new DataInputStream(bis);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return;
+		}
+
+		dis.readLine();
+		promptsSettings = dis.readLine();
+		autoSettings = dis.readLine();
+	}
+
+	/**
+	 * The method stores all the available pages in the script in a list
+	 * 
+	 */
+	private void getAvailablePages() {
+		ArrayList<String> temp = new ArrayList<String>();
+
+		if (rehearsal || ownLines) {
+			mCursor = mDbAdapter.fetchAllFilteredPages(character);
+		} else {
+			mCursor = mDbAdapter.fetchAllLines();
+		}
+
+		// First get the data from "page" column
+		if (mCursor.moveToFirst()) {
+			do {
+				temp.add(mCursor.getString(mCursor.getColumnIndex("page")));
+			} while (mCursor.moveToNext());
+		}
+
+		// Then we remove duplicates to get exact number of pages
+		HashSet<String> h = new HashSet<String>();
+		h.addAll(temp);
+		temp.clear();
+		temp.addAll(h);
+
+		// Finally sort the page numbers
+		int currentPage = findMin(temp);
+		for (int i = 0; i < temp.size(); i++) {
+			if (Integer.parseInt(temp.get(i)) == currentPage) {
+				availablePages.add(temp.get(i));
+				temp.remove(i);
+				i = -1;
+				if (temp.size() > 0) {
+					currentPage = findMin(temp);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Find minimum value in ArrayList
+	 * 
+	 * @param pages
+	 *            - arraylist to search
+	 * @return - minimum value in list
+	 * 
+	 */
+	private int findMin(ArrayList<String> pages) {
+		int min = Integer.MAX_VALUE;
+		for (String page : pages) {
+			if (Integer.parseInt(page) < min) {
+				min = Integer.parseInt(page);
+			}
+		}
+		return min;
 	}
 
 	// private void strikeout(long id) {
@@ -493,9 +625,7 @@ public class MainActivity extends ListActivity {
 	 * Here we reveal the appropriate word from the current line to the user.
 	 * 
 	 */
-	private void revealWord(boolean stats) {
-		// TODO: Make sure we reveal the correct amount of words, depending on
-		// the user's preference
+	private void revealWord() {
 		String words[] = currentLine.split("\\s+");
 		boolean note;
 		boolean audio;
@@ -527,20 +657,61 @@ public class MainActivity extends ListActivity {
 			this.setSelection(adapter.getCount());
 
 			visibleWords++;
-
-			if (stats) {
-				// Increment the number of prompts used for the current page
-				Cursor promptLine = mDbAdapter.fetchLine(number + 1);
-				int promptsCount = promptLine.getInt(promptLine
-						.getColumnIndex("prompts"));
-				promptsCount++;
-				mDbAdapter.updatePrompts(number + 1, promptsCount);
-			}
-		} else {
+		} else if (!promptLimitReached) {
 			Toast.makeText(MainActivity.this,
 					"No more hidden words for current line!",
 					Toast.LENGTH_SHORT).show();
+			promptLimitReached = true;
 		}
+	}
+
+	/**
+	 * This method will reveal the appropriate sentence from the current line to
+	 * the user.
+	 * 
+	 */
+	private void revealSentence() {
+		BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.UK);
+		String line = "";
+		int start;
+		int end;
+		boolean note;
+		boolean audio;
+		int number;
+		promptUsed = true;
+
+		iterator.setText(currentLine);
+
+		start = iterator.first();
+		for (int i = 0; i < visibleSentences; i++) {
+			end = iterator.next();
+			line += currentLine.substring(start, end);
+			start = end;
+			if (start == currentLine.length()) {
+				Toast.makeText(MainActivity.this,
+						"No more hidden words for current line!",
+						Toast.LENGTH_SHORT).show();
+				break;
+			}
+
+		}
+		// When we create a new line, we want to keep the note value, audio
+		// value and the line number the same
+		note = lines.get(lines.size() - 1).getNote();
+		audio = lines.get(lines.size() - 1).getAudio();
+		number = lines.get(lines.size() - 1).getNumber();
+		// Update the line we are working with
+		lines.remove(lines.size() - 1);
+		Line newLine = new Line(number, character, line, note, audio);
+		lines.add(newLine);
+
+		// Update the Listview
+		LineAdapter adapter = new LineAdapter(this, R.layout.play_list_layout,
+				lines);
+		setListAdapter(adapter);
+
+		this.setSelection(adapter.getCount());
+		visibleSentences++;
 	}
 
 	/**
@@ -865,10 +1036,6 @@ public class MainActivity extends ListActivity {
 		} else if (rehearsal && command.equals("back")) {
 			getListView().smoothScrollBy(-1, 1000);
 		}
-
-		// TODO: Bringing up the context menu takes two clicks. Its because we
-		// finish with a smoothScrollBy, and we lose focus. Need to find out
-		// what we are losing focus on
 	}
 
 	/**
@@ -878,99 +1045,91 @@ public class MainActivity extends ListActivity {
 	 *            - Tells us if are going to the next or previous page.
 	 */
 	private void switchPage(boolean pgUp) {
-		// TODO: If we are on "randomise" then we need to randomise which page we jump to next
-		boolean validPage = true;
-		pgNum = Integer.parseInt(pageNo);
+		int index = -1;
+		int lineNum;
 
-		// Decide if we want to increment or decrement pages
-		if (pgUp) {
-			pgNum++;
-		} else if (!pgUp) {
-			pgNum--;
+		mCursor = mDbAdapter.fetchPage(pageNo);
+		lineNum = mCursor.getCount();
+
+		// Get the index of the current page
+		for (int i = 0; i < availablePages.size(); i++) {
+			if (availablePages.get(i).equals(pageNo)) {
+				index = i;
+				break;
+			}
 		}
 
-		pageNo = Integer.toString(pgNum);
+		if (random) {
+			Random randomise = new Random();
+			index = randomise.nextInt(availablePages.size());
+		} else {
+			// Find the next available page
+			if (pgUp && index != -1 && index < availablePages.size() - 1) {
+				index++;
+			} else if (!pgUp && index != -1 && index > 0) {
+				index--;
+			} else {
+				Toast.makeText(getApplicationContext(),
+						"No more pages in script!", Toast.LENGTH_SHORT).show();
+				return;
+			}
+		}
 
-		// Here we handle if the user has selected to display own lines
-		if (ownLines || rehearsal) {
-			validPage = true;
+		pageNo = availablePages.get(index);
+
+		// Return new page from database
+		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
-			// Here we make sure to filter out any empty pages (where the
-			// character doesn't appear)
-			while (mCursor.getCount() == 0 && pgNum < lastPage && pgNum > 1) {
-				if (pgUp) {
-					pgNum++;
-				} else if (!pgUp) {
-					pgNum--;
-				}
-				pageNo = Integer.toString(pgNum);
-				mCursor = mDbAdapter.fetchCharacter(character, pageNo);
-			}
-			if (mCursor.getCount() == 0 || pgNum >= lastPage || pgNum <= 1) {
-				validPage = false;
-			}
 		} else {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
-		// Only display the page if we are on a valid page
-		if (validPage) {
-			if (rehearsal) {
-				mCursor = mDbAdapter.fetchPage(pageNo);
-			}
-			String act = "";
-			if (mCursor.moveToFirst()) {
-				act = "Act "
-						+ (mCursor.getString(mCursor.getColumnIndex("act")));
-			}
-			mPage.setText(pageNo);
-			mAct.setText(act);
-			visibleWords = 1;
-			lastViewedPos = 0;
-			topOffset = 0;
-			// Update completions count
-			// TODO: If a page has less than 23 lines, then the stats won't be
-			// recorded. This is just a temp fix
-			if (rehearsal && !promptUsed && lines.size() == 23) {
-				for (int i = 0; i < lines.size(); i++) {
-					if (lines.get(i).getCharacter().equals(character)) {
-						Cursor line = mDbAdapter.fetchLine(lines.get(i)
-								.getNumber() + 1);
-						int completionsCount = line.getInt(line
-								.getColumnIndex("completions"));
-						completionsCount++;
-						mDbAdapter.updateCompletions(
-								lines.get(i).getNumber() + 1, completionsCount);
-						break;
-					}
+
+		String act = "";
+		if (mCursor.moveToFirst()) {
+			act = "Act " + (mCursor.getString(mCursor.getColumnIndex("act")));
+		}
+
+		mPage.setText(pageNo);
+		mAct.setText(act);
+		visibleWords = 1;
+		visibleSentences = 1;
+		lastViewedPos = 0;
+		topOffset = 0;
+
+		// Update completions count
+		if (rehearsal && !promptUsed && lines.size() == lineNum) {
+			for (int i = 0; i < lines.size(); i++) {
+				if (lines.get(i).getCharacter().equals(character)) {
+					Cursor line = mDbAdapter
+							.fetchLine(lines.get(i).getNumber() + 1);
+					int completionsCount = line.getInt(line
+							.getColumnIndex("completions"));
+					completionsCount++;
+					mDbAdapter.updateCompletions(lines.get(i).getNumber() + 1,
+							completionsCount);
+					break;
 				}
 			}
-			startManagingCursor(mCursor);
-			if (rehearsal) {
-				lines = new ArrayList<Line>();
-				fillData("forward");
-				fillData("back");
-				getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
-				promptUsed = false;
-				for (int i = 0; i < lines.size(); i++) {
-					if (lines.get(i).getCharacter().equals(character)) {
-						Cursor line = mDbAdapter.fetchLine(lines.get(i)
-								.getNumber() + 1);
-						int viewCount = line.getInt(line
-								.getColumnIndex("views"));
-						viewCount++;
-						mDbAdapter.updateViews(lines.get(i).getNumber() + 1,
-								viewCount);
-						break;
-					}
+		}
+		if (rehearsal) {
+			lines = new ArrayList<Line>();
+			fillData("forward");
+			fillData("back");
+			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
+			promptUsed = false;
+			for (int i = 0; i < lines.size(); i++) {
+				if (lines.get(i).getCharacter().equals(character)) {
+					Cursor line = mDbAdapter
+							.fetchLine(lines.get(i).getNumber() + 1);
+					int viewCount = line.getInt(line.getColumnIndex("views"));
+					viewCount++;
+					mDbAdapter.updateViews(lines.get(i).getNumber() + 1,
+							viewCount);
+					break;
 				}
-			} else {
-				fillData("");
 			}
 		} else {
-			Toast.makeText(MainActivity.this,
-					"No more pages where this character appears.",
-					Toast.LENGTH_SHORT).show();
-			pageNo = (String) mPage.getText();
+			fillData("");
 		}
 	}
 
@@ -1190,7 +1349,7 @@ public class MainActivity extends ListActivity {
 					timer.setBase(SystemClock.elapsedRealtime());
 					timer.start();
 				} catch (Exception e) {
-					// TODO: Handle exception
+					e.printStackTrace();
 				}
 			}
 		});
@@ -1233,7 +1392,6 @@ public class MainActivity extends ListActivity {
 												"You must create recording before saving!",
 												Toast.LENGTH_LONG).show();
 									} catch (Exception e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 								} else {
@@ -1243,7 +1401,6 @@ public class MainActivity extends ListActivity {
 									try {
 										saveRecordingDialog(temp);
 									} catch (Exception e) {
-										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 								}
@@ -1484,7 +1641,6 @@ public class MainActivity extends ListActivity {
 							saveRecordingDialog(temp);
 							dialog.cancel();
 						} catch (Exception e) {
-							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}

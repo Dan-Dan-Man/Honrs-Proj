@@ -265,7 +265,6 @@ public class HomeActivity extends Activity {
 					readFile(script);
 					m_ProgressDialog.dismiss();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -303,7 +302,6 @@ public class HomeActivity extends Activity {
 			writer.write("No");
 			writer.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -339,10 +337,7 @@ public class HomeActivity extends Activity {
 			bis = new BufferedInputStream(is);
 			dis = new DataInputStream(bis);
 		} catch (IOException e) {
-			// TODO: Add proper error handling. Show popup to user informing
-			// them of the missing file (need to create their own/re-install)
-			// and then close the app.
-			Log.e(TAG, "Error");
+			e.printStackTrace();
 			return;
 		}
 
@@ -366,7 +361,6 @@ public class HomeActivity extends Activity {
 			}
 
 			// Keep count of what page we're on (23 lines/page)
-			// TODO: Subject to change depending on testing
 			if ((lineNo % 23) == 0 && lineNo != 0) {
 				pageNo++;
 			}

@@ -41,6 +41,8 @@ import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.ImageButton;
 import android.widget.PopupWindow;
 import android.widget.Spinner;
@@ -58,10 +60,6 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-
-// TODO: Refactor this class so it runs faster. Very slow to load up
-// TODO: Cannot allow both cueWords and ownLines to both be toggled on
-// TODO: Replace "Breakup Text" with "Randomise"
 public class OptionsActivity extends Activity {
 
 	private Button mContinue;
@@ -94,7 +92,6 @@ public class OptionsActivity extends Activity {
 	private ArrayList<String> pages;
 	private PlayDbAdapter mDbAdapter;
 	private Cursor mCursor;
-	private static final String TAG = "OptionsActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -217,6 +214,30 @@ public class OptionsActivity extends Activity {
 				showPopup("stage");
 			}
 		});
+
+		mCue.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) {
+					mOwn.setChecked(false);
+					mOwn.setEnabled(false);
+				} else {
+					mOwn.setEnabled(true);
+				}
+			}
+		});
+
+		mOwn.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) {
+					mCue.setChecked(false);
+					mCue.setEnabled(false);
+				} else {
+					mCue.setEnabled(true);
+				}
+			}
+		});
 	}
 
 	/**
@@ -228,8 +249,6 @@ public class OptionsActivity extends Activity {
 
 		// First get the data from "character" column and filter out unwanted
 		// characters (e.g. STAGE)
-		// TODO: "and" could cause later problems. Look to search for
-		// certain word than character sequence
 		if (mCursor.moveToFirst()) {
 			do {
 				String character = mCursor.getString(mCursor
@@ -447,7 +466,9 @@ public class OptionsActivity extends Activity {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {
 			if (mMode.getSelectedItem().equals("Normal")) {
-				mOwn.setEnabled(true);
+				if (!mRandom.isChecked()) {
+					mOwn.setEnabled(true);
+				}
 				mChar.setEnabled(false);
 				populateActs(false);
 			} else {

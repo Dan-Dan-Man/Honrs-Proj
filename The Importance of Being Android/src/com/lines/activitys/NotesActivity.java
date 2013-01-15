@@ -52,8 +52,6 @@ import com.lines.database.play.PlayDbAdapter;
  * @author Dan
  * 
  */
-// TODO: Maybe have a "GoTo" option where we can go to the current point in the
-// play where this note is saved.
 public class NotesActivity extends ListActivity {
 
 	private static final String TAG = "NotesActivity";

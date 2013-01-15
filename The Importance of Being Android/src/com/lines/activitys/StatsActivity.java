@@ -158,8 +158,6 @@ public class StatsActivity extends Activity {
 
 		// First get the data from "character" column and filter out unwanted
 		// characters (e.g. STAGE)
-		// TODO: "and" could cause later problems. Look to search for
-		// certain word than character sequence
 		if (mCursor.moveToFirst()) {
 			do {
 				String character = mCursor.getString(mCursor
