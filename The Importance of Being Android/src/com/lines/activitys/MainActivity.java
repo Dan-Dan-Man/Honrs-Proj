@@ -42,6 +42,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -87,6 +88,7 @@ public class MainActivity extends ListActivity {
 	private Button mNext;
 	private Button mPrev;
 	private Button mPrompt;
+	private Button mStopPlayBack;
 	private ImageButton mAudio;
 	private Cursor mCursor;
 	private PlayDbAdapter mDbAdapter;
@@ -112,6 +114,7 @@ public class MainActivity extends ListActivity {
 	private int hiddenLineNo;
 	private ArrayList<Line> lines = new ArrayList<Line>();
 	private ArrayList<String> availablePages = new ArrayList<String>();
+	private int playbackPosition = 0;
 	private static final int OPTIONS = 0;
 	private static final int STATS = 1;
 	private static final int SETTINGS = 2;
@@ -130,10 +133,6 @@ public class MainActivity extends ListActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		// TODO: If Autoplay is set to "Yes" then when we first load up a new
-		// page, or when a new line is revealed, then we we need to play all the
-		// recordings for all assigned audios to lines. Need to make sure the
-		// next one plays when the previous one finishes
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main_layout);
 		this.getListView().setDividerHeight(0);
@@ -141,6 +140,7 @@ public class MainActivity extends ListActivity {
 		mNext = (Button) findViewById(R.id.buttonNext);
 		mPrev = (Button) findViewById(R.id.buttonPrev);
 		mPrompt = (Button) findViewById(R.id.buttonPrompt);
+		mStopPlayBack = (Button) findViewById(R.id.buttonStopAudio);
 		mAudio = (ImageButton) findViewById(R.id.imageAudio);
 		mAct = (TextView) findViewById(R.id.textAct);
 		mPage = (TextView) findViewById(R.id.textPage);
@@ -274,6 +274,21 @@ public class MainActivity extends ListActivity {
 				}
 			}
 		});
+
+		mStopPlayBack.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				ditchPlayer();
+				playbackPosition = lines.size() - 1;
+				mStopPlayBack.setEnabled(false);
+				mStopPlayBack.setVisibility(View.INVISIBLE);
+			}
+		});
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		ditchPlayer();
 	}
 
 	@Override
@@ -388,7 +403,7 @@ public class MainActivity extends ListActivity {
 			return true;
 		case PLAY_RECORD:
 			try {
-				playSelectedRecording(info.id);
+				playSelectedRecording(info.id, false);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -542,13 +557,46 @@ public class MainActivity extends ListActivity {
 	// }
 
 	/**
+	 * If the user has chosen to autoplay audio files, then we loop through all
+	 * the visible lines, and playback in sequence the audio that has been
+	 * applied to each line.
+	 * 
+	 */
+	private void findNextAudio() {
+		for (int i = playbackPosition; i < lines.size(); i++) {
+			Cursor line = mDbAdapter.fetchLine(getLineNumber(i));
+			String audio = line.getString(line.getColumnIndex("audio"));
+
+			if (hiddenLineNo == getLineNumber(i)) {
+				break;
+			}
+
+			// If we find a line with an audio file, then update the latest
+			// playbackPosition, and play the audio file
+			if (!audio.equals("N")) {
+				try {
+					playbackPosition = i;
+					mStopPlayBack.setEnabled(true);
+					mStopPlayBack.setVisibility(View.VISIBLE);
+					playSelectedRecording(playbackPosition, true);
+					playbackPosition++;
+					break;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/**
 	 * Get the file associated with the selected line and play it.
 	 * 
 	 * @param id
 	 *            - the position of the selected item in the list
 	 * @throws Exception
 	 */
-	private void playSelectedRecording(long id) throws Exception {
+	private void playSelectedRecording(long id, final boolean autoplay)
+			throws Exception {
 		if (audioApplied(id)) {
 			// If the selected line is hidden, then we don't want to play the
 			// audio until the line is revealed
@@ -566,6 +614,18 @@ public class MainActivity extends ListActivity {
 				player.setDataSource(filename);
 				player.prepare();
 				player.start();
+
+				// When the audio file has stopped playing back, then we want to
+				// find the next audio file that we want to play
+				player.setOnCompletionListener(new OnCompletionListener() {
+					public void onCompletion(MediaPlayer mp) {
+						mStopPlayBack.setEnabled(false);
+						mStopPlayBack.setVisibility(View.INVISIBLE);
+						if (autoplay) {
+							findNextAudio();
+						}
+					}
+				});
 			}
 		}
 	}
@@ -1036,6 +1096,10 @@ public class MainActivity extends ListActivity {
 		} else if (rehearsal && command.equals("back")) {
 			getListView().smoothScrollBy(-1, 1000);
 		}
+
+		if (autoSettings.equals("Yes")) {
+			findNextAudio();
+		}
 	}
 
 	/**
@@ -1093,6 +1157,7 @@ public class MainActivity extends ListActivity {
 		mAct.setText(act);
 		visibleWords = 1;
 		visibleSentences = 1;
+		playbackPosition = 0;
 		lastViewedPos = 0;
 		topOffset = 0;
 
