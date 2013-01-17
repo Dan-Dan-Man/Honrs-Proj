@@ -32,7 +32,6 @@ import android.content.res.AssetManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.os.Environment;
-import android.util.Log;
 
 import com.lines.database.notes.NoteDbAdapter;
 import com.lines.database.play.PlayDbAdapter;
@@ -41,14 +40,13 @@ import com.lines.database.play.PlayDbAdapter;
  * This is the class for the whole application itself. Primarily used for our
  * database adapters. Now we only work with one adapter per database.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class LinesApp extends Application {
 
 	private static NoteDbAdapter nDb;
 	private static PlayDbAdapter pDb;
-	private static final String TAG = "LinesApp";
 	private boolean dbExists;
 
 	@Override
@@ -64,7 +62,6 @@ public class LinesApp extends Application {
 		// Create and open adapters to databases
 		nDb = new NoteDbAdapter(getApplicationContext());
 		pDb = new PlayDbAdapter(getApplicationContext());
-		Log.d(TAG, "Opening Databases");
 		nDb.open();
 		pDb.open();
 
@@ -73,8 +70,13 @@ public class LinesApp extends Application {
 				+ "/learnyourlines/scripts");
 
 		if (!scripts.exists()) {
-			Log.i(TAG, "Creating scripts directory");
 			scripts.mkdirs();
+		}
+
+		File defaultScript = new File(Environment.getExternalStorageDirectory()
+				+ "/learnyourlines/scripts/earnest.txt");
+
+		if (!defaultScript.exists()) {
 			transferScriptToSD();
 		}
 
@@ -83,7 +85,6 @@ public class LinesApp extends Application {
 				+ "/learnyourlines/audio");
 
 		if (!audio.exists()) {
-			Log.i(TAG, "Creating audio directory");
 			audio.mkdirs();
 		}
 	}
@@ -125,7 +126,7 @@ public class LinesApp extends Application {
 			in.close();
 			out.close();
 		} catch (IOException e) {
-			Log.e(TAG, "Failed to transfer sample script to SD card", e);
+			e.printStackTrace();
 		}
 	}
 
@@ -169,8 +170,7 @@ public class LinesApp extends Application {
 					SQLiteDatabase.OPEN_READONLY);
 			checkDB.close();
 		} catch (SQLiteException e) {
-			// TODO: Print proper message
-			// database doesn't exist yet.
+			e.printStackTrace();
 		}
 
 		return checkDB != null ? true : false;

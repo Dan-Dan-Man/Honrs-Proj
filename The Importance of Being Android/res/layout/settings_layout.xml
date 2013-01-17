@@ -8,7 +8,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:adjustViewBounds="true"
-        android:contentDescription="Background"
         android:gravity="center_vertical"
         android:scaleType="fitXY"
         android:src="@drawable/stage_curtains" />
@@ -21,7 +20,7 @@
         android:layout_alignParentLeft="true"
         android:layout_marginBottom="30dp"
         android:layout_marginLeft="30dp"
-        android:text="Save Changes"
+        android:text="@string/save"
         android:textSize="14dp" />
 
     <TextView
@@ -31,7 +30,7 @@
         android:layout_alignLeft="@+id/buttonSave"
         android:layout_alignParentTop="true"
         android:layout_marginTop="30dp"
-        android:text="Select Script:"
+        android:text="@string/script_prompt"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -50,7 +49,7 @@
         android:layout_alignLeft="@+id/spinnerScripts"
         android:layout_below="@+id/spinnerScripts"
         android:layout_marginTop="50dp"
-        android:text="No. of reveals for LINE!:"
+        android:text="@string/prompts_num"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -61,7 +60,7 @@
         android:layout_alignLeft="@+id/textPrompts"
         android:layout_below="@+id/textPrompts"
         android:layout_marginTop="94dp"
-        android:text="Auto-play audio:"
+        android:text="@string/autoplay"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -91,7 +90,7 @@
         android:layout_alignBottom="@+id/buttonSave"
         android:layout_marginLeft="27dp"
         android:layout_toRightOf="@+id/textAuto"
-        android:text="Restore to Default"
+        android:text="@string/reset"
         android:textSize="14dp" />
 
     <ImageButton

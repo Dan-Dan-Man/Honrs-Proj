@@ -7,8 +7,5 @@
     <string name="prompt_stats">Prompts Used</string>
     <string name="complete">Completions without prompts used</string>
     <string name="clear_stats">Clear Stats</string>
-    <string name="confirm_clear">Are you sure you wish to erase stats for the current selection?</string>
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
 
 </resources>

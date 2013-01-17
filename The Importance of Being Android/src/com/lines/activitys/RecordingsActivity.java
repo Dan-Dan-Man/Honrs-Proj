@@ -34,7 +34,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
@@ -63,7 +62,7 @@ import com.lines.database.play.PlayDbAdapter;
 /**
  * This class displays the list of recordings the user has created
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class RecordingsActivity extends ListActivity {
@@ -76,7 +75,6 @@ public class RecordingsActivity extends ListActivity {
 	private MediaPlayer player;
 	private static String DIRECTORY;
 	private PlayDbAdapter mDbAdapter;
-	private static final String TAG = "RecordingsActivity";
 	private static final int PLAY_ID = Menu.FIRST;
 	private static final int RENAME_ID = Menu.FIRST + 1;
 	private static final int DELETE_ID = Menu.FIRST + 2;
@@ -99,7 +97,6 @@ public class RecordingsActivity extends ListActivity {
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			lineNo = extras.getString("EXTRA_NUM");
-			Log.d(TAG, "Value passed: " + lineNo);
 			mSelect.setEnabled(true);
 			mSelect.setText("Select");
 		}
@@ -464,7 +461,6 @@ public class RecordingsActivity extends ListActivity {
 	 *         otherwise
 	 */
 	private boolean invalidFilename(String filename) {
-		Log.d(TAG, "Valid: " + VALID_CHARS.matcher(filename).find());
 		if (filename.equals("") || VALID_CHARS.matcher(filename).find()) {
 			return true;
 		} else {

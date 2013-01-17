@@ -24,7 +24,7 @@ package com.lines.classes;
 /**
  * Class for handling each line of the play.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class Line {
@@ -35,6 +35,7 @@ public class Line {
 	private boolean note;
 	private boolean audio;
 
+	// Constructor
 	public Line(int number, String character, String line, boolean note,
 			boolean audio) {
 		this.number = number;
@@ -44,6 +45,7 @@ public class Line {
 		this.audio = audio;
 	}
 
+	// Getters and Setters
 	public int getNumber() {
 		return number;
 	}

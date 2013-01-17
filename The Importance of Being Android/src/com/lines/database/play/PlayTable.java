@@ -27,7 +27,7 @@ import android.util.Log;
 /**
  * This class initialises the Database table used for storing the play.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 
@@ -38,8 +38,7 @@ public class PlayTable {
 			+ "number integer not null, " + "character text not null, "
 			+ "line text not null, " + "act integer not null, "
 			+ "page integer not null, " + "note text not null, "
-			+ "audio text not null, " + "striked text not null, "
-			+ "highlight text not null, " + "views integer not null, "
+			+ "audio text not null, " + "views integer not null, "
 			+ "prompts integer not null, " + "completions integer not null);";
 
 	public static void onCreate(SQLiteDatabase database) {

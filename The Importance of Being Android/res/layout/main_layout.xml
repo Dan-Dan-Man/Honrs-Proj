@@ -23,7 +23,6 @@
         android:layout_marginLeft="45dp"
         android:layout_marginTop="5dp"
         android:layout_toRightOf="@+id/imageAudio"
-        android:text="Act I"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -34,7 +33,6 @@
         android:layout_alignBaseline="@+id/textAct"
         android:layout_alignBottom="@+id/textAct"
         android:layout_toRightOf="@+id/textAct"
-        android:text=" | Page "
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -45,7 +43,6 @@
         android:layout_alignBaseline="@+id/textPageTitle"
         android:layout_alignBottom="@+id/textPageTitle"
         android:layout_toRightOf="@+id/textPageTitle"
-        android:text="12"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 

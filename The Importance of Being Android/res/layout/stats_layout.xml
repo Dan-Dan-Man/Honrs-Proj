@@ -8,7 +8,6 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:adjustViewBounds="true"
-        android:contentDescription="Background"
         android:gravity="center_vertical"
         android:scaleType="fitXY"
         android:src="@drawable/stage_curtains" />
@@ -138,7 +137,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textPrompts"
         android:layout_centerHorizontal="true"
-        android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -148,7 +146,6 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textComplete"
         android:layout_centerHorizontal="true"
-        android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -159,7 +156,6 @@
         android:layout_alignBottom="@+id/textComplete"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="8dp"
-        android:text="0"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -180,7 +176,6 @@
         android:layout_alignBaseline="@+id/textViewsNum"
         android:layout_alignBottom="@+id/textViewsNum"
         android:layout_alignRight="@+id/textPercent"
-        android:text="0.0%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -191,7 +186,6 @@
         android:layout_alignBaseline="@+id/textPromptsNum"
         android:layout_alignBottom="@+id/textPromptsNum"
         android:layout_alignLeft="@+id/textViewsPercent"
-        android:text="0.0%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -202,7 +196,6 @@
         android:layout_alignBaseline="@+id/textCompleteNum"
         android:layout_alignBottom="@+id/textCompleteNum"
         android:layout_alignLeft="@+id/textViewsPercent"
-        android:text="0.0%"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 

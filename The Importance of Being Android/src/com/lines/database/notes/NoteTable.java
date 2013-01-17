@@ -24,13 +24,6 @@ package com.lines.database.notes;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-/**
- * This class initialises the Database table used for storing the play.
- * 
- * @author Dan
- * 
- */
-
 public class NoteTable {
 	// Database creation SQL statement
 	private static final String DATABASE_CREATE = "create table Note "

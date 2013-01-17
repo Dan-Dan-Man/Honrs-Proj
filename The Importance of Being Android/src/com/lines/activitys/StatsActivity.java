@@ -34,7 +34,6 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
@@ -51,10 +50,9 @@ import com.lines.database.play.PlayDbAdapter;
  * The Stats screen where the user can view some statistics of their
  * performances with choice of filtering results.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
-
 public class StatsActivity extends Activity {
 
 	private Spinner mChar;
@@ -81,7 +79,6 @@ public class StatsActivity extends Activity {
 	private float totalViews = 0;
 	private float totalPrompts = 0;
 	private float totalCompletions = 0;
-	private static final String TAG = "StatsActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -113,8 +110,6 @@ public class StatsActivity extends Activity {
 			currentPage = extras.getString("EXTRA_PAGE");
 			currentAct = extras.getString("EXTRA_ACT");
 			character = extras.getString("EXTRA_CHARACTER");
-		} else {
-			Log.i(TAG, "No user choice to pass through");
 		}
 
 		// Set the default selected item in character spinner
@@ -541,7 +536,7 @@ public class StatsActivity extends Activity {
 	 * This class updates the page spinner depending on the selection made in
 	 * the act spinner.
 	 * 
-	 * @author Dan
+	 * @author Daniel Muir, s0930256
 	 * 
 	 */
 	public class ActOnItemSelectedListener implements OnItemSelectedListener {
@@ -557,7 +552,6 @@ public class StatsActivity extends Activity {
 			}
 
 			populatePages(act);
-			// showStats();
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
@@ -565,23 +559,17 @@ public class StatsActivity extends Activity {
 		}
 	}
 
-	@Override
-	protected void onPause() {
-		super.onPause();
-	}
-
 	/**
-	 * This class updates the page spinner depending on the selection made in
-	 * the act spinner.
+	 * This class updates the act spinner depending on the selection made in the
+	 * char spinner.
 	 * 
-	 * @author Dan
+	 * @author Daniel Muir, s0930256
 	 * 
 	 */
 	public class CharOnItemSelectedListener implements OnItemSelectedListener {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {
 			populateActs();
-			// showStats();
 		}
 
 		public void onNothingSelected(AdapterView<?> arg0) {
@@ -589,6 +577,13 @@ public class StatsActivity extends Activity {
 		}
 	}
 
+	/**
+	 * This class shows the stats for the current selection when the value in
+	 * the page spinner changes.
+	 * 
+	 * @author Daniel Muir, s0930256
+	 * 
+	 */
 	public class PageOnItemSelectedListener implements OnItemSelectedListener {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {

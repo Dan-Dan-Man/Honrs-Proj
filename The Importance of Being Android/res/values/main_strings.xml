@@ -4,5 +4,13 @@
     <string name="prev">Prev</string>
     <string name="next">Next</string>
     <string name="line">LINE!</string>
+    <string name="title">Title</string>
+    <string name="title_hint">Enter a title&#8230;</string>
+    <string name="note">Note</string>
+    <string name="note_hint">Enter a note&#8230;</string>
+    <string name="recording">Recording</string>
+    <string name="recording_name">Name</string>
+    <string name="name_hint">Enter a name&#8230;</string>
+    <string name="preview">Preview</string>
 
 </resources>

@@ -26,7 +26,6 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -49,12 +48,11 @@ import com.lines.database.play.PlayDbAdapter;
 /**
  * This activity displays the list of performance notes the user has created.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class NotesActivity extends ListActivity {
 
-	private static final String TAG = "NotesActivity";
 	private Button mDelete;
 	private Button mBack;
 	private NoteDbAdapter mNDbAdapter;
@@ -86,8 +84,6 @@ public class NotesActivity extends ListActivity {
 		} else {
 			mCursor = mNDbAdapter.fetchAllNotes();
 		}
-
-		Log.d(TAG, "No. of notes: " + mCursor.getCount());
 
 		startManagingCursor(mCursor);
 		fillData();
@@ -151,7 +147,6 @@ public class NotesActivity extends ListActivity {
 	private void deleteNote(long id) {
 		mCursor = mNDbAdapter.fetchNote(id);
 		int lineNo = mCursor.getInt(mCursor.getColumnIndex("number"));
-		Log.d(TAG, "Deleting with lineNo: " + lineNo);
 		mNDbAdapter.deleteNote(id);
 		updatePlayDb(lineNo);
 		if (lineNum != null) {
@@ -298,8 +293,6 @@ public class NotesActivity extends ListActivity {
 		String note;
 
 		final long newId = id;
-
-		Log.d(TAG, "Returning row: " + id);
 
 		mCursor = mNDbAdapter.fetchNote(id);
 

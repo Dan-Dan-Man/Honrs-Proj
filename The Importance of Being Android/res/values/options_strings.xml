@@ -17,7 +17,6 @@
     <string name="random">Randomise pages</string>
     <string name="own_lines">Display only own lines</string>
     <string name="stage">Stage Directions</string>
-    <string name="back">Back</string>
     <string name="cont">Continue</string>
     <string name="dismiss">Dismiss</string>
     <string name="mode_help">In NORMAL mode, the script is available to read with no hidden text, and stats are not recorded. \n\nIn REHEARSAL mode, the selected character\'s lines will be hidden, and stats will be recorded.</string>

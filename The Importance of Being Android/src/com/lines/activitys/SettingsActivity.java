@@ -38,7 +38,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.view.ViewPager.LayoutParams;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -60,7 +59,7 @@ import com.lines.database.play.PlayDbAdapter;
  * words to reveal when they require a prompt and if they wish to have audio
  * auto-play for lines with an assigned file when a new page is loaded
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class SettingsActivity extends Activity {
@@ -80,7 +79,6 @@ public class SettingsActivity extends Activity {
 	private String defaultScript;
 	private String defaultPrompts;
 	private String defaultAuto;
-	private static final String TAG = "SettingsActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -344,11 +342,9 @@ public class SettingsActivity extends Activity {
 			String firstWord = words[0];
 
 			// Keep a count of which Act we're on
-			// TODO: This will need to be better suited for other files.
 			if (firstWord.equals("FIRST") || firstWord.equals("SECOND")
 					|| firstWord.equals("THIRD")) {
 				actNo++;
-				Log.d(TAG, Integer.toString(actNo));
 			}
 
 			// Keep count of what page we're on (23 lines/page)
@@ -412,16 +408,15 @@ public class SettingsActivity extends Activity {
 			// file, create a new row in the database. Filter out text we don't
 			// want in our database.
 			if (!isAllUpperCase(words[0])) {
+				firstWord = firstWord.substring(0, firstWord.length() - 1);
+				firstWord = firstWord.toUpperCase();
 				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
-						"N", "N", "N", "N", 0, 0, 0);
+						"N", "N", 0, 0, 0);
 				// If we're not adding to the database, then we need to reduce
 				// the line count.
 			} else {
 				lineNo--;
 			}
-
-			Log.d(TAG, Integer.toString(pageNo));
-			Log.i(TAG, firstWord + " :::: " + text);
 
 			// Clear "text" before we read next line
 			text = "";

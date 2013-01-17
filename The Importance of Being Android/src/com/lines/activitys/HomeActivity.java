@@ -38,9 +38,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
@@ -52,15 +50,13 @@ import com.lines.classes.LinesApp;
 import com.lines.database.play.PlayDbAdapter;
 
 /**
- * The Home Screen where the user will start off.
+ * The Home Screen where the user will start off. From here they can begin
+ * rehearsing, view statistics, recordings and performance notes or view and
+ * edit settings.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
-
-// TODO: Some minor formating bugs in database. Need to examine these and edit
-// textfile.
-
 public class HomeActivity extends Activity {
 
 	private PlayDbAdapter mDbAdapter;
@@ -72,25 +68,11 @@ public class HomeActivity extends Activity {
 	private LinesApp app;
 	private Runnable populateDB;
 	private ProgressDialog m_ProgressDialog = null;
-	private static final String TAG = "HomeActivity";
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.home_layout);
-
-		// Create an object of the application class so we can check if a
-		// database for the play exists
-		app = (LinesApp) this.getApplication();
-
-		// TODO: If we press the back button at the home screen, and then reload
-		// the app, the database is re-populated.
-
-		// If a database doesn't exist, then ask the user to select a script to
-		// load
-		if (!app.dbExists()) {
-			selectScript();
-		}
 
 		mTop = (TextView) findViewById(R.id.textTop);
 		mMiddle = (TextView) findViewById(R.id.textMiddle);
@@ -98,6 +80,16 @@ public class HomeActivity extends Activity {
 
 		mUpArrow = (ImageButton) findViewById(R.id.imageButtonArrowUp);
 		mDownArrow = (ImageButton) findViewById(R.id.imageButtonArrowDown);
+
+		// Create an object of the application class so we can check if a
+		// database for the play exists
+		app = (LinesApp) this.getApplication();
+
+		// If a database doesn't exist, then ask the user to select a script to
+		// load
+		if (!app.dbExists()) {
+			selectScript();
+		}
 
 		/**
 		 * Method for scrolling down text
@@ -140,12 +132,6 @@ public class HomeActivity extends Activity {
 			Intent i = new Intent(this, SettingsActivity.class);
 			startActivityForResult(i, 0);
 		}
-	}
-
-	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		getMenuInflater().inflate(R.menu.activity_main, menu);
-		return true;
 	}
 
 	/**
@@ -257,6 +243,7 @@ public class HomeActivity extends Activity {
 	 * being loaded.
 	 * 
 	 * @param script
+	 *            - the selected script to load
 	 */
 	private void createThread(final String script) {
 		populateDB = new Runnable() {
@@ -280,6 +267,7 @@ public class HomeActivity extends Activity {
 	 * settings.
 	 * 
 	 * @param script
+	 *            - the selected script name we are saving to file
 	 */
 	private void createSettings(String script) {
 		File settings = new File(Environment.getExternalStorageDirectory()
@@ -287,14 +275,15 @@ public class HomeActivity extends Activity {
 		if (settings.exists()) {
 			settings.delete();
 		}
-		
+
 		FileWriter fileWriter;
 		BufferedWriter writer;
-		
+
+		// Write the three settings to file
 		try {
 			fileWriter = new FileWriter(settings);
 			writer = new BufferedWriter(fileWriter);
-			
+
 			writer.write(script);
 			writer.newLine();
 			writer.write("1");
@@ -307,9 +296,11 @@ public class HomeActivity extends Activity {
 	}
 
 	/**
-	 * Here we read the file, extracting the character name speaking the line.
+	 * Here we read the script the user has selected, extracting the revelent
+	 * info, and store into database
 	 * 
-	 * @param file
+	 * @param script
+	 *            - the selected script we are reading
 	 * @throws IOException
 	 */
 	private void readFile(String script) throws IOException {
@@ -353,11 +344,9 @@ public class HomeActivity extends Activity {
 			String firstWord = words[0];
 
 			// Keep a count of which Act we're on
-			// TODO: This will need to be better suited for other files.
 			if (firstWord.equals("FIRST") || firstWord.equals("SECOND")
 					|| firstWord.equals("THIRD")) {
 				actNo++;
-				Log.d(TAG, Integer.toString(actNo));
 			}
 
 			// Keep count of what page we're on (23 lines/page)
@@ -421,16 +410,15 @@ public class HomeActivity extends Activity {
 			// file, create a new row in the database. Filter out text we don't
 			// want in our database.
 			if (!isAllUpperCase(words[0])) {
+				firstWord = firstWord.substring(0, firstWord.length() - 1);
+				firstWord = firstWord.toUpperCase();
 				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
-						"N", "N", "N", "N", 0, 0, 0);
+						"N", "N", 0, 0, 0);
 				// If we're not adding to the database, then we need to reduce
 				// the line count.
 			} else {
 				lineNo--;
 			}
-
-			Log.d(TAG, Integer.toString(pageNo));
-			Log.i(TAG, firstWord + " :::: " + text);
 
 			// Clear "text" before we read next line
 			text = "";

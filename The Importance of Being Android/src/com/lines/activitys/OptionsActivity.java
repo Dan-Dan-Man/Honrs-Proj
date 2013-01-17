@@ -57,7 +57,7 @@ import com.lines.database.play.PlayDbAdapter;
  * the part of the play to rehearse. They can also make different configurations
  * to suit their needs.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class OptionsActivity extends Activity {
@@ -459,7 +459,7 @@ public class OptionsActivity extends Activity {
 	 * This class updates the available configurations depending on the
 	 * selection made in the mode spinner.
 	 * 
-	 * @author Dan
+	 * @author Daniel Muir, s0930256
 	 * 
 	 */
 	public class ModeOnItemSelectedListener implements OnItemSelectedListener {
@@ -488,7 +488,7 @@ public class OptionsActivity extends Activity {
 	 * This class updates the page spinner depending on the selection made in
 	 * the act spinner.
 	 * 
-	 * @author Dan
+	 * @author Daniel Muir, s0930256
 	 * 
 	 */
 	public class ActOnItemSelectedListener implements OnItemSelectedListener {
@@ -512,7 +512,7 @@ public class OptionsActivity extends Activity {
 	 * This class updates the page spinner depending on the selection made in
 	 * the act spinner.
 	 * 
-	 * @author Dan
+	 * @author Daniel Muir, s0930256
 	 * 
 	 */
 	public class CharOnItemSelectedListener implements OnItemSelectedListener {

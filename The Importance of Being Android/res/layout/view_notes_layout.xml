@@ -12,7 +12,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:background="#500000"
-        android:text="Delete"
+        android:text="@string/delete"
         android:textColor="#FFFFFF"
         android:textSize="22dp" />
 
@@ -23,7 +23,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:background="#500000"
-        android:text="Back"
+        android:text="@string/back"
         android:textColor="#FFFFFF"
         android:textSize="22dp" />
 
@@ -46,7 +46,7 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="15dp"
-        android:text="Performance Notes"
+        android:text="@string/performance_notes"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="#FFFFFF" />
 
@@ -58,10 +58,10 @@
         android:layout_below="@+id/textHeading"
         android:layout_marginLeft="15dp"
         android:layout_marginTop="20dp"
-        android:text="No notes currently saved..."
+        android:text="@string/no_notes"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="#FFFFFF" />
-
+
     <ListView
         android:id="@id/android:list"
         android:layout_width="match_parent"
@@ -69,7 +69,6 @@
         android:layout_above="@+id/buttonDelete"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/textHeading" >
-
     </ListView>
 
 </RelativeLayout>

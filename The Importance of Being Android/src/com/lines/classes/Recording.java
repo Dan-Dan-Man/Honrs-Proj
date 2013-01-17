@@ -24,23 +24,23 @@ package com.lines.classes;
 /**
  * Class to store name and duration of each audio file
  * 
- * @author Dan
- *
+ * @author Daniel Muir, s0930256
+ * 
  */
 public class Recording {
-	
+
 	private String name;
 	private int time;
-	
+
 	public Recording(String name, int time) {
 		this.name = name;
 		this.time = time;
 	}
-	
+
 	public String getName() {
 		return name;
 	}
-	
+
 	public int getTime() {
 		return time;
 	}

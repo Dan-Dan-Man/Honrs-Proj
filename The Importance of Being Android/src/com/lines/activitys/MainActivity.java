@@ -48,7 +48,6 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Environment;
 import android.os.SystemClock;
-import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -77,12 +76,11 @@ import com.lines.database.play.PlayDbAdapter;
 /**
  * The Main Screen where the user will rehearse their lines.
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class MainActivity extends ListActivity {
 
-	private static final String TAG = "MainActivity";
 	private TextView mPage;
 	private TextView mAct;
 	private Button mNext;
@@ -106,7 +104,6 @@ public class MainActivity extends ListActivity {
 	private boolean stage;
 	private boolean promptUsed = false;
 	private boolean promptLimitReached = false;
-	private int lastPage;
 	private int visibleWords = 1;
 	private int visibleSentences = 1;
 	private int lastViewedPos;
@@ -123,8 +120,6 @@ public class MainActivity extends ListActivity {
 	private static final int PLAY_RECORD = 2;
 	private static final int ADD_RECORD = 3;
 	private static final int REMOVE_RECORD = 4;
-	private static final int HIGHLIGHT = 5;
-	private static final int STRIKE = 6;
 	private MediaPlayer player;
 	private MediaRecorder recorder;
 	private static final String TEMP_FILE = Environment
@@ -145,7 +140,7 @@ public class MainActivity extends ListActivity {
 		mAct = (TextView) findViewById(R.id.textAct);
 		mPage = (TextView) findViewById(R.id.textPage);
 
-		// Retrieve User choice from previous Activity
+		// Retrieve the User's configurations from the Options Screen
 		Bundle extras = getIntent().getExtras();
 		if (extras != null) {
 			pageNo = extras.getString("EXTRA_PAGE");
@@ -156,8 +151,6 @@ public class MainActivity extends ListActivity {
 			random = extras.getBoolean("EXTRA_RANDOM");
 			ownLines = extras.getBoolean("EXTRA_OWN");
 			stage = extras.getBoolean("EXTRA_STAGE");
-		} else {
-			Log.e(TAG, "Unable to pass user choice through");
 		}
 
 		mPage.setText(pageNo);
@@ -166,8 +159,6 @@ public class MainActivity extends ListActivity {
 		LinesApp app = (LinesApp) this.getApplication();
 		mDbAdapter = app.getPlayAdapter();
 		mNDbAdapter = app.getNoteAdapter();
-
-		getLastPage();
 
 		getAvailablePages();
 
@@ -205,7 +196,7 @@ public class MainActivity extends ListActivity {
 		// When Next button is long pressed, play jumps to next page.
 		mNext.setOnLongClickListener(new View.OnLongClickListener() {
 			public boolean onLongClick(View v) {
-				if (Integer.parseInt(mPage.getText().toString()) < lastPage) {
+				if (Integer.parseInt(mPage.getText().toString()) < getLastPage()) {
 					switchPage(true);
 				} else {
 					Toast.makeText(MainActivity.this,
@@ -265,6 +256,8 @@ public class MainActivity extends ListActivity {
 			}
 		});
 
+		// When the Audio button is pressed, show a dialog to allow the user to
+		// record themselves
 		mAudio.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				try {
@@ -275,6 +268,8 @@ public class MainActivity extends ListActivity {
 			}
 		});
 
+		// If audio is playing, then this button becomes visible and we can stop
+		// playback when we press it
 		mStopPlayBack.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				ditchPlayer();
@@ -285,33 +280,50 @@ public class MainActivity extends ListActivity {
 		});
 	}
 
+	/**
+	 * When we leave the screen, stop audio playback.
+	 * 
+	 */
 	@Override
 	protected void onPause() {
 		super.onPause();
 		ditchPlayer();
 	}
 
+	/**
+	 * When we come back to this screen, set everything back to the way we left
+	 * it.
+	 * 
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
 		String oldSettings = promptsSettings;
+		// Reload our settings file, in case anything has changed
 		try {
 			loadSettings();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		// Decide which data we need to retrieve from the database
 		if (ownLines) {
 			mCursor = mDbAdapter.fetchCharacter(character, pageNo);
 		} else {
 			mCursor = mDbAdapter.fetchPage(pageNo);
 		}
+		// If we're in rehearsal mode, then we need to make sure we have the
+		// correct amount of lines revealed
 		if (rehearsal) {
 			fillData("forward");
 			fillData("back");
 			getListView().smoothScrollBy(5000, mCursor.getCount() * 1000);
+			// If the user has changed the amount of words to be revealed in the
+			// prompt, then reset the number of words visible for the current
+			// line
 			if (!promptsSettings.equals(oldSettings)) {
 				visibleSentences = 1;
 				visibleWords = 1;
+				// Show the correct amount of revealed words if there are any
 			} else if (promptsSettings.equals("Whole Sentence")) {
 				if (visibleSentences > 1) {
 					visibleSentences--;
@@ -383,8 +395,6 @@ public class MainActivity extends ListActivity {
 		menu.add(0, PLAY_RECORD, 2, "Play recording");
 		menu.add(0, ADD_RECORD, 3, "Apply recording");
 		menu.add(0, REMOVE_RECORD, 4, "Remove recording");
-		menu.add(0, HIGHLIGHT, 5, "Highlight text");
-		menu.add(0, STRIKE, 6, "Strikeout text");
 	}
 
 	/**
@@ -411,28 +421,18 @@ public class MainActivity extends ListActivity {
 		case ADD_RECORD:
 			setListViewPos();
 			Intent i = new Intent(MainActivity.this, RecordingsActivity.class);
-			Log.d(TAG,
-					"LineNo being passed through: "
-							+ Long.toString(getLineNumber(info.id)));
 			i.putExtra("EXTRA_NUM", Long.toString(getLineNumber(info.id)));
 			MainActivity.this.startActivity(i);
 			return true;
 		case REMOVE_RECORD:
 			removeRecording(info.id);
 			return true;
-		case HIGHLIGHT:
-			// TODO: Select and highlight text
-			return true;
-		case STRIKE:
-			// TODO: Select and strikethrough text
-			// strikeout(info.id);
-			return true;
 		}
 		return super.onContextItemSelected(item);
 	}
 
 	/**
-	 * Read the Settings file and
+	 * Read the Settings file and store data into attributes
 	 * 
 	 * @throws IOException
 	 * 
@@ -516,45 +516,6 @@ public class MainActivity extends ListActivity {
 		}
 		return min;
 	}
-
-	// private void strikeout(long id) {
-	// Log.d(TAG, "ID: " + id);
-	// TextView character = (TextView) getListView().getChildAt((int) id)
-	// .findViewById(R.id.textCharacter);
-	// TextView line = (TextView) getListView().getChildAt((int) id)
-	// .findViewById(R.id.textLine);
-	//
-	// Spannable characterStrike = (Spannable) character.getText();
-	// Spannable lineStrike = (Spannable) line.getText();
-	//
-	// Log.d(TAG, "Before: " + characterStrike.length());
-	//
-	// characterStrike.setSpan(new StrikethroughSpan(), 0, character.getText()
-	// .length() - 1, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-	//
-	// lineStrike
-	// .setSpan(new StrikethroughSpan(), 0,
-	// line.getText().length() - 1,
-	// Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-	//
-	// // WordtoSpan.removeSpan(new StrikethroughSpan());
-	//
-	// character.setText(characterStrike);
-	// line.setText(lineStrike);
-	//
-	// Log.d(TAG, "After: " + characterStrike.length());
-	//
-	// // mLine.setText("Italic, highlighted, bold.",
-	// // TextView.BufferType.SPANNABLE);
-	// //
-	// // Spannable WordtoSpan = (Spannable) mLine.getText();
-	// //
-	// // WordtoSpan.setSpan(new BackgroundColorSpan(0xFFFFFF00), 8,
-	// // 19, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-	// //
-	// // mLine.setText(WordtoSpan);
-	//
-	// }
 
 	/**
 	 * If the user has chosen to autoplay audio files, then we loop through all
@@ -665,7 +626,6 @@ public class MainActivity extends ListActivity {
 	 * @return - true if file found, false if not
 	 */
 	private boolean audioApplied(long id) {
-		// Check database
 		Cursor line = mDbAdapter.fetchLine(getLineNumber(id));
 
 		String audio = line.getString(line.getColumnIndex("audio"));
@@ -711,7 +671,7 @@ public class MainActivity extends ListActivity {
 
 			// Update the Listview
 			LineAdapter adapter = new LineAdapter(this,
-					R.layout.play_list_layout, lines);
+					R.layout.script_list_layout, lines);
 			setListAdapter(adapter);
 
 			this.setSelection(adapter.getCount());
@@ -766,8 +726,8 @@ public class MainActivity extends ListActivity {
 		lines.add(newLine);
 
 		// Update the Listview
-		LineAdapter adapter = new LineAdapter(this, R.layout.play_list_layout,
-				lines);
+		LineAdapter adapter = new LineAdapter(this,
+				R.layout.script_list_layout, lines);
 		setListAdapter(adapter);
 
 		this.setSelection(adapter.getCount());
@@ -779,7 +739,7 @@ public class MainActivity extends ListActivity {
 	 * limit to number of pages user can view.
 	 * 
 	 */
-	private void getLastPage() {
+	private int getLastPage() {
 		mCursor = mDbAdapter.fetchAllLines();
 		String page = "";
 
@@ -787,7 +747,7 @@ public class MainActivity extends ListActivity {
 			page = (mCursor.getString(mCursor.getColumnIndex("page")));
 		}
 
-		lastPage = Integer.parseInt(page);
+		return Integer.parseInt(page);
 	}
 
 	/**
@@ -932,18 +892,6 @@ public class MainActivity extends ListActivity {
 		return lines;
 	}
 
-	// // Called with the result of the other activity
-	// // requestCode was the origin request code send to the activity
-	// // resultCode is the return code, 0 is everything is ok
-	// // intend can be used to get data
-	// @Override
-	// protected void onActivityResult(int requestCode, int resultCode,
-	// Intent intent) {
-	// super.onActivityResult(requestCode, resultCode, intent);
-	// fillData();
-	//
-	// }
-
 	/**
 	 * This method extracts the stage directions from the current line when the
 	 * user wants to reveal a word and stage directions are toggled off.
@@ -1083,8 +1031,8 @@ public class MainActivity extends ListActivity {
 		}
 
 		// Finally show data in our custom listview
-		LineAdapter adapter = new LineAdapter(this, R.layout.play_list_layout,
-				lines);
+		LineAdapter adapter = new LineAdapter(this,
+				R.layout.script_list_layout, lines);
 		setListAdapter(adapter);
 
 		this.getListView().setSelectionFromTop(lastViewedPos, topOffset);
@@ -1364,8 +1312,6 @@ public class MainActivity extends ListActivity {
 			fillData("");
 		}
 	}
-
-	// //////////// RECORDING METHODS //////////////////
 
 	/**
 	 * Here we record the user rehearsing their line(s) and display to them a

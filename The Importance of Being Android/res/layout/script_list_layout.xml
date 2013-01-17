@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#000000" >
+
+    <TextView
+        android:id="@+id/textCharacter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:textColor="#FFFFFF"
+        android:textSize="16dp"
+        android:typeface="serif" />
+
+    <TextView
+        android:id="@+id/textLine"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textCharacter"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="12dp"
+        android:typeface="serif" />
+
+    <ImageButton
+        android:id="@+id/imageButtonNotes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/textCharacter"
+        android:layout_marginRight="15dp"
+        android:background="@null"
+        android:src="@drawable/sym_action_chat" />
+
+    <ImageButton
+        android:id="@+id/imageButtonAudio"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/textCharacter"
+        android:layout_marginLeft="15dp"
+        android:background="@null"
+        android:src="@drawable/ic_btn_speak_now" />
+
+</RelativeLayout>
