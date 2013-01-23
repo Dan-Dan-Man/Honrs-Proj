@@ -33,7 +33,7 @@
         android:layout_alignBaseline="@+id/textAct"
         android:layout_alignBottom="@+id/textAct"
         android:layout_toRightOf="@+id/textAct"
-        android:text=" | Page"
+        android:text="@string/page"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 

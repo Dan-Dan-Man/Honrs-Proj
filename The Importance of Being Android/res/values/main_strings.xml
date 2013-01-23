@@ -12,5 +12,7 @@
     <string name="recording_name">Name</string>
     <string name="name_hint">Enter a name&#8230;</string>
     <string name="preview">Preview</string>
+    <string name="page"> | Page </string>
+    <string name="record_time">00:00</string>
 
 </resources>

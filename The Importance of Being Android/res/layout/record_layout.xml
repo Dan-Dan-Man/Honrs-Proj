@@ -52,7 +52,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/imageButtonRecordStart"
         android:gravity="center"
-        android:text="00:00"
+        android:text="@string/record_time"
         android:textColor="#FFFFFF"
         android:textSize="22dp" />
 

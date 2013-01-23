@@ -7,6 +7,9 @@
         android:minSdkVersion="8"
         android:targetSdkVersion="15" />
 
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:name="com.lines.classes.LinesApp"
         android:icon="@drawable/ic_launcher"
@@ -30,7 +33,7 @@
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         <activity
-            android:name=".activitys.SettingsActivity"
+            android:name="com.lines.activitys.SettingsActivity"
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
         <activity
@@ -46,8 +49,5 @@
             android:theme="@android:style/Theme.NoTitleBar" >
         </activity>
     </application>
-    
-    <uses-permission android:name="android.permission.RECORD_AUDIO" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>
