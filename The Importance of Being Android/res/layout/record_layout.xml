@@ -52,6 +52,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/imageButtonRecordStart"
         android:gravity="center"
+        android:text="00:00"
         android:textColor="#FFFFFF"
         android:textSize="22dp" />
 
