@@ -44,6 +44,7 @@
         android:layout_alignBaseline="@+id/textPageTitle"
         android:layout_alignBottom="@+id/textPageTitle"
         android:layout_toRightOf="@+id/textPageTitle"
+        android:layout_marginLeft="5dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -113,8 +114,17 @@
         android:layout_marginRight="5dp"
         android:background="@null"
         android:enabled="false"
-        android:text="Stop Playback"
+        android:text="@string/stop_playback"
         android:textColor="#FFFFFF"
         android:visibility="invisible" />
+
+    <ViewFlipper
+        android:id="@+id/viewFlipper"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:adjustViewBounds="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true" >
+    </ViewFlipper>
 
 </RelativeLayout>

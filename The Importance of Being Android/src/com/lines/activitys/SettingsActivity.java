@@ -409,7 +409,6 @@ public class SettingsActivity extends Activity {
 			// want in our database.
 			if (!isAllUpperCase(words[0])) {
 				firstWord = firstWord.substring(0, firstWord.length() - 1);
-				firstWord = firstWord.toUpperCase();
 				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
 						"N", "N", 0, 0, 0);
 				// If we're not adding to the database, then we need to reduce

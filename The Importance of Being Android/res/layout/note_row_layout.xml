@@ -21,7 +21,7 @@
         android:layout_alignTop="@+id/checkNote"
         android:layout_marginLeft="30dp"
         android:layout_toRightOf="@+id/checkNote"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textSize="18dp"
         android:textColor="#FFFFFF" />
 
     <TextView
@@ -32,6 +32,6 @@
         android:layout_below="@+id/textTitle"
         android:layout_marginTop="5dp"
         android:textColor="#B8B8B8"
-        android:textSize="12dp" />
+        android:textSize="14dp" />
 
 </RelativeLayout>

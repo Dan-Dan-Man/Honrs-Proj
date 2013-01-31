@@ -36,7 +36,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/spinnerCharacter"
         android:layout_marginRight="25dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="7dp"
         android:layout_toLeftOf="@+id/textTitleChar"
         android:text="@string/act_select"
         android:textColor="#FFFFFF" />
@@ -74,10 +74,10 @@
         android:layout_height="40dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:layout_marginBottom="35dp"
+        android:layout_marginBottom="20dp"
         android:layout_marginRight="20dp"
         android:text="@string/clear_stats"
-        android:textSize="12sp" />
+        android:textSize="16sp" />
 
     <TextView
         android:id="@+id/textComplete"
@@ -88,7 +88,7 @@
         android:layout_marginTop="20dp"
         android:text="@string/complete"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textStats"
@@ -98,7 +98,8 @@
         android:layout_centerVertical="true"
         android:layout_marginLeft="10dp"
         android:text="@string/stats"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="16dp" />
 
     <TextView
         android:id="@+id/textViews"
@@ -109,7 +110,7 @@
         android:layout_marginTop="25dp"
         android:text="@string/views"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textPrompts"
@@ -120,7 +121,7 @@
         android:layout_marginTop="20dp"
         android:text="@string/prompt_stats"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textNum"
@@ -129,7 +130,8 @@
         android:layout_above="@+id/textViews"
         android:layout_centerHorizontal="true"
         android:text="@string/num"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="16dp" />
 
     <TextView
         android:id="@+id/textViewsNum"
@@ -138,7 +140,7 @@
         android:layout_above="@+id/textPrompts"
         android:layout_centerHorizontal="true"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textPromptsNum"
@@ -147,7 +149,7 @@
         android:layout_above="@+id/textComplete"
         android:layout_centerHorizontal="true"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textCompleteNum"
@@ -155,9 +157,9 @@
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/textComplete"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="8dp"
+        android:layout_marginBottom="15dp"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textPercent"
@@ -167,7 +169,8 @@
         android:layout_alignParentRight="true"
         android:layout_marginRight="40dp"
         android:text="@string/percent"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="16dp" />
 
     <TextView
         android:id="@+id/textViewsPercent"
@@ -177,7 +180,7 @@
         android:layout_alignBottom="@+id/textViewsNum"
         android:layout_alignRight="@+id/textPercent"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textPromptsPercent"
@@ -187,7 +190,7 @@
         android:layout_alignBottom="@+id/textPromptsNum"
         android:layout_alignLeft="@+id/textViewsPercent"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/textCompletePercent"
@@ -197,6 +200,6 @@
         android:layout_alignBottom="@+id/textCompleteNum"
         android:layout_alignLeft="@+id/textViewsPercent"
         android:textColor="#FFFFFF"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
 </RelativeLayout>

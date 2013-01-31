@@ -24,21 +24,23 @@
                 android:layout_height="wrap_content"
                 android:text="@string/help"
                 android:textColor="#FFFFFF"
-                android:textSize="20dp" />
+                android:textSize="24dp" />
 
             <TextView
                 android:id="@+id/text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:textColor="#FFFFFF" />
+                android:textColor="#FFFFFF"
+                android:textSize="16dp" />
 
             <Button
                 android:id="@+id/dismiss"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
-                android:text="@string/dismiss" />
+                android:text="@string/dismiss"
+                android:textSize="16dp" />
         </LinearLayout>
     </LinearLayout>
 

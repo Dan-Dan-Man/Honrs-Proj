@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.text.Html;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,10 +46,12 @@ import com.lines.activitys.NotesActivity;
 public class LineAdapter extends ArrayAdapter<Line> {
 
 	private ArrayList<Line> lines;
+	private Typeface font;
 
 	public LineAdapter(Context context, int textViewResourceId,
 			ArrayList<Line> lines) {
 		super(context, textViewResourceId, lines);
+		font = Typeface.createFromAsset(context.getAssets(), "fonts/COUR.TTF");
 		this.lines = lines;
 	}
 
@@ -75,10 +78,12 @@ public class LineAdapter extends ArrayAdapter<Line> {
 			mNote.setFocusable(false);
 			mAudio.setFocusable(false);
 			if (mCharacter != null) {
-				mCharacter.setText(line.getCharacter(),
-						TextView.BufferType.SPANNABLE);
+				String character = line.getCharacter().toUpperCase();
+				mCharacter.setTypeface(font);
+				mCharacter.setText(character, TextView.BufferType.SPANNABLE);
 			}
 			if (mLine != null) {
+				mLine.setTypeface(font);
 				mLine.setText(Html.fromHtml(line.getLine()),
 						TextView.BufferType.SPANNABLE);
 			}

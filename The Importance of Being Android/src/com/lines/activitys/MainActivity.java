@@ -50,12 +50,16 @@ import android.os.Environment;
 import android.os.SystemClock;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.GestureDetector;
+import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.Button;
 import android.widget.Chronometer;
@@ -65,6 +69,7 @@ import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewFlipper;
 
 import com.lines.R;
 import com.lines.classes.Line;
@@ -115,6 +120,8 @@ public class MainActivity extends ListActivity {
 	private static final int OPTIONS = 0;
 	private static final int STATS = 1;
 	private static final int SETTINGS = 2;
+	private static final int RECORDINGS = 3;
+	private static final int NOTES = 4;
 	private static final int ADD_NOTE = 0;
 	private static final int VIEW_NOTES = 1;
 	private static final int PLAY_RECORD = 2;
@@ -125,6 +132,16 @@ public class MainActivity extends ListActivity {
 	private static final String TEMP_FILE = Environment
 			.getExternalStorageDirectory() + "/learnyourlines/audio/-.3gpp";
 	private static final Pattern VALID_CHARS = Pattern.compile("[^a-zA-Z0-9]");
+	private static final int SWIPE_MIN_DISTANCE = 120;
+	private static final int SWIPE_MAX_OFF_PATH = 250;
+	private static final int SWIPE_THRESHOLD_VELOCITY = 200;
+	private GestureDetector gestureDetector;
+	View.OnTouchListener gestureListener;
+	private Animation slideLeftIn;
+	private Animation slideLeftOut;
+	private Animation slideRightIn;
+	private Animation slideRightOut;
+	private ViewFlipper viewFlipper;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -139,6 +156,27 @@ public class MainActivity extends ListActivity {
 		mAudio = (ImageButton) findViewById(R.id.imageAudio);
 		mAct = (TextView) findViewById(R.id.textAct);
 		mPage = (TextView) findViewById(R.id.textPage);
+
+		// Set up animations for detecting finger movement
+		viewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper);
+		slideLeftIn = AnimationUtils.loadAnimation(this, R.anim.slide_left_in);
+		slideLeftOut = AnimationUtils
+				.loadAnimation(this, R.anim.slide_left_out);
+		slideRightIn = AnimationUtils
+				.loadAnimation(this, R.anim.slide_right_in);
+		slideRightOut = AnimationUtils.loadAnimation(this,
+				R.anim.slide_right_out);
+
+		// This listener allows us to switch page based on finger movement
+		gestureDetector = new GestureDetector(new MyGestureDetector());
+		gestureListener = new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+				if (gestureDetector.onTouchEvent(event)) {
+					return true;
+				}
+				return false;
+			}
+		};
 
 		// Retrieve the User's configurations from the Options Screen
 		Bundle extras = getIntent().getExtras();
@@ -281,6 +319,19 @@ public class MainActivity extends ListActivity {
 	}
 
 	/**
+	 * Override this method so that the viewFlipper and the ListView can work
+	 * concurrently.
+	 * 
+	 * @param event
+	 * @return
+	 */
+	@Override
+	public boolean dispatchTouchEvent(MotionEvent event) {
+		super.dispatchTouchEvent(event);
+		return gestureDetector.onTouchEvent(event);
+	}
+
+	/**
 	 * When we leave the screen, stop audio playback.
 	 * 
 	 */
@@ -352,6 +403,8 @@ public class MainActivity extends ListActivity {
 		menu.add(0, OPTIONS, 0, "Options");
 		menu.add(0, STATS, 1, "Statistics");
 		menu.add(0, SETTINGS, 2, "Settings");
+		menu.add(0, RECORDINGS, 3, "Recordings");
+		menu.add(0, NOTES, 4, "Notes");
 		return true;
 	}
 
@@ -360,13 +413,14 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	public boolean onOptionsItemSelected(MenuItem item) {
+		Intent i;
 		switch (item.getItemId()) {
 		case (OPTIONS):
 			finish();
 			break;
 		case (STATS):
 			setListViewPos();
-			Intent i = new Intent(MainActivity.this, StatsActivity.class);
+			i = new Intent(MainActivity.this, StatsActivity.class);
 			i.putExtra("EXTRA_ACT", mAct.getText());
 			i.putExtra("EXTRA_PAGE", mPage.getText());
 			i.putExtra("EXTRA_CHARACTER", character);
@@ -374,8 +428,18 @@ public class MainActivity extends ListActivity {
 			break;
 		case (SETTINGS):
 			setListViewPos();
-			Intent j = new Intent(MainActivity.this, SettingsActivity.class);
-			MainActivity.this.startActivity(j);
+			i = new Intent(MainActivity.this, SettingsActivity.class);
+			MainActivity.this.startActivity(i);
+			break;
+		case (RECORDINGS):
+			setListViewPos();
+			i = new Intent(MainActivity.this, RecordingsActivity.class);
+			MainActivity.this.startActivity(i);
+			break;
+		case (NOTES):
+			setListViewPos();
+			i = new Intent(MainActivity.this, NotesActivity.class);
+			MainActivity.this.startActivity(i);
 			break;
 		}
 		return false;
@@ -851,7 +915,7 @@ public class MainActivity extends ListActivity {
 
 		// If the character's name is "STAGE." then we remove the whole line
 		for (int i = 0; i < lines.size(); i++) {
-			if (lines.get(i).getCharacter().equals("STAGE.")) {
+			if (lines.get(i).getCharacter().equals("STAGE")) {
 				lines.remove(i);
 				i--;
 				// Otherwise we need to check if the line contains a stage
@@ -1676,5 +1740,45 @@ public class MainActivity extends ListActivity {
 		if (player != null) {
 			player.release();
 		}
+	}
+
+	/**
+	 * Class which detects finger movement, and switches page accordingly.
+	 * 
+	 * @author Daniel Muir, s0930256
+	 * 
+	 */
+	class MyGestureDetector extends SimpleOnGestureListener {
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			try {
+				if (Math.abs(e1.getY() - e2.getY()) > SWIPE_MAX_OFF_PATH)
+					return false;
+				// right to left swipe
+				if (e1.getX() - e2.getX() > SWIPE_MIN_DISTANCE
+						&& Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+					viewFlipper.setInAnimation(slideLeftIn);
+					viewFlipper.setOutAnimation(slideLeftOut);
+					switchPage(true);
+				} else if (e2.getX() - e1.getX() > SWIPE_MIN_DISTANCE
+						&& Math.abs(velocityX) > SWIPE_THRESHOLD_VELOCITY) {
+					viewFlipper.setInAnimation(slideRightIn);
+					viewFlipper.setOutAnimation(slideRightOut);
+					switchPage(false);
+				}
+			} catch (Exception e) {
+				// nothing
+			}
+			return false;
+		}
+	}
+
+	@Override
+	public boolean onTouchEvent(MotionEvent event) {
+		if (gestureDetector.onTouchEvent(event))
+			return true;
+		else
+			return false;
 	}
 }

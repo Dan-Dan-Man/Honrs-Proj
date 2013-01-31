@@ -253,7 +253,7 @@ public class OptionsActivity extends Activity {
 			do {
 				String character = mCursor.getString(mCursor
 						.getColumnIndex("character"));
-				if (!(character.equals("STAGE.") || character.contains("and"))) {
+				if (!(character.equals("STAGE") || character.contains("and"))) {
 					characters.add(character);
 				}
 			} while (mCursor.moveToNext());
@@ -278,7 +278,7 @@ public class OptionsActivity extends Activity {
 
 		// Set contents of Character Spinner
 		mAdapterChar = new ArrayAdapter<String>(OptionsActivity.this,
-				R.layout.spinner_text_layout, characters);
+				android.R.layout.simple_spinner_item, characters);
 		mAdapterChar
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mChar.setAdapter(mAdapterChar);
@@ -335,7 +335,7 @@ public class OptionsActivity extends Activity {
 
 		// Set contents of Act Spinner
 		mAdapterAct = new ArrayAdapter<String>(OptionsActivity.this,
-				R.layout.spinner_text_layout, acts);
+				android.R.layout.simple_spinner_item, acts);
 		mAdapterAct
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mAct.setAdapter(mAdapterAct);
@@ -386,7 +386,7 @@ public class OptionsActivity extends Activity {
 
 		// Set contents of Page Spinner
 		mAdapterPage = new ArrayAdapter<String>(OptionsActivity.this,
-				R.layout.spinner_text_layout, temp);
+				android.R.layout.simple_spinner_item, temp);
 		mAdapterPage
 				.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 		mPage.setAdapter(mAdapterPage);
@@ -452,7 +452,7 @@ public class OptionsActivity extends Activity {
 			}
 		});
 
-		popupWindow.showAsDropDown(mCueHelp, 50, -150);
+		popupWindow.showAsDropDown(mCueHelp, 50, -250);
 	}
 
 	/**

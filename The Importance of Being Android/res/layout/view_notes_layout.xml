@@ -59,8 +59,8 @@
         android:layout_marginLeft="15dp"
         android:layout_marginTop="20dp"
         android:text="@string/no_notes"
-        android:textAppearance="?android:attr/textAppearanceSmall"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="16dp" />
 
     <ListView
         android:id="@id/android:list"

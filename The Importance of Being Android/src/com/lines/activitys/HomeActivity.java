@@ -218,18 +218,27 @@ public class HomeActivity extends Activity {
 
 		selection.setAdapter(aa);
 
-		alertDialogBuilder.setCancelable(false).setPositiveButton(
-				"Load Script", new DialogInterface.OnClickListener() {
-					public void onClick(DialogInterface dialog, int id) {
-						final String script = selection.getSelectedItem()
-								.toString();
-						if (script != null) {
-							dialog.dismiss();
-							createThread(script);
-							createSettings(script);
-						}
-					}
-				});
+		alertDialogBuilder
+				.setCancelable(false)
+				.setPositiveButton("Load Script",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog, int id) {
+								final String script = selection
+										.getSelectedItem().toString();
+								if (script != null) {
+									dialog.dismiss();
+									createThread(script);
+									createSettings(script);
+								}
+							}
+						})
+				.setNegativeButton("Exit",
+						new DialogInterface.OnClickListener() {
+							public void onClick(DialogInterface dialog,
+									int which) {
+								finish();
+							}
+						});
 
 		// create alert dialog
 		AlertDialog alertDialog = alertDialogBuilder.create();
@@ -411,7 +420,6 @@ public class HomeActivity extends Activity {
 			// want in our database.
 			if (!isAllUpperCase(words[0])) {
 				firstWord = firstWord.substring(0, firstWord.length() - 1);
-				firstWord = firstWord.toUpperCase();
 				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
 						"N", "N", 0, 0, 0);
 				// If we're not adding to the database, then we need to reduce
