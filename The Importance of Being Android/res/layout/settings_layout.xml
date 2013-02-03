@@ -100,7 +100,7 @@
         android:layout_alignRight="@+id/buttonReset"
         android:layout_below="@+id/textPrompts"
         android:background="@null"
-        android:src="@drawable/ic_menu_help" />
+        android:src="@drawable/help" />
 
     <ImageButton
         android:id="@+id/imageButtonAuto"
@@ -109,6 +109,6 @@
         android:layout_alignRight="@+id/buttonReset"
         android:layout_alignTop="@+id/spinnerAuto"
         android:background="@null"
-        android:src="@drawable/ic_menu_help" />
+        android:src="@drawable/help" />
 
 </RelativeLayout>

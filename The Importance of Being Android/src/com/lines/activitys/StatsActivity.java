@@ -120,19 +120,6 @@ public class StatsActivity extends Activity {
 			}
 		}
 
-		// Get the total value of all stats
-		mCursor = mDbAdapter.fetchAllLines();
-
-		if (mCursor.moveToFirst()) {
-			do {
-				totalViews += mCursor.getInt(mCursor.getColumnIndex("views"));
-				totalPrompts += mCursor.getInt(mCursor
-						.getColumnIndex("prompts"));
-				totalCompletions += mCursor.getInt(mCursor
-						.getColumnIndex("completions"));
-			} while (mCursor.moveToNext());
-		}
-
 		mPage.setOnItemSelectedListener(new PageOnItemSelectedListener());
 		mAct.setOnItemSelectedListener(new ActOnItemSelectedListener());
 		mChar.setOnItemSelectedListener(new CharOnItemSelectedListener());
@@ -348,6 +335,26 @@ public class StatsActivity extends Activity {
 	}
 
 	/**
+	 * Reset and re-obtain the total count for each of the statistics
+	 * 
+	 */
+	private void getTotalStats() {
+		totalViews = 0;
+		totalPrompts = 0;
+		totalCompletions = 0;
+		mCursor = mDbAdapter.fetchAllLines();
+		if (mCursor.moveToFirst()) {
+			do {
+				totalViews += mCursor.getInt(mCursor.getColumnIndex("views"));
+				totalPrompts += mCursor.getInt(mCursor
+						.getColumnIndex("prompts"));
+				totalCompletions += mCursor.getInt(mCursor
+						.getColumnIndex("completions"));
+			} while (mCursor.moveToNext());
+		}
+	}
+
+	/**
 	 * This method searches the database and finds the stats based on the user's
 	 * selections and then formats and displays them
 	 * 
@@ -359,6 +366,8 @@ public class StatsActivity extends Activity {
 		float views = 0;
 		float prompts = 0;
 		float completions = 0;
+
+		getTotalStats();
 
 		mCursor = mDbAdapter.fetchCharacter(character, page);
 		String words[] = act.split("\\s+");
@@ -476,30 +485,27 @@ public class StatsActivity extends Activity {
 		}
 
 		// Reset all the stats for the selected items in the database
+		// TODO: Need to refactor this to be more efficent. Crashes the app if
+		// we select a large range to reset.
 		if (mCursor.moveToFirst()) {
 			do {
 				int line = mCursor.getInt(mCursor.getColumnIndex("number"));
-				line++;
-				mDbAdapter.updateViews(line, 0);
-				mDbAdapter.updatePrompts(line, 0);
-				mDbAdapter.updateCompletions(line, 0);
-			} while (mCursor.moveToNext());
-		}
-
-		// Finally update our total count of all stats
-		mCursor = mDbAdapter.fetchAllLines();
-
-		totalViews = 0;
-		totalPrompts = 0;
-		totalCompletions = 0;
-
-		if (mCursor.moveToFirst()) {
-			do {
-				totalViews += mCursor.getInt(mCursor.getColumnIndex("views"));
-				totalPrompts += mCursor.getInt(mCursor
-						.getColumnIndex("prompts"));
-				totalCompletions += mCursor.getInt(mCursor
+				int views = mCursor.getInt(mCursor.getColumnIndex("views"));
+				int prompts = mCursor.getInt(mCursor.getColumnIndex("prompts"));
+				int completions = mCursor.getInt(mCursor
 						.getColumnIndex("completions"));
+				line++;
+				// Check if the current line has some statistic before we update
+				// the value
+				if (views > 0) {
+					mDbAdapter.updateViews(line, 0);
+				}
+				if (prompts > 0) {
+					mDbAdapter.updatePrompts(line, 0);
+				}
+				if (completions > 0) {
+					mDbAdapter.updateCompletions(line, 0);
+				}
 			} while (mCursor.moveToNext());
 		}
 

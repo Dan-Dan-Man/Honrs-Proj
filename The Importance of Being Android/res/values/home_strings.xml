@@ -20,7 +20,7 @@
     <string name="prompts_num">No. of reveals for LINE!:</string>
     <string name="autoplay">Auto-play audio:</string>
     <string name="reset">Restore to Default</string>
-    <string name="prompt_help">Here you can choose how many words you want to reveal for the current hidden line when you press "LINE!"</string>
+    <string name="prompt_help">Here you can choose how many words you want to reveal from the current hidden line when you press "LINE!"</string>
     <string name="auto_help">When you start a new page, you can allow all lines that have a recording associated to them to automatically play.</string>
 
     <string-array name="prompts_array">

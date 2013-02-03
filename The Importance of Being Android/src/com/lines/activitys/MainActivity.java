@@ -88,6 +88,7 @@ public class MainActivity extends ListActivity {
 
 	private TextView mPage;
 	private TextView mAct;
+	private Button mRec;
 	private Button mNext;
 	private Button mPrev;
 	private Button mPrompt;
@@ -152,6 +153,7 @@ public class MainActivity extends ListActivity {
 		mNext = (Button) findViewById(R.id.buttonNext);
 		mPrev = (Button) findViewById(R.id.buttonPrev);
 		mPrompt = (Button) findViewById(R.id.buttonPrompt);
+		mRec = (Button) findViewById(R.id.buttonRec);
 		mStopPlayBack = (Button) findViewById(R.id.buttonStopAudio);
 		mAudio = (ImageButton) findViewById(R.id.imageAudio);
 		mAct = (TextView) findViewById(R.id.textAct);
@@ -205,17 +207,13 @@ public class MainActivity extends ListActivity {
 
 		// Update view count for the selected character
 		if (rehearsal) {
-			for (int i = 0; i < lines.size(); i++) {
-				if (lines.get(i).getCharacter().equals(character)) {
-					Cursor line = mDbAdapter
-							.fetchLine(lines.get(i).getNumber() + 1);
-					int viewCount = line.getInt(line.getColumnIndex("views"));
-					viewCount++;
-					mDbAdapter.updateViews(lines.get(i).getNumber() + 1,
-							viewCount);
-					break;
-				}
-			}
+			Cursor line = mDbAdapter.fetchCharacter(character, pageNo);
+			line.moveToFirst();
+			int lineNum = line.getInt(line.getColumnIndex("number"));
+			int viewCount = line.getInt(line.getColumnIndex("views"));
+			viewCount++;
+			lineNum++;
+			mDbAdapter.updateViews(lineNum, viewCount);
 		}
 
 		// When Next button is pressed, play jumps until user's next line.
@@ -314,6 +312,16 @@ public class MainActivity extends ListActivity {
 				playbackPosition = lines.size() - 1;
 				mStopPlayBack.setEnabled(false);
 				mStopPlayBack.setVisibility(View.INVISIBLE);
+			}
+		});
+
+		mRec.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					showRecordingDialog();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		});
 	}
@@ -620,7 +628,7 @@ public class MainActivity extends ListActivity {
 	 *            - the position of the selected item in the list
 	 * @throws Exception
 	 */
-	private void playSelectedRecording(long id, final boolean autoplay)
+	private void playSelectedRecording(final long id, final boolean autoplay)
 			throws Exception {
 		if (audioApplied(id)) {
 			// If the selected line is hidden, then we don't want to play the
@@ -1172,6 +1180,8 @@ public class MainActivity extends ListActivity {
 		playbackPosition = 0;
 		lastViewedPos = 0;
 		topOffset = 0;
+		ditchPlayer();
+		mStopPlayBack.setVisibility(View.INVISIBLE);
 
 		// Update completions count
 		if (rehearsal && !promptUsed && lines.size() == lineNum) {
@@ -1397,10 +1407,15 @@ public class MainActivity extends ListActivity {
 		final Chronometer timer = (Chronometer) recordView
 				.findViewById(R.id.chrono);
 		final TextView text = (TextView) recordView.findViewById(R.id.textTime);
+		final TextView recording = (TextView) recordView
+				.findViewById(R.id.textTitle);
 		final ImageButton startRecord = (ImageButton) recordView
 				.findViewById(R.id.imageButtonRecordStart);
 		final ImageButton stopRecord = (ImageButton) recordView
 				.findViewById(R.id.imageButtonRecordStop);
+
+		stopRecord.setEnabled(false);
+		recording.setText("");
 
 		startRecord.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -1410,6 +1425,8 @@ public class MainActivity extends ListActivity {
 					startRecord.setVisibility(View.INVISIBLE);
 					stopRecord.setEnabled(true);
 					stopRecord.setVisibility(View.VISIBLE);
+					recording.setText(getResources().getString(
+							R.string.recording));
 
 					ditchRecorder();
 
@@ -1436,6 +1453,7 @@ public class MainActivity extends ListActivity {
 				stopRecord.setVisibility(View.INVISIBLE);
 				startRecord.setEnabled(true);
 				startRecord.setVisibility(View.VISIBLE);
+				recording.setText("");
 
 				recorder.stop();
 				timer.stop();
@@ -1464,7 +1482,7 @@ public class MainActivity extends ListActivity {
 										showRecordingDialog();
 										Toast.makeText(
 												getApplicationContext(),
-												"You must create recording before saving!",
+												"You must create a recording before saving!",
 												Toast.LENGTH_LONG).show();
 									} catch (Exception e) {
 										e.printStackTrace();
@@ -1536,9 +1554,9 @@ public class MainActivity extends ListActivity {
 
 		// Increment the progress bar each second
 		final CountDownTimer timer = new CountDownTimer(player.getDuration(),
-				55) {
+				50) {
 			public void onTick(long millisUntilFinished) {
-				seekBar.setProgress(seekBar.getProgress() + 100);
+				seekBar.setProgress(seekBar.getProgress() + 50);
 			}
 
 			public void onFinish() {

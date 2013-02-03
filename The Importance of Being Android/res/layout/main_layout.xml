@@ -10,19 +10,31 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="15dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginTop="5dp"
         android:background="@null"
-        android:src="@drawable/ic_btn_speak_now" />
+        android:src="@drawable/record_icon" />
+    
+    <Button
+        android:id="@+id/buttonRec"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="8dp"
+        android:layout_toRightOf="@+id/imageAudio"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:background="@null"
+        android:text="@string/rec"
+        android:textColor="#FFFFFF" />
 
     <TextView
         android:id="@+id/textAct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/imageAudio"
+        android:layout_alignTop="@+id/buttonRec"
         android:layout_marginLeft="45dp"
-        android:layout_marginTop="5dp"
-        android:layout_toRightOf="@+id/imageAudio"
+        android:layout_toRightOf="@+id/buttonRec"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -43,8 +55,8 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/textPageTitle"
         android:layout_alignBottom="@+id/textPageTitle"
-        android:layout_toRightOf="@+id/textPageTitle"
         android:layout_marginLeft="5dp"
+        android:layout_toRightOf="@+id/textPageTitle"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -53,7 +65,7 @@
         android:layout_height="fill_parent"
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/imageAudio"
+        android:layout_below="@+id/textPageTitle"
         android:layout_marginTop="5dp"
         android:background="#000000" >
 
@@ -122,9 +134,9 @@
         android:id="@+id/viewFlipper"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:adjustViewBounds="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true" >
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true" >
     </ViewFlipper>
 
 </RelativeLayout>

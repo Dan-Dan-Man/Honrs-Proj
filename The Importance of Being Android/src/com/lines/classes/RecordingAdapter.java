@@ -27,7 +27,6 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -63,7 +62,6 @@ public class RecordingAdapter extends ArrayAdapter<Recording> {
 		}
 		Recording record = recordings.get(position);
 		String name = record.getName();
-		Log.d("", name);
 		int time = record.getTime();
 		if (name != null) {
 			TextView mName = (TextView) v.findViewById(R.id.textTitle);

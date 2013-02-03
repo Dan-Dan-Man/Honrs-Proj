@@ -32,7 +32,7 @@
         android:layout_marginTop="10dp"
         android:background="@null"
         android:padding="10dp"
-        android:src="@android:drawable/presence_busy" />
+        android:src="@drawable/begin_recording_icon" />
 
     <ImageButton
         android:id="@+id/imageButtonRecordStop"
@@ -42,7 +42,7 @@
         android:layout_alignTop="@+id/imageButtonRecordStart"
         android:background="@null"
         android:padding="10dp"
-        android:src="@android:drawable/presence_online"
+        android:src="@drawable/stop_recording_icon"
         android:visibility="invisible" />
 
     <TextView

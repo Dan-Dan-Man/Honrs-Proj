@@ -296,9 +296,9 @@ public class RecordingsActivity extends ListActivity {
 
 		// Increment the progress bar each second
 		final CountDownTimer timer = new CountDownTimer(player.getDuration(),
-				55) {
+				50) {
 			public void onTick(long millisUntilFinished) {
-				seekBar.setProgress(seekBar.getProgress() + 100);
+				seekBar.setProgress(seekBar.getProgress() + 50);
 			}
 
 			public void onFinish() {
@@ -487,6 +487,7 @@ public class RecordingsActivity extends ListActivity {
 			overwriteFile(id, filename, newFile, oldFile);
 		} else {
 			oldFile.renameTo(newFile);
+			updateDatabase(oldFile, newFile);
 			Toast.makeText(getApplicationContext(), "Recording renamed!",
 					Toast.LENGTH_LONG).show();
 			populateList();
@@ -521,6 +522,7 @@ public class RecordingsActivity extends ListActivity {
 							public void onClick(DialogInterface dialog, int id) {
 								try {
 									temp.renameTo(newFile);
+									updateDatabase(temp, newFile);
 									Toast.makeText(getApplicationContext(),
 											"New recording saved!",
 											Toast.LENGTH_LONG).show();
@@ -540,6 +542,38 @@ public class RecordingsActivity extends ListActivity {
 						}
 					}
 				}).show();
+	}
+
+	/**
+	 * Once we have renamed the file, check if any lines in the database have an
+	 * audio file associated with it, and update accordingly.
+	 * 
+	 * @param oldFile
+	 *            - The old File
+	 * @param newFile
+	 *            - The new File we have renamed to
+	 */
+	private void updateDatabase(File oldFile, File newFile) {
+
+		String oldFilename = oldFile.getName();
+		String newFilename = newFile.getName();
+
+		Cursor cursor = mDbAdapter.fetchAllLines();
+
+		// Loop through every line in database and update audio files
+		// accordingly
+		if (cursor.moveToFirst()) {
+			do {
+				String filename = cursor.getString(cursor
+						.getColumnIndex("audio"));
+				if (filename.equals(DIRECTORY + oldFilename)) {
+					int lineNum = cursor
+							.getInt(cursor.getColumnIndex("number"));
+					lineNum++;
+					mDbAdapter.updateAudio(lineNum, DIRECTORY + newFilename);
+				}
+			} while (cursor.moveToNext());
+		}
 	}
 
 	/**

@@ -17,56 +17,56 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/TextTitle3"
-        android:layout_marginTop="25dp"
         android:layout_centerHorizontal="true"
-        android:padding="15dp"
+        android:layout_marginTop="15dp"
         android:background="@null"
-        android:src="@android:drawable/arrow_up_float" />
+        android:padding="10dp"
+        android:src="@drawable/arrow" />
 
     <ImageButton
         android:id="@+id/imageButtonArrowDown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textBottom"
-        android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
-        android:padding="15dp"
+        android:layout_marginTop="30dp"
         android:background="@null"
-        android:src="@android:drawable/arrow_down_float" />
+        android:padding="10dp"
+        android:src="@drawable/arrow_reverse" />
 
     <TextView
         android:id="@+id/textBottom"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textMiddle"
-        android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
         android:text="@string/stats"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#FFFFFF" />
+        android:textColor="#6B6A6A" />
 
     <TextView
         android:id="@+id/textMiddle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/textTop"
-        android:layout_marginTop="30dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
         android:clickable="true"
         android:onClick="menuClick"
         android:text="@string/start"
-        android:textSize="26dp"
-        android:textColor="#FFFFFF" />
+        android:textColor="#FFFFFF"
+        android:textSize="26dp" />
 
     <TextView
         android:id="@+id/textTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/imageButtonArrowUp"
-        android:layout_marginTop="25dp"
         android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#FFFFFF" />
+        android:textColor="#6B6A6A" />
 
     <TextView
         android:id="@+id/textTitle1"

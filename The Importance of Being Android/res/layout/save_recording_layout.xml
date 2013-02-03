@@ -42,7 +42,7 @@
         android:layout_below="@+id/textPreview"
         android:layout_centerHorizontal="true"
         android:background="@null"
-        android:src="@android:drawable/ic_media_play" />
+        android:src="@drawable/play_icon" />
 
     <SeekBar
         android:id="@+id/seekBarAudio"
@@ -62,7 +62,7 @@
         android:layout_alignRight="@+id/imagePreview"
         android:layout_below="@+id/textPreview"
         android:background="@null"
-        android:src="@android:drawable/checkbox_off_background"
+        android:src="@drawable/stop_icon"
         android:visibility="invisible" />
 
 </RelativeLayout>

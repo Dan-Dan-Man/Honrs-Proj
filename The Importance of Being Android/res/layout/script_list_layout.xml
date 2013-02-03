@@ -33,7 +33,7 @@
         android:layout_alignTop="@+id/textCharacter"
         android:layout_marginRight="15dp"
         android:background="@null"
-        android:src="@drawable/sym_action_chat" />
+        android:src="@android:drawable/sym_action_chat" />
 
     <ImageButton
         android:id="@+id/imageButtonAudio"
@@ -43,6 +43,6 @@
         android:layout_alignTop="@+id/textCharacter"
         android:layout_marginLeft="15dp"
         android:background="@null"
-        android:src="@drawable/ic_btn_speak_now" />
+        android:src="@android:drawable/ic_lock_silent_mode_off" />
 
 </RelativeLayout>
