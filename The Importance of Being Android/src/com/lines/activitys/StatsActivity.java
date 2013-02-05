@@ -41,6 +41,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.lines.R;
 import com.lines.classes.LinesApp;
@@ -529,6 +530,9 @@ public class StatsActivity extends Activity {
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog, int id) {
 								deleteStats();
+								Toast.makeText(getApplicationContext(),
+										"Stats cleared for current selection.",
+										Toast.LENGTH_SHORT).show();
 							}
 						})
 				.setNegativeButton("No", new DialogInterface.OnClickListener() {
