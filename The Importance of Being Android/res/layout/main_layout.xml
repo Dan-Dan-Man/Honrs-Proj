@@ -4,37 +4,69 @@
     android:layout_height="match_parent"
     android:background="#500000" >
 
+    <Chronometer
+        android:id="@+id/chrono"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     <ImageButton
-        android:id="@+id/imageAudio"
+        android:id="@+id/imageAudioStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_marginTop="15dp"
         android:layout_marginLeft="5dp"
+        android:layout_marginTop="15dp"
         android:background="@null"
         android:src="@drawable/record_icon" />
-    
+
     <Button
-        android:id="@+id/buttonRec"
+        android:id="@+id/buttonRecStart"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="5dp"
         android:layout_marginTop="8dp"
-        android:layout_toRightOf="@+id/imageAudio"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_toRightOf="@+id/imageAudioStart"
         android:background="@null"
         android:text="@string/rec"
+        android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
+
+    <ImageButton
+        android:id="@+id/imageAudioStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="15dp"
+        android:background="@null"
+        android:src="@drawable/record_icon"
+        android:visibility="invisible" />
+
+    <Button
+        android:id="@+id/buttonRecStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="8dp"
+        android:layout_toRightOf="@+id/imageAudioStop"
+        android:background="@null"
+        android:text="@string/rec"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#D70404"
+        android:visibility="invisible" />
 
     <TextView
         android:id="@+id/textAct"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignTop="@+id/buttonRec"
+        android:layout_alignTop="@+id/buttonRecStart"
         android:layout_marginLeft="45dp"
-        android:layout_toRightOf="@+id/buttonRec"
+        android:layout_toRightOf="@+id/buttonRecStart"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
 
@@ -59,6 +91,18 @@
         android:layout_toRightOf="@+id/textPageTitle"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
+
+    <TextView
+        android:id="@+id/textRecordingTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/textPage"
+        android:layout_marginRight="10dp"
+        android:text="@string/record_time"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#FFFFFF"
+        android:visibility="invisible" />
 
     <RelativeLayout
         android:layout_width="fill_parent"

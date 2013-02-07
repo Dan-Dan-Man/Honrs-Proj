@@ -88,12 +88,16 @@ public class MainActivity extends ListActivity {
 
 	private TextView mPage;
 	private TextView mAct;
-	private Button mRec;
+	private TextView mTimeDisplay;
+	private Button mRecStart;
+	private Button mRecStop;
 	private Button mNext;
 	private Button mPrev;
 	private Button mPrompt;
 	private Button mStopPlayBack;
-	private ImageButton mAudio;
+	private ImageButton mAudioStart;
+	private ImageButton mAudioStop;
+	private Chronometer mTimer;
 	private Cursor mCursor;
 	private PlayDbAdapter mDbAdapter;
 	private NoteDbAdapter mNDbAdapter;
@@ -143,6 +147,7 @@ public class MainActivity extends ListActivity {
 	private Animation slideRightIn;
 	private Animation slideRightOut;
 	private ViewFlipper viewFlipper;
+	private File temp;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -153,11 +158,15 @@ public class MainActivity extends ListActivity {
 		mNext = (Button) findViewById(R.id.buttonNext);
 		mPrev = (Button) findViewById(R.id.buttonPrev);
 		mPrompt = (Button) findViewById(R.id.buttonPrompt);
-		mRec = (Button) findViewById(R.id.buttonRec);
+		mRecStart = (Button) findViewById(R.id.buttonRecStart);
+		mRecStop = (Button) findViewById(R.id.buttonRecStop);
 		mStopPlayBack = (Button) findViewById(R.id.buttonStopAudio);
-		mAudio = (ImageButton) findViewById(R.id.imageAudio);
+		mAudioStart = (ImageButton) findViewById(R.id.imageAudioStart);
+		mAudioStop = (ImageButton) findViewById(R.id.imageAudioStop);
 		mAct = (TextView) findViewById(R.id.textAct);
 		mPage = (TextView) findViewById(R.id.textPage);
+		mTimeDisplay = (TextView) findViewById(R.id.textRecordingTimer);
+		mTimer = (Chronometer) findViewById(R.id.chrono);
 
 		// Set up animations for detecting finger movement
 		viewFlipper = (ViewFlipper) findViewById(R.id.viewFlipper);
@@ -292,18 +301,6 @@ public class MainActivity extends ListActivity {
 			}
 		});
 
-		// When the Audio button is pressed, show a dialog to allow the user to
-		// record themselves
-		mAudio.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				try {
-					showRecordingDialog();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-
 		// If audio is playing, then this button becomes visible and we can stop
 		// playback when we press it
 		mStopPlayBack.setOnClickListener(new View.OnClickListener() {
@@ -315,10 +312,44 @@ public class MainActivity extends ListActivity {
 			}
 		});
 
-		mRec.setOnClickListener(new View.OnClickListener() {
+		// When the Audio button is pressed, show a dialog to allow the user to
+		// record themselves
+		mAudioStart.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				try {
-					showRecordingDialog();
+					beginRecording();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		mRecStart.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					beginRecording();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		// When the Audio button is pressed, show a dialog to allow the user to
+		// record themselves
+		mAudioStop.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					saveRecordingDialog(temp);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+
+		mRecStop.setOnClickListener(new View.OnClickListener() {
+			public void onClick(View v) {
+				try {
+					saveRecordingDialog(temp);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -347,6 +378,7 @@ public class MainActivity extends ListActivity {
 	protected void onPause() {
 		super.onPause();
 		ditchPlayer();
+		ditchRecorder();
 	}
 
 	/**
@@ -1388,134 +1420,42 @@ public class MainActivity extends ListActivity {
 	}
 
 	/**
-	 * Here we record the user rehearsing their line(s) and display to them a
-	 * timer showing time elapsed.
+	 * Setup a new temporary file and begin recording the user.
 	 * 
-	 * @throws Exception
 	 */
-	private void showRecordingDialog() throws Exception {
-		// Create temporary file to store audio recording
-		final File temp = new File(TEMP_FILE);
+	private void beginRecording() {
+		temp = new File(TEMP_FILE);
 
-		LayoutInflater li = LayoutInflater.from(this);
-		View recordView = li.inflate(R.layout.record_layout, null);
+		ditchRecorder();
 
-		AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
+		// Setup and start recording
+		try {
+			recorder = new MediaRecorder();
+			recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+			recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+			recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+			recorder.setOutputFile(TEMP_FILE);
+			recorder.prepare();
+			recorder.start();
+			mTimer.setBase(SystemClock.elapsedRealtime());
+			mTimer.start();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 
-		alertDialogBuilder.setView(recordView);
-
-		final Chronometer timer = (Chronometer) recordView
-				.findViewById(R.id.chrono);
-		final TextView text = (TextView) recordView.findViewById(R.id.textTime);
-		final TextView recording = (TextView) recordView
-				.findViewById(R.id.textTitle);
-		final ImageButton startRecord = (ImageButton) recordView
-				.findViewById(R.id.imageButtonRecordStart);
-		final ImageButton stopRecord = (ImageButton) recordView
-				.findViewById(R.id.imageButtonRecordStop);
-
-		stopRecord.setEnabled(false);
-		recording.setText("");
-
-		startRecord.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				try {
-					// Update buttons
-					startRecord.setEnabled(false);
-					startRecord.setVisibility(View.INVISIBLE);
-					stopRecord.setEnabled(true);
-					stopRecord.setVisibility(View.VISIBLE);
-					recording.setText(getResources().getString(
-							R.string.recording));
-
-					ditchRecorder();
-
-					// Setup and start recording
-					recorder = new MediaRecorder();
-					recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-					recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-					recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-					recorder.setOutputFile(TEMP_FILE);
-					recorder.prepare();
-					recorder.start();
-					timer.setBase(SystemClock.elapsedRealtime());
-					timer.start();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-
-		stopRecord.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				// Update buttons
-				stopRecord.setEnabled(false);
-				stopRecord.setVisibility(View.INVISIBLE);
-				startRecord.setEnabled(true);
-				startRecord.setVisibility(View.VISIBLE);
-				recording.setText("");
-
-				recorder.stop();
-				timer.stop();
-			}
-		});
+		mAudioStart.setVisibility(View.INVISIBLE);
+		mRecStart.setVisibility(View.INVISIBLE);
+		mAudioStop.setVisibility(View.VISIBLE);
+		mRecStop.setVisibility(View.VISIBLE);
+		mTimeDisplay.setVisibility(View.VISIBLE);
 
 		// Update our textview displaying the timer elapsed each second
-		timer.setOnChronometerTickListener(new OnChronometerTickListener() {
+		mTimer.setOnChronometerTickListener(new OnChronometerTickListener() {
 			public void onChronometerTick(Chronometer chrono) {
 				String asText = chrono.getText().toString();
-				text.setText(asText);
+				mTimeDisplay.setText(asText);
 			}
 		});
-
-		alertDialogBuilder
-				.setCancelable(false)
-				.setPositiveButton("Save Recording",
-						new DialogInterface.OnClickListener() {
-							// Stop recording and move to next popup to name the
-							// audio file
-							public void onClick(DialogInterface dialog, int id) {
-								// If the user hasn't created a temporary file,
-								// then don't let them try and save
-								if (!temp.exists()) {
-									try {
-										showRecordingDialog();
-										Toast.makeText(
-												getApplicationContext(),
-												"You must create a recording before saving!",
-												Toast.LENGTH_LONG).show();
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								} else {
-									if (stopRecord.isEnabled()) {
-										recorder.stop();
-									}
-									try {
-										saveRecordingDialog(temp);
-									} catch (Exception e) {
-										e.printStackTrace();
-									}
-								}
-							}
-						})
-				.setNegativeButton("Cancel",
-						new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int id) {
-								// Delete temporary file if user cancels
-								temp.delete();
-								if (stopRecord.isEnabled()) {
-									recorder.stop();
-								}
-								dialog.cancel();
-							}
-						});
-
-		// create alert dialog
-		AlertDialog alertDialog = alertDialogBuilder.create();
-
-		// show it
-		alertDialog.show();
 	}
 
 	/**
@@ -1525,6 +1465,16 @@ public class MainActivity extends ListActivity {
 	 *            - The newly created audio file
 	 */
 	private void saveRecordingDialog(final File temp) throws Exception {
+
+		mAudioStart.setVisibility(View.VISIBLE);
+		mRecStart.setVisibility(View.VISIBLE);
+		mAudioStop.setVisibility(View.INVISIBLE);
+		mRecStop.setVisibility(View.INVISIBLE);
+		mTimeDisplay.setVisibility(View.INVISIBLE);
+
+		recorder.stop();
+		mTimer.stop();
+
 		LayoutInflater li = LayoutInflater.from(this);
 		View recordView = li.inflate(R.layout.save_recording_layout, null);
 
@@ -1534,13 +1484,10 @@ public class MainActivity extends ListActivity {
 
 		final EditText title = (EditText) recordView
 				.findViewById(R.id.editTitle);
-
 		final ImageButton preview = (ImageButton) recordView
 				.findViewById(R.id.imagePreview);
-
 		final ImageButton stop = (ImageButton) recordView
 				.findViewById(R.id.imageStop);
-
 		final SeekBar seekBar = (SeekBar) recordView
 				.findViewById(R.id.seekBarAudio);
 
