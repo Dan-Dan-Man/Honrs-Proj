@@ -26,10 +26,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="3dp"
         android:layout_toRightOf="@+id/imageAudioStart"
         android:background="@null"
+        android:padding="5dp"
         android:text="@string/rec"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
@@ -51,10 +51,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_marginLeft="5dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="3dp"
         android:layout_toRightOf="@+id/imageAudioStop"
         android:background="@null"
+        android:padding="5dp"
         android:text="@string/rec"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#D70404"
@@ -65,7 +65,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignTop="@+id/buttonRecStart"
-        android:layout_marginLeft="45dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="40dp"
         android:layout_toRightOf="@+id/buttonRecStart"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="#FFFFFF" />
@@ -110,7 +111,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/textPageTitle"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="10dp"
         android:background="#000000" >
 
         <ListView

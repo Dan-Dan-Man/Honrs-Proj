@@ -1470,9 +1470,8 @@ public class MainActivity extends ListActivity {
 		mRecStart.setVisibility(View.VISIBLE);
 		mAudioStop.setVisibility(View.INVISIBLE);
 		mRecStop.setVisibility(View.INVISIBLE);
-		mTimeDisplay.setVisibility(View.INVISIBLE);
 
-		recorder.stop();
+		ditchRecorder();
 		mTimer.stop();
 
 		LayoutInflater li = LayoutInflater.from(this);
@@ -1496,6 +1495,7 @@ public class MainActivity extends ListActivity {
 		player = new MediaPlayer();
 		player.setDataSource(TEMP_FILE);
 		player.prepare();
+		stop.setEnabled(false);
 
 		seekBar.setMax(player.getDuration());
 
@@ -1582,6 +1582,7 @@ public class MainActivity extends ListActivity {
 									if (stop.isEnabled()) {
 										player.stop();
 									}
+									mTimeDisplay.setVisibility(View.INVISIBLE);
 									saveRecording(temp, textTitle);
 								}
 							}
@@ -1594,6 +1595,7 @@ public class MainActivity extends ListActivity {
 								if (stop.isEnabled()) {
 									player.stop();
 								}
+								mTimeDisplay.setVisibility(View.INVISIBLE);
 								dialog.cancel();
 							}
 						});
