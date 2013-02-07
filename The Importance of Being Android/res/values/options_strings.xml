@@ -22,7 +22,7 @@
     <string name="mode_help">In NORMAL mode, the script is available to read with no hidden text, and stats are not recorded. \n\nIn REHEARSAL mode, the selected character\'s lines will be hidden, and stats will be recorded.</string>
     <string name="cue_help">Cue Words will colour relevent words red from the previous line delivered by another character, to help you remember the context of your current line. \n\n Not available when DISPLAY ONLY OWN LINES is toggled on.</string>
     <string name="random_help">The next page that is displayed will be chosen completely at random.</string>
-    <string name="own_line_help">Here you will only display the lines delivered by your selected character. \n\n Not available in REHEARSAL mode or when CUE WORDS is toggled on.</string>
+    <string name="own_line_help">Here you will only display the lines delivered by your selected character. \n\n Not available when CUE WORDS is toggled on.</string>
     <string name="stage_help">Toggling this will either hide or show the stage directions.</string>
 
 </resources>

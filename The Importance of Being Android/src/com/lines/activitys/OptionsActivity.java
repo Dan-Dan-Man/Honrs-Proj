@@ -466,14 +466,9 @@ public class OptionsActivity extends Activity {
 		public void onItemSelected(AdapterView<?> parent, View v, int pos,
 				long id) {
 			if (mMode.getSelectedItem().equals("Normal")) {
-				if (!mRandom.isChecked()) {
-					mOwn.setEnabled(true);
-				}
 				mChar.setEnabled(false);
 				populateActs(false);
 			} else {
-				mOwn.setEnabled(false);
-				mOwn.setChecked(false);
 				mChar.setEnabled(true);
 				populateActs(true);
 			}
