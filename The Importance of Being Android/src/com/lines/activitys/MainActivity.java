@@ -245,8 +245,8 @@ public class MainActivity extends ListActivity {
 					switchPage(true);
 				} else {
 					Toast.makeText(MainActivity.this,
-							"No more pages available in script!",
-							Toast.LENGTH_SHORT).show();
+							"No more pages in script!", Toast.LENGTH_SHORT)
+							.show();
 				}
 				return true;
 			}
@@ -268,6 +268,10 @@ public class MainActivity extends ListActivity {
 			public boolean onLongClick(View v) {
 				if (Integer.parseInt(mPage.getText().toString()) > 1) {
 					switchPage(false);
+				} else {
+					Toast.makeText(MainActivity.this,
+							"No more pages in script!", Toast.LENGTH_SHORT)
+							.show();
 				}
 				return true;
 			}
