@@ -222,7 +222,9 @@ public class OptionsActivity extends Activity {
 					mOwn.setChecked(false);
 					mOwn.setEnabled(false);
 				} else {
-					mOwn.setEnabled(true);
+					if (mMode.getSelectedItem().equals("Normal")) {
+						mOwn.setEnabled(true);
+					}
 				}
 			}
 		});
@@ -467,9 +469,12 @@ public class OptionsActivity extends Activity {
 				long id) {
 			if (mMode.getSelectedItem().equals("Normal")) {
 				mChar.setEnabled(false);
+				mOwn.setEnabled(true);
 				populateActs(false);
 			} else {
 				mChar.setEnabled(true);
+				mOwn.setChecked(false);
+				mOwn.setEnabled(false);
 				populateActs(true);
 			}
 		}

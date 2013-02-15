@@ -234,6 +234,11 @@ public class MainActivity extends ListActivity {
 					promptLimitReached = false;
 					setListViewPos();
 					fillData("forward");
+				} else {
+					Toast.makeText(
+							getApplicationContext(),
+							"Press and hold, or swipe the screen, to move to the next page.",
+							Toast.LENGTH_SHORT).show();
 				}
 			}
 		});
@@ -255,11 +260,18 @@ public class MainActivity extends ListActivity {
 		// When Prev button is pressed, play jumps until user's prev line.
 		mPrev.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
-				visibleWords = 1;
-				visibleSentences = 1;
-				promptLimitReached = false;
-				setListViewPos();
-				fillData("back");
+				if (rehearsal) {
+					visibleWords = 1;
+					visibleSentences = 1;
+					promptLimitReached = false;
+					setListViewPos();
+					fillData("back");
+				} else {
+					Toast.makeText(
+							getApplicationContext(),
+							"Press and hold, or swipe the screen, to move to the previous page.",
+							Toast.LENGTH_SHORT).show();
+				}
 			}
 		});
 
