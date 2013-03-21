@@ -313,8 +313,6 @@ public class HomeActivity extends Activity {
 	 * @throws IOException
 	 */
 	private void readFile(String script) throws IOException {
-		// TODO: Need to make sure a new act starts on a new page.
-
 		String text = "";
 
 		InputStream is;
@@ -353,8 +351,7 @@ public class HomeActivity extends Activity {
 			String firstWord = words[0];
 
 			// Keep a count of which Act we're on
-			if (firstWord.equals("FIRST") || firstWord.equals("SECOND")
-					|| firstWord.equals("THIRD")) {
+			if (words[words.length - 1].equals("ACT")) {
 				actNo++;
 			}
 
@@ -417,7 +414,7 @@ public class HomeActivity extends Activity {
 
 			// Once we have all the data picked out from current line in text
 			// file, create a new row in the database. Filter out text we don't
-			// want in our database.
+			// want in our database (Key words).
 			if (!isAllUpperCase(words[0])) {
 				firstWord = firstWord.substring(0, firstWord.length() - 1);
 				mDbAdapter.createPlay(lineNo, firstWord, text, actNo, pageNo,
