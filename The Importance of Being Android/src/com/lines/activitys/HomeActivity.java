@@ -70,15 +70,15 @@ public class HomeActivity extends Activity {
 		// everytime. Check ForumApp example and see if same thing happens
 		// there.
 		// Create and populate Database if one doesn't exist
-//		if (!checkDataBase()) {
-//			try {
-//				Log.d(TAG, "Creating new Database");
-//				readFile();
-//			} catch (IOException e) {
-//				// TODO: Add proper error handling
-//				Log.e(TAG, "Error");
-//			}
-//		}
+		if (!checkDataBase()) {
+			try {
+				Log.d(TAG, "Creating new Database");
+				readFile();
+			} catch (IOException e) {
+				// TODO: Add proper error handling
+				Log.e(TAG, "Error");
+			}
+		}
 
 		Log.d(TAG, "Opening Database");
 
