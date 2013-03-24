@@ -443,7 +443,6 @@ public class StatsActivity extends Activity {
 		mPromptsPercent.setText(promptsPercentFormat);
 		mCompleteNum.setText(completionsFormat);
 		mCompletePercent.setText(completionsPercentFormat);
-
 	}
 
 	/**
@@ -486,8 +485,6 @@ public class StatsActivity extends Activity {
 		}
 
 		// Reset all the stats for the selected items in the database
-		// TODO: Need to refactor this to be more efficent. Crashes the app if
-		// we select a large range to reset.
 		if (mCursor.moveToFirst()) {
 			do {
 				int line = mCursor.getInt(mCursor.getColumnIndex("number"));

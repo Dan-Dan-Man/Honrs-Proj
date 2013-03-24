@@ -657,8 +657,6 @@ public class MainActivity extends ListActivity {
 			if (!audio.equals("N")) {
 				try {
 					playbackPosition = i;
-					mStopPlayBack.setEnabled(true);
-					mStopPlayBack.setVisibility(View.VISIBLE);
 					playSelectedRecording(playbackPosition, true);
 					playbackPosition++;
 					break;
@@ -689,6 +687,9 @@ public class MainActivity extends ListActivity {
 			} else {
 				Cursor line = mDbAdapter.fetchLine(getLineNumber(id));
 				String filename = line.getString(line.getColumnIndex("audio"));
+				
+				mStopPlayBack.setEnabled(true);
+				mStopPlayBack.setVisibility(View.VISIBLE);
 
 				ditchPlayer();
 				player = new MediaPlayer();
@@ -811,7 +812,6 @@ public class MainActivity extends ListActivity {
 	 * 
 	 */
 	private void revealSentence() {
-		BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.UK);
 		String line = "";
 		int start;
 		int end;
@@ -820,6 +820,7 @@ public class MainActivity extends ListActivity {
 		int number;
 		promptUsed = true;
 
+		BreakIterator iterator = BreakIterator.getSentenceInstance(Locale.UK);
 		iterator.setText(currentLine);
 
 		start = iterator.first();
@@ -1516,8 +1517,7 @@ public class MainActivity extends ListActivity {
 		seekBar.setMax(player.getDuration());
 
 		// Increment the progress bar each second
-		final CountDownTimer timer = new CountDownTimer(player.getDuration(),
-				50) {
+		final CountDownTimer timer = new CountDownTimer(player.getDuration(), 50) {
 			public void onTick(long millisUntilFinished) {
 				seekBar.setProgress(seekBar.getProgress() + 50);
 			}
