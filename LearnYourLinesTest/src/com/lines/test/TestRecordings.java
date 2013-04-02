@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project 
+ * Copyright (C) 2013 The Android Open Source Project 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,7 +29,6 @@ import java.nio.channels.FileChannel;
 
 import android.os.Environment;
 import android.test.ActivityInstrumentationTestCase2;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.jayway.android.robotium.solo.Solo;
@@ -132,7 +131,6 @@ public class TestRecordings extends
 			solo.clickLongInList(0);
 			solo.clickOnText("Delete");
 			solo.clickOnButton("Ok");
-			Log.e("", oldFilename);
 			assertFalse(solo.searchText(oldFilename));
 
 			oldName = oldFilename;

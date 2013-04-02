@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 The Android Open Source Project 
+ * Copyright (C) 2013 The Android Open Source Project 
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ import com.lines.activitys.SettingsActivity;
 /**
  * Our test class for the Settings Activity
  * 
- * @author Dan
+ * @author Daniel Muir, s0930256
  * 
  */
 public class TestSettings extends
