@@ -102,6 +102,7 @@ public class TestMain extends ActivityInstrumentationTestCase2<OptionsActivity> 
 		if (solo.searchButton("Yes")) {
 			solo.clickOnButton("Yes");
 		}
+		// Go to Recordings screen
 		solo.pressMenuItem(4);
 		assertTrue(solo.searchText("testName"));
 	}
