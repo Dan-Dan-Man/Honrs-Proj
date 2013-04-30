@@ -29,8 +29,6 @@ import java.io.OutputStream;
 
 import android.app.Application;
 import android.content.res.AssetManager;
-import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteException;
 import android.os.Environment;
 
 import com.lines.database.notes.NoteDbAdapter;
@@ -163,17 +161,13 @@ public class LinesApp extends Application {
 	 * @return
 	 */
 	private boolean checkDataBase() {
-		String DB_PATH = "/data/data/com.lines/databases/Play Data";
-		SQLiteDatabase checkDB = null;
-		try {
-			checkDB = SQLiteDatabase.openDatabase(DB_PATH, null,
-					SQLiteDatabase.OPEN_READONLY);
-			checkDB.close();
-		} catch (SQLiteException e) {
-			e.printStackTrace();
-		}
+		File database = getApplicationContext().getDatabasePath("Play Data");
 
-		return checkDB != null ? true : false;
+		if (!database.exists()) {
+		    return false;
+		} else {
+			return true;
+		}
 
 	}
 
